@@ -1,0 +1,4 @@
+interface:
+  display_name: "Harness Artifact"
+  short_description: "Create versioned HTML project views"
+  default_prompt: "Use $harness-artifact to create a neutral user-facing project visualization."

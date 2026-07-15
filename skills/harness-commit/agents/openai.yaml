@@ -1,0 +1,4 @@
+interface:
+  display_name: "Harness Commit"
+  short_description: "Prepare Conventional Commits"
+  default_prompt: "Use $harness-commit to organize changes and create a Conventional Commit."

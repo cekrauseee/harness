@@ -1,0 +1,23 @@
+{
+  "name": "harness",
+  "version": "0.1.0",
+  "description": "File-native project continuity and engineering standards for coding agents.",
+  "author": {
+    "name": "Henrique Krause"
+  },
+  "skills": [
+    "./skills/harness-init",
+    "./skills/harness-recall",
+    "./skills/harness-remember",
+    "./skills/harness-session",
+    "./skills/harness-audit",
+    "./skills/harness-worktree",
+    "./skills/harness-commit",
+    "./skills/harness-pr",
+    "./skills/harness-review",
+    "./skills/harness-docs-init",
+    "./skills/harness-docs-maintain",
+    "./skills/harness-docs-audit",
+    "./skills/harness-artifact"
+  ]
+}

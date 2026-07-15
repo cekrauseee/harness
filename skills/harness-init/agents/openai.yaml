@@ -1,0 +1,4 @@
+interface:
+  display_name: "Harness Init"
+  short_description: "Initialize global Harness state"
+  default_prompt: "Use $harness-init to initialize or link this project to the global Harness."

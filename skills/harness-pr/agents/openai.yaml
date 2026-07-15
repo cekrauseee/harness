@@ -1,0 +1,4 @@
+interface:
+  display_name: "Harness Pull Request"
+  short_description: "Prepare conventional pull requests"
+  default_prompt: "Use $harness-pr to draft or publish a conventional pull request."

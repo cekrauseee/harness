@@ -1,0 +1,28 @@
+{
+  "name": "harness",
+  "version": "0.1.0",
+  "description": "File-native project continuity and engineering standards for coding agents.",
+  "author": {
+    "name": "Henrique Krause",
+    "url": "https://github.com/cekrauseee"
+  },
+  "homepage": "https://github.com/cekrauseee/harness",
+  "repository": "https://github.com/cekrauseee/harness",
+  "license": "MIT",
+  "keywords": ["agents", "documentation", "memory", "skills", "worktrees"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Harness",
+    "shortDescription": "Portable project continuity for coding agents.",
+    "longDescription": "Harness gives coding agents deterministic project memory, concise sessions, neutral documentation artifacts, and shared engineering conventions without adding Harness state to the repository.",
+    "developerName": "Henrique Krause",
+    "category": "Productivity",
+    "capabilities": ["Write"],
+    "websiteURL": "https://github.com/cekrauseee/harness",
+    "defaultPrompt": [
+      "Initialize Harness for this project and continue the current work.",
+      "Recall the relevant Harness context for this task.",
+      "Review these changes using the Harness severity standard."
+    ]
+  }
+}

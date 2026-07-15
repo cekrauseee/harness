@@ -1,0 +1,4 @@
+interface:
+  display_name: "Harness Audit"
+  short_description: "Audit global Harness state"
+  default_prompt: "Use $harness-audit to check Harness identity, memory, sessions, and cleanup."

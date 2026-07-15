@@ -1,0 +1,4 @@
+interface:
+  display_name: "Harness Review"
+  short_description: "Classify actionable review findings"
+  default_prompt: "Use $harness-review to review changes and classify actionable findings."

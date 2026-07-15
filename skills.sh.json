@@ -1,0 +1,25 @@
+{
+  "$schema": "https://skills.sh/schemas/skills.sh.schema.json",
+  "notGrouped": "bottom",
+  "groupings": [
+    {
+      "title": "Harness",
+      "description": "Portable project continuity, documentation, and engineering standards for coding agents.",
+      "skills": [
+        "harness-init",
+        "harness-recall",
+        "harness-remember",
+        "harness-session",
+        "harness-audit",
+        "harness-worktree",
+        "harness-commit",
+        "harness-pr",
+        "harness-review",
+        "harness-docs-init",
+        "harness-docs-maintain",
+        "harness-docs-audit",
+        "harness-artifact"
+      ]
+    }
+  ]
+}

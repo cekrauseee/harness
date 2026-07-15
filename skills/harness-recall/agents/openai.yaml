@@ -1,0 +1,4 @@
+interface:
+  display_name: "Harness Recall"
+  short_description: "Recall scoped project context"
+  default_prompt: "Use $harness-recall to recover the relevant project context for this task."
