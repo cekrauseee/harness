@@ -1,6 +1,6 @@
 ---
 name: harness-pr
-description: Draft and validate English pull requests with Conventional Commit titles and evidence-based descriptions, and publish only with explicit authorization. Use when preparing, reviewing, validating, opening, or updating a pull request.
+description: Draft and validate evidence-based pull requests with Conventional Commit titles. Use when preparing, reviewing, explicitly publishing, or updating a pull request.
 ---
 
 # Harness Pull Request

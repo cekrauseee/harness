@@ -1,34 +1,49 @@
 ---
 name: harness-recall
-description: Recover task-relevant durable project memory and active handoffs from the global Harness under an explicit context budget. Use when automatic lifecycle recall is unavailable, when a fresh agent needs project continuity, or when manually inspecting exactly which stored context applies to a task.
+description: Find and selectively load task-relevant Harness memory or handoffs. Use before work that may depend on prior project context, after compaction or host changes, or when continuity needs inspection.
 ---
 
 # Harness Recall
 
-Use this as a fallback or diagnostic surface. Automatic `SessionStart` and `PostCompact` hooks normally recall context.
+Pull context only when the task suggests prior project knowledge may matter. Search semantic cards first, then hydrate only the selected record.
 
-## Recall scoped context
+## Search cards
 
-Always choose an explicit token budget:
+Use a concrete task query:
 
 ```bash
 python3 scripts/recall.py \
-  --repo <repository> \
+  --project <project-path> \
+  --json \
+  search \
   --query "document the OAuth refresh flow" \
-  --budget-tokens 1200 \
-  --json
+  --limit 3
 ```
 
-The command reads only active topic memories and active sessions. It never recalls unclassified candidates or archived entries. Results are ranked deterministically by lexical relevance, with active sessions favored, then packed without exceeding the requested approximate token budget.
+Search returns compact cards without full content. Ranking is deterministic and lexical, with strong title, phrase, read-rule, and tag matches favored. Status and recency refine the result. A weak or absent match returns no cards.
 
-Use text output when injecting the result into agent context. Use `--json` for automation and inspection. Treat `source` paths as traceability, not as repository paths.
+## Hydrate a selection
+
+After inspecting the cards, load only the record required for the task:
+
+```bash
+python3 scripts/recall.py \
+  --project <project-path> \
+  --json \
+  hydrate \
+  --id <memory-or-session-id> \
+  --budget-tokens 1200
+```
+
+Choose the budget deliberately. Treat source and artifact references as traceability, not as automatic instructions to load more context. `--repo` remains a compatibility alias for `--project`.
 
 ## Rules
 
-- Do not run without a deliberate budget.
 - Prefer a concrete task query over a broad project name.
-- Do not load the full Harness after a sparse recall.
+- Hydrate no more than the smallest relevant card set, normally one record.
+- Do not load the full Harness after a sparse or empty search.
 - Do not treat an absent result as permission to infer project facts.
+- Do not search every prompt; reuse verified context while it remains relevant.
 - Keep native host memory optional; Harness recall must stand on its own.
 
 Read [references/selection.md](references/selection.md) when tuning a query or interpreting an empty result.

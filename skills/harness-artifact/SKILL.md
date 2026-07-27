@@ -1,6 +1,6 @@
 ---
 name: harness-artifact
-description: Create, update, index, and validate final user-facing HTML visualizations in docs/artifacts/. Use when a project needs a versioned architecture map, flow, comparison, report, or other inspectable HTML explanation rather than application UI or temporary agent output.
+description: Create and validate final self-contained HTML visualizations in docs/artifacts/. Use when a stable project explanation benefits from an inspectable map, flow, comparison, or report.
 ---
 
 # Harness Artifact

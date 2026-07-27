@@ -1,4 +1,6 @@
 interface:
   display_name: "Harness Docs Audit"
-  short_description: "Audit canonical project docs"
-  default_prompt: "Use $harness-docs-audit to audit documentation routing, links, and drift."
+  short_description: "Audit project docs and artifacts"
+  default_prompt: "Use $harness-docs-audit to verify this project's documentation routing, links, artifacts, and drift."
+policy:
+  allow_implicit_invocation: true

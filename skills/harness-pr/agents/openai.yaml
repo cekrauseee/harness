@@ -1,4 +1,6 @@
 interface:
   display_name: "Harness Pull Request"
-  short_description: "Prepare conventional pull requests"
-  default_prompt: "Use $harness-pr to draft or publish a conventional pull request."
+  short_description: "Prepare evidence-based pull requests"
+  default_prompt: "Use $harness-pr to derive a truthful pull request from the actual diff and available verification."
+policy:
+  allow_implicit_invocation: true

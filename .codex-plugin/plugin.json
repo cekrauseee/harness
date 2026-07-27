@@ -1,7 +1,7 @@
 {
   "name": "harness",
-  "version": "0.2.1",
-  "description": "File-native project continuity and engineering standards for coding agents.",
+  "version": "0.3.0",
+  "description": "Lean, file-native continuity and bounded agent orchestration for any project.",
   "author": {
     "name": "Henrique Krause",
     "url": "https://github.com/cekrauseee"
@@ -9,20 +9,20 @@
   "homepage": "https://github.com/cekrauseee/harness",
   "repository": "https://github.com/cekrauseee/harness",
   "license": "MIT",
-  "keywords": ["agents", "documentation", "memory", "skills", "worktrees"],
+  "keywords": ["agents", "continuity", "memory", "orchestration", "projects", "skills"],
   "skills": "./skills/",
   "interface": {
     "displayName": "Harness",
-    "shortDescription": "Portable project continuity for coding agents.",
-    "longDescription": "Harness gives coding agents deterministic project memory, concise sessions, neutral documentation artifacts, and shared engineering conventions without adding Harness state to the repository.",
+    "shortDescription": "Lean continuity and bounded agent orchestration.",
+    "longDescription": "Harness gives agents project-native identity, pull-based semantic recall, concise handoffs, and bounded multi-agent orchestration for coding and non-coding work. Engineering workflows remain available on demand.",
     "developerName": "Henrique Krause",
     "category": "Productivity",
     "capabilities": ["Write"],
     "websiteURL": "https://github.com/cekrauseee/harness",
     "defaultPrompt": [
-      "Initialize Harness for this project and continue the current work.",
-      "Recall the relevant Harness context for this task.",
-      "Review these changes using the Harness severity standard."
+      "Continue this project from only the relevant stored context.",
+      "Coordinate this authorized multi-agent task within a bounded work graph.",
+      "Review these changes using evidence-backed severity."
     ]
   }
 }

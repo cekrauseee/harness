@@ -1,6 +1,6 @@
 ---
 name: harness-docs-audit
-description: Audit versioned developer documentation and HTML artifacts for structure, routing, broken links, size, accessibility, external dependencies, drift, duplication, and Harness boundary violations. Use when reviewing README.md, docs/, module docs, or docs/artifacts, or before publishing documentation changes.
+description: Audit project documentation and HTML artifacts for structure, routing, links, size, accessibility, dependencies, drift, duplication, and Harness boundaries. Use during documentation review or before publication.
 ---
 
 # Harness Docs Audit

@@ -6,17 +6,26 @@ Harness memory is explicit, file-native, scoped, and auditable. It replaces proj
 
 - Global memory contains explicitly accepted preferences that apply across projects.
 - Project memory contains operational facts, provisional decisions, and expensive-to-rediscover context.
-- Session state contains the minimum continuation handoff.
+- Session state contains an episodic continuation handoff for material work.
 - Stable developer knowledge belongs in versioned project documentation.
 
 ## Lifecycle
 
 ```text
 candidate -> classify -> deduplicate -> activate, promote, or discard
-          -> budgeted recall -> verify -> stale, supersede, or archive
+          -> search card -> hydrate selected record -> verify
+          -> stale, supersede, dormant, closed, or archive
 ```
 
-Automatic adapters update timestamps and recall context, but never persist raw prompts, responses, or transcripts. Injected behavior rules direct agents to create concise checkpoints and candidates without asking the user. Durable items include a conditional read rule, verification timestamp, and review date. Hooks never promote a candidate to durable memory. Recall excludes workspace files, inactive memory, and items past their review date by default.
+Every searchable record has a semantic title, short summary, conditional read rule, tags, status, update time, and optional artifact references. The generated catalog indexes those compact cards without full content.
+
+Search returns a small ranked card set and no content. The agent hydrates only a selected ID under an explicit budget. Weak matches return no context. This keeps large records discoverable without injecting them and prevents unrelated sessions from entering the prompt.
+
+Durable items include provenance, a freshness signal, and a review date. Explicitly installed adapters may update maintenance metadata but never inject context or promote a candidate. Recall excludes workspace files and stale or inactive records by default.
+
+## Sessions
+
+Do not create a session for every conversation. Start one lazily when material work may require a handoff. Keep the current session active, mark interrupted but relevant work dormant, and close completed work. Search may still find dormant or closed sessions at lower priority when their semantic card strongly matches.
 
 ## Content boundaries
 

@@ -1,5 +1,7 @@
 # Engineering standards
 
+These standards apply only when the project work involves the corresponding engineering surface. They are not requirements for Harness identity, memory, sessions, recall, or orchestration.
+
 ## Language
 
 Write repository-facing documentation, commit messages, branch names, and pull request content in English. Prefer simple words, active voice, short sentences, and factual claims.

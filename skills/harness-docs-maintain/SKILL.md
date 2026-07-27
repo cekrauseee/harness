@@ -1,6 +1,6 @@
 ---
 name: harness-docs-maintain
-description: Maintain concise, canonical, English developer documentation in README.md and docs/. Use when documenting a project change, architecture, module, setup, command, workflow, contract, or stable decision, or when reorganizing documentation and removing stale or duplicate guidance.
+description: Maintain concise canonical English developer documentation. Use when code-project architecture, setup, commands, modules, workflows, contracts, or stable decisions change or documentation drifts.
 ---
 
 # Harness Docs Maintain

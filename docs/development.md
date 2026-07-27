@@ -3,7 +3,7 @@
 ## Requirements
 
 - Python 3.11 or later.
-- Git.
+- Git only for repository and engineering workflows.
 - Node.js with `npx` for `skills.sh` discovery checks.
 - GitHub CLI for publication.
 
@@ -36,8 +36,11 @@ npx skills add . --list
 
 - Keep skills self-contained.
 - Keep `SKILL.md` procedural and concise; move detailed standards to conditional references.
+- Keep core continuity project-native; do not require Git or host hooks.
+- Keep recall pull-based and preserve a strict search-then-hydrate boundary.
+- Keep orchestration bounded, depth one, and explicit about write ownership.
 - Add tests for every deterministic script.
 - Preserve atomic writes and fail-open adapters.
 - Bump `DEFAULTS_VERSION` whenever managed charter, standards, aliases, or policies change.
-- Do not add migration logic for the legacy Project Harness layout.
+- Preserve compatibility aliases and migrate supported global state idempotently.
 - Use Conventional Commits for all repository history.

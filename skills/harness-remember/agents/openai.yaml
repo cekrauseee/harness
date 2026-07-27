@@ -1,4 +1,6 @@
 interface:
   display_name: "Harness Remember"
-  short_description: "Persist and consolidate project memory"
-  default_prompt: "Use $harness-remember to capture or consolidate durable project context."
+  short_description: "Preserve concise durable context"
+  default_prompt: "Use $harness-remember to preserve this verified, expensive-to-rediscover project context as a semantic memory."
+policy:
+  allow_implicit_invocation: true

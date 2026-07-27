@@ -4,13 +4,14 @@
   "groupings": [
     {
       "title": "Harness",
-      "description": "Portable project continuity, documentation, and engineering standards for coding agents.",
+      "description": "Lean project continuity, bounded orchestration, and on-demand engineering workflows.",
       "skills": [
         "harness-init",
         "harness-recall",
         "harness-remember",
         "harness-session",
         "harness-audit",
+        "harness-orchestrate",
         "harness-worktree",
         "harness-commit",
         "harness-pr",

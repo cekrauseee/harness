@@ -1,6 +1,6 @@
 ---
 name: harness-worktree
-description: Plan, create, validate, adopt, and retire isolated Git worktrees with Harness-controlled semantics and lifecycle while delegating only physical path and storage to the active agent host. Use when naming, creating, locating, validating, adopting, reusing, or removing a worktree, or when a task needs the Harness `type/slug` branch convention.
+description: Plan and control isolated Git worktree lifecycles while the host selects storage. Use for task-branch naming, creation, adoption, validation, reuse, or safe retirement.
 ---
 
 # Harness Worktree

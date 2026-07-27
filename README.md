@@ -1,8 +1,6 @@
 # Harness
 
-Harness is a file-native continuity and engineering behavior layer for coding agents. It gives Codex, Claude Code, and other skill-compatible hosts a shared way to recover project context, manage concise handoffs, produce canonical documentation, and follow consistent Git and review conventions.
-
-Harness is not an application, daemon, database, deployment tool, or product framework. Its non-versioned state lives outside repositories. Only canonical developer documentation and user-facing documentation artifacts are written to a project, and only when the task requires them.
+Harness is a lean, file-native continuity and orchestration layer for agents. It gives Codex, Claude Code, and other skill-compatible hosts a shared way to identify local projects, find only relevant stored context, maintain concise handoffs, and coordinate bounded multi-agent work. Harness works with coding and non-coding projects. Git, engineering conventions, developer documentation, and HTML artifacts remain available when the task needs them, but they are not requirements for project continuity.
 
 ## Install
 
@@ -18,7 +16,7 @@ List the available skills without installing them:
 npx skills add cekrauseee/harness --list
 ```
 
-The `skills.sh` installer copies skills but does not execute lifecycle hooks. `harness-init` installs supported host adapters idempotently on first project initialization. Full plugin installations can discover the bundled hook configuration directly.
+The `skills.sh` installer copies skills. Host adapters are opt-in and silent: install them only through the explicit adapter command when maintenance hooks are wanted. They do not inject project memory or create a work session for every conversation.
 
 ## Operating model
 
@@ -36,6 +34,7 @@ Harness stores machine-local state under `${HARNESS_HOME:-~/.harness}`:
       index.md
       decisions.md
       memory/
+        catalog.jsonl
       references/
       sessions/
       workspace/
@@ -43,23 +42,24 @@ Harness stores machine-local state under `${HARNESS_HOME:-~/.harness}`:
         policy.toml
 ```
 
-A Git repository stores only a local, non-versioned project identifier in Git configuration. Harness adds no state files to the checkout. Linked worktrees resolve the same project identifier and global container. Physical worktree paths and storage follow the active host; Harness controls their creation and lifecycle. The global `worktrees/` directory stores policy only.
+Each project has a stable UUID and one or more machine-local bindings. A registered path is sufficient; Git identity and host project IDs are optional bindings. Harness writes no identity marker or state into the project.
 
-Lifecycle adapters automate the normal flow:
+Agents pull context in two stages:
 
-- session start or resume resolves the project and recalls scoped context;
-- each user prompt recalls only task-relevant memory and handoffs;
-- the injected continuity rule makes the agent maintain concise structured handoffs without asking the user;
-- pre-compact and stop hooks flush timestamps and any structured state already supplied by the agent;
-- a compacted session starts again with the minimum required context;
-- stop updates session continuity without persisting raw host messages; explicit structured summaries may become memory candidates;
-- explicit skills remain available for recovery, inspection, and exceptional maintenance.
+1. Search a compact semantic catalog by title, summary, read rule, tags, status, and recency.
+2. Hydrate only the selected memory or session under an explicit context budget.
 
-Native host memory is optional. Harness is designed so a fresh task can recover project continuity with host memory disabled.
+An empty or weak search returns no context. IDs remain stable internal handles, while agents select records through semantic cards. Large records stay discoverable because their compact cards are indexed separately from full content. Sessions are episodic handoffs, not automatic transcripts. Agents create one only when material work may need continuation, update it with current outcomes and next actions, and mark it dormant or closed when appropriate. Native host memory and lifecycle hooks are optional. Hooks remain disabled until explicitly installed. A fresh task can recover continuity through the agent-facing Harness skills alone.
+
+## Bounded orchestration
+
+When delegation is already appropriate, `harness-orchestrate` turns the work into a small dependency graph. The root agent only coordinates. It is the sole spawn authority; child agents do not delegate, graph depth stays at one, and every writable artifact has one owner at a time.
+
+Each node receives a minimal context packet and explicit limits for nodes, waves, retries, review cycles, context, output, and reasoning effort. Reviewers and verifiers are read-only. Fixers run only for accepted findings, and the graph stops as soon as acceptance evidence is complete.
 
 Managed defaults refresh by schema version. Machine-local overrides live under `~/.harness/overrides/`; workspace cleanup overrides use `workspace/policy.local.json`.
 
-## Engineering standards
+## On-demand engineering
 
 Harness uses Conventional Commits for commits and pull request titles. Task branches extend the same vocabulary while worktree paths and storage stay host-native:
 
@@ -69,7 +69,7 @@ branch:  docs/artifact-routing
 checkout: isolated, host-stored, Harness-managed
 ```
 
-Repository-facing documentation is always English, simple, objective, coherent, concise, and factual. Reviews contain only evidence-backed, actionable findings classified from `P0` through `P3`.
+These conventions load only for relevant engineering work. Repository-facing documentation is English, simple, objective, coherent, concise, and factual. Reviews contain only evidence-backed, actionable findings classified from `P0` through `P3`.
 
 ## Documentation and artifacts
 
@@ -99,6 +99,7 @@ Artifacts are static, self-contained HTML visualizations for users. They use a n
 | `harness-remember` | Capture and consolidate project memory. |
 | `harness-session` | Maintain concise continuation and handoff state. |
 | `harness-audit` | Check identity, memory, sessions, cleanup, and repository boundaries. |
+| `harness-orchestrate` | Coordinate bounded, depth-one multi-agent work graphs. |
 | `harness-worktree` | Control creation and lifecycle while using host-selected worktree storage. |
 | `harness-commit` | Organize authorized changes into Conventional Commits. |
 | `harness-pr` | Draft or publish conventional pull requests. |
@@ -112,7 +113,7 @@ See [the documentation index](docs/index.md) for architecture, standards, develo
 
 ## Security and privacy
 
-Harness state can outlive a local clone. Do not store secrets, credentials, raw transcripts, routine command output, or hidden reasoning. Memory candidates require classification before they become durable context. Workspace files are excluded from recall and cleaned by policy.
+Harness state can outlive a local project path. Do not store secrets, credentials, raw transcripts, routine command output, or hidden reasoning. Memory candidates require classification before they become durable context. Workspace files are excluded from recall and cleaned by policy.
 
 ## License
 

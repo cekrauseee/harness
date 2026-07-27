@@ -1,7 +1,7 @@
 {
   "name": "harness",
-  "version": "0.2.1",
-  "description": "File-native project continuity and engineering standards for coding agents.",
+  "version": "0.3.0",
+  "description": "Lean, file-native continuity and bounded agent orchestration for any project.",
   "author": {
     "name": "Henrique Krause"
   },
@@ -11,6 +11,7 @@
     "./skills/harness-remember",
     "./skills/harness-session",
     "./skills/harness-audit",
+    "./skills/harness-orchestrate",
     "./skills/harness-worktree",
     "./skills/harness-commit",
     "./skills/harness-pr",

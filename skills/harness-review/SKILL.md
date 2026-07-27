@@ -1,6 +1,6 @@
 ---
 name: harness-review
-description: Review code, documentation, commits, or pull requests read-only and report evidence-backed actionable findings classified P0-P3. Use when a user asks for a review, audit of a diff, risk assessment, or validation of proposed changes; apply fixes only when separately requested.
+description: Review code, documentation, commits, or pull requests read-only. Use for diff review, risk assessment, or change validation that requires evidence-backed P0-P3 findings.
 ---
 
 # Harness Review

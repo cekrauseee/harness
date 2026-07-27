@@ -1,4 +1,6 @@
 interface:
   display_name: "Harness Worktree"
-  short_description: "Manage host-stored worktree lifecycles"
-  default_prompt: "Use $harness-worktree to create and manage an isolated worktree while letting the active host choose its storage path."
+  short_description: "Control isolated Git worktrees"
+  default_prompt: "Use $harness-worktree to plan and control this isolated Git checkout while preserving host-selected storage."
+policy:
+  allow_implicit_invocation: true

@@ -1,6 +1,6 @@
 ---
 name: harness-commit
-description: Classify changes, prepare and validate English Conventional Commit messages, and create commits only with explicit authorization. Use when a user asks to name, organize, validate, or create one or more Git commits.
+description: Organize changes and validate English Conventional Commits. Use for commit planning, message preparation, staging boundaries, or explicitly authorized commit creation.
 ---
 
 # Harness Commit

@@ -1,6 +1,6 @@
 ---
 name: harness-docs-init
-description: Create or repair the concise, English, versioned developer documentation baseline for a repository. Use when a project needs a README, documentation index, project overview, architecture guide, development guide, module documentation structure, or artifact index without overwriting existing content.
+description: Create or repair a concise English developer-documentation baseline without overwriting content. Use when a code project lacks canonical README, architecture, development, module, or artifact routing.
 ---
 
 # Harness Docs Init
