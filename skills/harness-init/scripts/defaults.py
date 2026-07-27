@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Callable
 
 
-DEFAULTS_VERSION = 1
+DEFAULTS_VERSION = 2
 CHARTER = """# Harness Charter
 
 - Keep Harness state outside repositories.
@@ -22,7 +22,7 @@ CHARTER = """# Harness Charter
 STANDARDS = {
     "commits.md": "# Commits\n\nUse Conventional Commits: `type(scope): imperative description`. Use English, lowercase types, and no final period.\n",
     "branches.md": "# Branches\n\nUse `type/short-kebab-case-description` with Conventional Commit types. Do not include an agent or person name.\n",
-    "worktrees.md": "# Worktrees\n\nDerive the directory name from the branch as `type-short-description-<short-id>`. Git remains authoritative.\n",
+    "worktrees.md": "# Worktrees\n\nUse a `type/short-kebab-case-description` branch in an isolated checkout. Prefer the active host's native worktree mechanism and let the host manage its path and lifecycle. Git remains authoritative.\n",
     "pull-requests.md": "# Pull requests\n\nUse a Conventional Commit title in English. Describe Summary, Changes, Verification, and Risks from actual evidence.\n",
     "documentation.md": "# Documentation\n\nWrite canonical repository documentation in English with simple, direct, coherent, and concise language.\n",
     "reviews.md": "# Reviews\n\nReport only actionable findings with severity, evidence, impact, and a suggested direction. Review does not imply modification.\n",
@@ -37,9 +37,10 @@ QUERY_ALIASES = {
     "revisao": ["review"], "worktree": ["worktrees"],
 }
 WORKSPACE_POLICY = {"managed_by": "harness", "max_age_days": 7, "schema_version": 1}
-WORKTREE_POLICY = """root = "project-container"
-directory_template = "{type}-{slug}-{short_id}"
+WORKTREE_POLICY = """creation = "host-native"
 branch_template = "{type}/{slug}"
+isolated_checkout = true
+host_managed_path = true
 agent_prefix = false
 """
 

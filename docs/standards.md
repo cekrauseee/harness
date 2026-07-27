@@ -2,7 +2,7 @@
 
 ## Language
 
-Write repository-facing documentation, commit messages, branch names, worktree names, and pull request content in English. Prefer simple words, active voice, short sentences, and factual claims.
+Write repository-facing documentation, commit messages, branch names, and pull request content in English. Prefer simple words, active voice, short sentences, and factual claims.
 
 ## Conventional Commits
 
@@ -16,7 +16,9 @@ Allowed types are `feat`, `fix`, `docs`, `refactor`, `perf`, `test`, `build`, `c
 
 ## Branches and worktrees
 
-Use `type/short-kebab-case-slug` for branches. Derive the worktree directory as `type-short-kebab-case-slug-shortid`. Do not include host names, agent names, or usernames.
+Use `type/short-kebab-case-slug` for task branches. Do not include host names, agent names, or usernames.
+
+Create task work in a separate checkout. Prefer the active host's native worktree mechanism and let it manage the directory, storage root, metadata, and lifecycle. Keep task setup, edits, generated files, and verification inside that checkout. Use ordinary Git only when the host provides no native mechanism.
 
 Long-lived base branches such as `main` are exempt from task-branch naming.
 

@@ -6,7 +6,6 @@ import subprocess
 import sys
 import tempfile
 import unittest
-import uuid
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -27,7 +26,7 @@ def run_script(relative: str, *args: str, stdin: str | None = None) -> subproces
 class SkillPackagingTests(unittest.TestCase):
     def test_standard_skills_are_self_contained_and_complete(self) -> None:
         expected = {
-            "harness-worktree": ("resolve_worktree.py", "worktrees.md"),
+            "harness-worktree": ("resolve_branch.py", "worktrees.md"),
             "harness-commit": ("validate_conventional.py", "conventional-commits.md"),
             "harness-pr": ("render_pr.py", "pull-requests.md"),
             "harness-review": ("validate_review.py", "review-severity.md"),
@@ -43,90 +42,69 @@ class SkillPackagingTests(unittest.TestCase):
 
 
 class WorktreeResolverTests(unittest.TestCase):
-    def prepare(self, root: Path, harness_home: Path) -> str:
+    def prepare(self, root: Path) -> None:
         subprocess.run(["git", "init", "-q", "-b", "trunk", str(root)], check=True)
         subprocess.run(["git", "-C", str(root), "config", "user.name", "Test"], check=True)
         subprocess.run(["git", "-C", str(root), "config", "user.email", "test@example.com"], check=True)
         (root / "README.md").write_text("# Test\n")
         subprocess.run(["git", "-C", str(root), "add", "README.md"], check=True)
         subprocess.run(["git", "-C", str(root), "commit", "-q", "-m", "test: seed repository"], check=True)
-        project_id = str(uuid.uuid4())
-        project = harness_home / "projects" / project_id
-        project.mkdir(parents=True)
-        (project / "manifest.json").write_text(json.dumps({"id": project_id}))
-        subprocess.run(["git", "-C", str(root), "config", "--local", "harness.project-id", project_id], check=True)
-        return project_id
 
-    def test_resolves_host_neutral_branch_and_global_path_without_writing(self) -> None:
+    def test_resolves_branch_semantics_without_path_or_harness_state(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            harness_home = root / "harness-home"
-            project_id = self.prepare(root, harness_home)
-            before = sorted(str(path.relative_to(harness_home)) for path in harness_home.rglob("*"))
+            self.prepare(root)
+            before = sorted(str(path.relative_to(root)) for path in root.rglob("*"))
             result = run_script(
-                "skills/harness-worktree/scripts/resolve_worktree.py",
+                "skills/harness-worktree/scripts/resolve_branch.py",
                 "--project",
                 str(root),
                 "--type",
                 "docs",
                 "--slug",
                 "Artifact Guidelines",
-                "--short-id",
-                "a31f",
-                "--harness-home",
-                str(harness_home),
                 "--require-available",
             )
             self.assertEqual(result.returncode, 0, result.stderr)
             payload = json.loads(result.stdout)
-            self.assertEqual(payload["branch"], "docs/artifact-guidelines")
-            self.assertEqual(payload["worktree_id"], "docs-artifact-guidelines-a31f")
             self.assertEqual(
-                Path(payload["path"]).resolve(),
-                (
-                    harness_home
-                    / "projects"
-                    / project_id
-                    / "worktrees"
-                    / "docs-artifact-guidelines-a31f"
-                ).resolve(),
+                payload,
+                {
+                    "base": "trunk",
+                    "branch": "docs/artifact-guidelines",
+                    "branch_exists": False,
+                    "slug": "artifact-guidelines",
+                    "type": "docs",
+                },
             )
-            after = sorted(str(path.relative_to(harness_home)) for path in harness_home.rglob("*"))
-            self.assertEqual(before, after, "resolution must not create Harness state")
-            self.assertEqual("trunk", payload["base"])
-            self.assertNotIn("codex", payload["branch"])
-            self.assertNotIn("claude", payload["branch"])
+            after = sorted(str(path.relative_to(root)) for path in root.rglob("*"))
+            self.assertEqual(before, after, "resolution must not write Git or Harness state")
+            self.assertNotIn("path", payload)
+            self.assertNotIn("worktree_id", payload)
+            self.assertNotIn("project_id", payload)
 
-    def test_rejects_existing_worktree_path_when_availability_is_required(self) -> None:
+    def test_rejects_existing_branch_when_availability_is_required(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             repo = root / "repo"
             repo.mkdir()
-            project_id = self.prepare(repo, root)
-            path = (
-                root
-                / "projects"
-                / project_id
-                / "worktrees"
-                / "fix-session-expiry-a31f"
+            self.prepare(repo)
+            subprocess.run(
+                ["git", "-C", str(repo), "branch", "fix/session-expiry"],
+                check=True,
             )
-            path.mkdir(parents=True)
             result = run_script(
-                "skills/harness-worktree/scripts/resolve_worktree.py",
+                "skills/harness-worktree/scripts/resolve_branch.py",
                 "--project",
                 str(repo),
                 "--type",
                 "fix",
                 "--slug",
                 "session-expiry",
-                "--short-id",
-                "a31f",
-                "--harness-home",
-                str(root),
                 "--require-available",
             )
             self.assertEqual(result.returncode, 2)
-            self.assertIn("collides", result.stderr)
+            self.assertIn("already exists", result.stderr)
 
 
 class ConventionalCommitTests(unittest.TestCase):

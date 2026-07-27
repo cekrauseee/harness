@@ -1,4 +1,4 @@
-# Worktree Convention
+# Worktree Semantics
 
 ## Allowed Types
 
@@ -26,5 +26,10 @@ Use `chore` only when no more specific type applies.
 - Keep external issue IDs only when the project requires them.
 - Configure the base branch per project; otherwise use `main`.
 - Treat long-lived base branches such as `main` as exceptions to task-branch naming.
+- Create a separate Git checkout for the task and keep task setup, edits, generated files, and verification inside it.
+- Prefer the active host's native worktree mechanism and lifecycle.
+- Let the host choose the directory name, storage root, metadata, and cleanup behavior.
+- Fall back to ordinary Git only when the host provides no worktree mechanism.
+- Never place a worktree under Harness global state merely to satisfy this skill.
 
-Conventional Commits specifies commit messages, not branches or worktrees. This naming system is a Harness extension using the same vocabulary.
+Conventional Commits specifies commit messages, not branches. The `type/slug` branch convention is a Harness extension using the same vocabulary. Physical worktree storage is deliberately host-specific.

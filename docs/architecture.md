@@ -8,7 +8,8 @@ flowchart LR
   Skills --> State["Global Harness state"]
   Skills --> Git["Git repository"]
   State --> Memory["Memory and sessions"]
-  State --> Worktrees["Worktree locations"]
+  State --> Policy["Worktree policy"]
+  Host --> Worktrees["Host-managed worktrees"]
   Git --> Docs["Versioned docs and artifacts"]
 ```
 
@@ -34,7 +35,9 @@ Adapters fail open. They do not persist raw host messages, change product files,
 
 ## Worktrees
 
-Harness defines a location and naming policy. Git remains the source of truth and the agent or host runs ordinary Git commands. Worktrees use `type/slug` branches and `type-slug-shortid` directories under the project container. Harness derives and validates the repository base revision. Host and user names never appear in those names.
+Harness defines portable branch, base, isolation, and verification semantics. The active host creates worktrees through its native mechanism and owns checkout paths, storage layout, metadata, lifecycle, and cleanup. Codex therefore uses Codex worktree behavior, while another host uses its own compatible behavior.
+
+Task branches use `type/slug`. Harness derives and validates the repository base revision, then verifies that implementation and tests run in the isolated checkout. When no host mechanism exists, the agent may use ordinary Git without imposing a Harness storage root. Host and user names never appear in Harness task branches.
 
 ## Delivery
 

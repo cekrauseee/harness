@@ -1,4 +1,4 @@
 interface:
   display_name: "Harness Worktree"
-  short_description: "Resolve branch and worktree names"
-  default_prompt: "Use $harness-worktree to plan a conventional branch and worktree location."
+  short_description: "Create isolated host-native worktrees"
+  default_prompt: "Use $harness-worktree to plan Harness branch semantics and create an isolated worktree through the active host."

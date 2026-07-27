@@ -8,7 +8,7 @@ Harness provides host-neutral project continuity and engineering standards for c
 
 - Agent-facing policies and workflow standards.
 - Machine-local project identity, memory, references, sessions, and scratch state.
-- Deterministic branch and worktree naming and location.
+- Deterministic task-branch naming and portable worktree isolation semantics.
 - Canonical developer documentation and neutral HTML artifacts when requested.
 
 ## Excluded concerns
@@ -18,6 +18,7 @@ Harness provides host-neutral project continuity and engineering standards for c
 - Daemons, servers, databases, embeddings, or network services.
 - Autonomous commits, pushes, pull requests, deployments, or destructive Git operations.
 - Host UI, model selection, sandboxing, permissions, or tool execution.
+- Worktree storage paths, host metadata, and host lifecycle management.
 
 ## Precedence
 
