@@ -77,7 +77,7 @@ class CoreHarnessTest(unittest.TestCase):
         self.assertFalse(again["created"])
         self.assertEqual(project_id, again["project"]["id"])
 
-    def test_memory_classification_catalog_and_budgeted_recall(self) -> None:
+    def test_memory_classification_catalog_and_two_stage_recall(self) -> None:
         project_id, base = self.initialize()
         candidate_id = str(uuid.uuid4())
         self.command(
@@ -95,11 +95,17 @@ class CoreHarnessTest(unittest.TestCase):
         self.assertIn(candidate_id, catalog)
         recall = json.loads(self.command(
             RECALL, "--repo", str(self.repo), "--query", "autenticacao movel legacy refresh endpoint",
-            "--budget-tokens", "40", "--json",
+            "--budget-tokens", "200", "--json",
         ).stdout)
-        self.assertLessEqual(recall["estimated_tokens"], 40)
-        self.assertEqual(candidate_id, Path(recall["entries"][0]["source"]).stem)
+        self.assertLessEqual(recall["estimated_tokens"], 200)
+        self.assertEqual(candidate_id, recall["entries"][0]["id"])
+        self.assertNotIn("content", recall["entries"][0])
         self.assertEqual(project_id, recall["project_id"])
+        hydrated = json.loads(self.command(
+            RECALL, "--repo", str(self.repo), "--json", "hydrate",
+            "--id", candidate_id, "--budget-tokens", "200",
+        ).stdout)
+        self.assertIn("legacy refresh endpoint", hydrated["entry"]["content"])
         memory = json.loads((base / f"memory/topics/authentication/{candidate_id}.json").read_text())
         for field in ("last_verified_at", "read_when", "review_after"):
             self.assertTrue(memory[field])
@@ -109,7 +115,7 @@ class CoreHarnessTest(unittest.TestCase):
             HOOK, "event", "user-prompt", "--json",
             input_json={"cwd": str(self.repo), "session_id": str(uuid.uuid4()), "prompt": "autenticacao movel"},
         ).stdout)
-        self.assertIn("legacy refresh endpoint", hook_recall["hookSpecificOutput"]["additionalContext"])
+        self.assertEqual({"continue": True}, hook_recall)
 
     def test_discard_removes_candidate_content(self) -> None:
         _, base = self.initialize()
@@ -127,7 +133,7 @@ class CoreHarnessTest(unittest.TestCase):
         self.assertNotIn(secret, archived)
         self.assertNotIn("content", json.loads(archived))
 
-    def test_session_stop_checkpoints_but_does_not_close(self) -> None:
+    def test_hooks_do_not_checkpoint_or_capture_candidates(self) -> None:
         _, base = self.initialize()
         session_id = str(uuid.uuid4())
         self.command(
@@ -142,27 +148,25 @@ class CoreHarnessTest(unittest.TestCase):
         active = base / f"sessions/active/{session_id}.json"
         self.assertTrue(active.is_file())
         self.assertFalse((base / f"sessions/closed/{session_id}.json").exists())
-        self.assertEqual("Mapped refresh paths.", json.loads(active.read_text())["summary"])
-        self.assertEqual(1, len(list((base / "memory/candidates").glob("*.json"))))
+        self.assertEqual("", json.loads(active.read_text())["summary"])
+        self.assertEqual(0, len(list((base / "memory/candidates").glob("*.json"))))
         self.command(SESSION, "--repo", str(self.repo), "--json", "close", "--session-id", session_id)
         self.assertFalse(active.exists())
 
-    def test_hook_auto_init_and_fail_open(self) -> None:
+    def test_hook_does_not_auto_init_and_fails_open_silently(self) -> None:
         result = self.command(
             HOOK, "event", "session-start", "--json", "--budget-tokens", "120",
             input_json={"cwd": str(self.repo), "session_id": str(uuid.uuid4()), "prompt": "Inspect docs"},
         )
         payload = json.loads(result.stdout)
         self.assertTrue(payload["continue"])
-        self.assertIn("hookSpecificOutput", payload)
+        self.assertEqual({"continue": True}, payload)
         configured = subprocess.run(
             ["git", "-C", str(self.repo), "config", "--local", "--get", "harness.project-id"],
-            text=True, capture_output=True, check=True,
+            text=True, capture_output=True, check=False,
         ).stdout.strip()
-        self.assertEqual(str(uuid.UUID(configured)), configured)
-        base = self.root / "harness-home/projects" / configured
-        session_file = next((base / "sessions/active").glob("*.json"))
-        self.assertNotIn("Inspect docs", session_file.read_text())
+        self.assertEqual("", configured)
+        self.assertFalse((self.root / "harness-home/projects").exists())
         outside = self.command(HOOK, "event", "session-start", "--json", input_json={"cwd": str(self.root)})
         outside_payload = json.loads(outside.stdout)
         self.assertTrue(outside_payload["continue"])
@@ -196,8 +200,7 @@ class CoreHarnessTest(unittest.TestCase):
             input_json={"cwd": str(self.repo), "session_id": session_id, "last_assistant_message": "raw private response"},
         )
         self.assertTrue(json.loads(stopped.stdout)["continue"])
-        session = json.loads((base / f"sessions/active/{session_id}.json").read_text())
-        self.assertNotIn("raw private response", json.dumps(session))
+        self.assertFalse((base / f"sessions/active/{session_id}.json").exists())
         self.assertEqual([], list((base / "memory/candidates").glob("*.json")))
 
     def test_hook_installation_is_idempotent_and_preserves_existing_hooks(self) -> None:
@@ -230,9 +233,13 @@ class CoreHarnessTest(unittest.TestCase):
             env=env, text=True, capture_output=True, check=True,
         )
         hooks = json.loads(result.stdout)["hooks"]
-        self.assertTrue(hooks["skipped"])
-        self.assertIn("plugin-bundled", hooks["reason"])
+        self.assertFalse(hooks["installed"])
+        self.assertIn("explicit", hooks["reason"])
         self.assertFalse((self.root / "codex-home/hooks.json").exists())
+        self.assertEqual(
+            {"hooks": {}},
+            json.loads((ROOT / "hooks/hooks.json").read_text()),
+        )
 
     def test_audit_clean_container(self) -> None:
         self.initialize()

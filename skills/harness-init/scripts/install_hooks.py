@@ -14,10 +14,7 @@ import tempfile
 
 MARKER = "harness-init/scripts/hook_adapter.py"
 EVENTS = {
-    "SessionStart": ("startup|resume|clear|compact", "session-start", "Loading Harness context"),
-    "UserPromptSubmit": (None, "user-prompt", "Loading task-specific Harness context"),
-    "PreCompact": ("manual|auto", "pre-compact", "Checkpointing Harness context"),
-    "Stop": (None, "stop", "Updating Harness continuity"),
+    "SessionStart": ("startup|resume|clear|compact", "session-start"),
 }
 
 
@@ -76,7 +73,7 @@ def preserve_unmanaged_group(value: object) -> object | None:
     return updated
 
 
-def hook_group(adapter: Path, matcher: str | None, event: str, status: str) -> dict:
+def hook_group(adapter: Path, matcher: str | None, event: str) -> dict:
     command = f"python3 {shlex.quote(str(adapter))} event {event}"
     group: dict = {
         "hooks": [
@@ -84,7 +81,6 @@ def hook_group(adapter: Path, matcher: str | None, event: str, status: str) -> d
                 "type": "command",
                 "command": command,
                 "timeout": 15,
-                "statusMessage": status,
             }
         ]
     }
@@ -101,7 +97,8 @@ def install(host: str, adapter: Path) -> dict:
         raise RuntimeError(f"The hooks key must contain a JSON object: {path}")
 
     changed = False
-    for event_name, (matcher, event, status) in EVENTS.items():
+    all_events = set(EVENTS) | {"UserPromptSubmit", "PreCompact", "Stop"}
+    for event_name in sorted(all_events):
         existing = hooks.get(event_name, [])
         if not isinstance(existing, list):
             raise RuntimeError(f"hooks.{event_name} must contain a JSON array: {path}")
@@ -110,10 +107,16 @@ def install(host: str, adapter: Path) -> dict:
             for item in existing
             if (preserved := preserve_unmanaged_group(item)) is not None
         ]
-        desired = hook_group(adapter, matcher, event, status)
-        updated = retained + [desired]
+        if event_name in EVENTS:
+            matcher, event = EVENTS[event_name]
+            updated = retained + [hook_group(adapter, matcher, event)]
+        else:
+            updated = retained
         if updated != existing:
-            hooks[event_name] = updated
+            if updated:
+                hooks[event_name] = updated
+            else:
+                hooks.pop(event_name, None)
             changed = True
 
     if changed or not path.exists():

@@ -7,16 +7,16 @@ from pathlib import Path
 from typing import Callable
 
 
-DEFAULTS_VERSION = 3
+DEFAULTS_VERSION = 4
 CHARTER = """# Harness Charter
 
-- Keep Harness state outside repositories.
-- Use English for repository documentation and engineering metadata.
+- Keep Harness state outside project directories.
+- Treat project artifacts and documentation as canonical.
+- Use the project's language and conventions unless the task requires otherwise.
 - Keep language simple, direct, coherent, and concise.
-- Follow project standards for commits, branches, worktrees, pull requests, and reviews.
 - Never promote automatic observations into durable memory without classification.
 - Do not persist raw prompts, responses, transcripts, secrets, or routine tool output.
-- Do not commit, push, publish, or remove work without user authorization.
+- Do not publish, share, or remove work without user authorization.
 - Report verification and uncertainty honestly.
 """
 STANDARDS = {
@@ -26,7 +26,7 @@ STANDARDS = {
     "pull-requests.md": "# Pull requests\n\nUse a Conventional Commit title in English. Describe Summary, Changes, Verification, and Risks from actual evidence.\n",
     "documentation.md": "# Documentation\n\nWrite canonical repository documentation in English with simple, direct, coherent, and concise language.\n",
     "reviews.md": "# Reviews\n\nReport only actionable findings with severity, evidence, impact, and a suggested direction. Review does not imply modification.\n",
-    "continuity.md": "# Continuity\n\nFor material work, use the Harness session skill without asking the user to record a concise task, outcome, blocker, and next step. Capture expensive-to-rediscover observations as candidates with the Harness memory skill. Never copy raw prompts, responses, transcripts, secrets, or routine tool output.\n",
+    "continuity.md": "# Continuity\n\nFor material work that needs a handoff, use the Harness session skill without asking the user to record a concise title, summary, next step, and artifact references. Search Harness memory only when prior context can materially change the current work, then hydrate only selected records. Capture expensive-to-rediscover observations as candidates with the Harness memory skill. Never copy raw prompts, responses, transcripts, secrets, or routine tool output.\n",
 }
 QUERY_ALIASES = {
     "artefato": ["artifact"], "artifacts": ["artefatos"],

@@ -84,26 +84,89 @@ def lock(path: Path, timeout: float = 5.0) -> Iterator[None]:
             path.rmdir()
 
 
-def git(repo: Path, *args: str) -> str:
-    result = subprocess.run(["git", "-C", str(repo), *args], capture_output=True, text=True)
-    if result.returncode:
-        raise RuntimeError(result.stderr.strip() or "Git command failed")
-    return result.stdout.strip()
-
-
-def resolve(repo_path: str) -> tuple[str, Path]:
-    root = Path(git(Path(repo_path).expanduser().resolve(), "rev-parse", "--show-toplevel")).resolve()
-    project_id = git(root, "config", "--local", "--get", "harness.project-id")
-    if not project_id:
-        raise RuntimeError("Repository is not linked to Harness; run harness-init")
+def git(path: Path, *args: str) -> str:
     try:
-        project_id = str(uuid.UUID(project_id))
-    except ValueError as exc:
-        raise RuntimeError("Repository has an invalid Harness project id") from exc
-    base = home() / "projects" / project_id
-    if not (base / "manifest.json").is_file():
-        raise RuntimeError("Harness project does not exist; run harness-init")
-    return project_id, base
+        result = subprocess.run(
+            ["git", "-C", str(path), *args], capture_output=True, text=True, check=False
+        )
+    except OSError:
+        return ""
+    return result.stdout.strip() if result.returncode == 0 else ""
+
+
+def valid_project_id(value: str) -> str:
+    try:
+        return str(uuid.UUID(value))
+    except (ValueError, AttributeError) as exc:
+        raise RuntimeError(f"Invalid Harness project id: {value}") from exc
+
+
+def resolve(
+    project: str,
+    project_id: str = "",
+    host: str = "",
+    host_project_id: str = "",
+) -> tuple[str, Path]:
+    if project_id:
+        identifier = valid_project_id(project_id)
+        base = home() / "projects" / identifier
+        if not (base / "manifest.json").is_file():
+            raise RuntimeError("Harness project does not exist")
+        return identifier, base
+    target = Path(project).expanduser().resolve()
+    matches: list[tuple[int, str, Path]] = []
+    host_matches: set[tuple[str, Path]] = set()
+    for manifest_path in sorted((home() / "projects").glob("*/manifest.json")):
+        try:
+            manifest = load(manifest_path)
+            identifier = valid_project_id(manifest["id"])
+        except (RuntimeError, KeyError):
+            continue
+        bindings = [item for item in manifest.get("bindings", []) if isinstance(item, dict)]
+        bindings.extend(
+            {"type": "path", "value": value}
+            for value in manifest.get("repository_paths", [])
+            if isinstance(value, str)
+        )
+        if host and host_project_id and any(
+            item.get("type") == "host"
+            and item.get("host") == host.lower()
+            and item.get("value") == host_project_id
+            for item in bindings
+        ):
+            host_matches.add((identifier, manifest_path.parent))
+        for item in bindings:
+            if item.get("type") != "path":
+                continue
+            try:
+                bound = Path(str(item["value"])).expanduser().resolve()
+                target.relative_to(bound)
+            except (KeyError, ValueError):
+                continue
+            matches.append((len(bound.parts), identifier, manifest_path.parent))
+    path_match: tuple[str, Path] | None = None
+    if matches:
+        matches.sort(key=lambda item: (-item[0], item[1]))
+        if len(matches) > 1 and matches[0][0] == matches[1][0] and matches[0][1] != matches[1][1]:
+            raise RuntimeError("Ambiguous Harness path binding")
+        path_match = (matches[0][1], matches[0][2])
+    if len(host_matches) > 1:
+        raise RuntimeError("Ambiguous Harness host binding")
+    if host_matches:
+        host_match = next(iter(host_matches))
+        if path_match and path_match[0] != host_match[0]:
+            raise RuntimeError("Host and path resolve to different Harness projects")
+        return host_match
+    if path_match:
+        return path_match
+    root = git(target, "rev-parse", "--show-toplevel")
+    legacy = git(Path(root), "config", "--local", "--get", "harness.project-id") if root else ""
+    if legacy:
+        identifier = valid_project_id(legacy)
+        base = home() / "projects" / identifier
+        if (base / "manifest.json").is_file():
+            return identifier, base
+    raise RuntimeError("Project is not linked to Harness; run harness-init")
 
 
 def slug(value: str) -> str:
@@ -122,23 +185,47 @@ def record_id(value: str | None = None) -> str:
 
 def rebuild_catalog(base: Path) -> None:
     rows: list[dict] = []
+    for status in ("active", "dormant", "closed"):
+        for path in sorted((base / "sessions" / status).glob("*.json")):
+            item = load(path)
+            rows.append({
+                "artifact_refs": item.get("artifact_refs", []),
+                "id": item.get("id", path.stem),
+                "kind": "session",
+                "path": str(path.relative_to(base)),
+                "read_when": item.get("read_when", ""),
+                "schema_version": 2,
+                "status": item.get("status", status),
+                "summary": (item.get("summary") or item.get("task") or "")[:320],
+                "tags": item.get("tags", []),
+                "title": (
+                    item.get("title")
+                    or item.get("task")
+                    or f"session {str(item.get('id', ''))[:8]}"
+                )[:160],
+                "updated_at": item.get("updated_at", ""),
+            })
     for path in sorted((base / "memory/topics").glob("*/*.json")):
         item = load(path)
         if item.get("status") != "active":
             continue
         rows.append({
+            "artifact_refs": item.get("artifact_refs", []),
             "confidence": item.get("confidence", "medium"),
             "id": item["id"],
-            "last_verified_at": item.get("last_verified_at", ""),
+            "kind": "memory",
             "path": str(path.relative_to(base)),
             "read_when": item.get("read_when", ""),
             "review_after": item.get("review_after", ""),
-            "source_session": item.get("source_session", ""),
+            "schema_version": 2,
             "status": "active",
+            "summary": item.get("summary", ""),
+            "tags": item.get("tags", []),
+            "title": item.get("title", item.get("topic", "")),
             "topic": item["topic"],
             "updated_at": item["updated_at"],
         })
-    rows.sort(key=lambda row: (row["topic"], row["id"]))
+    rows.sort(key=lambda row: (row["kind"], row["path"]))
     content = "".join(json.dumps(row, sort_keys=True, ensure_ascii=False) + "\n" for row in rows)
     atomic_write(base / "memory/catalog.jsonl", content)
 
@@ -148,17 +235,25 @@ def candidate(base: Path, args: argparse.Namespace) -> dict:
     path = base / "memory/candidates" / f"{candidate_id}.json"
     if not args.content.strip():
         raise RuntimeError("Candidate content cannot be empty")
+    topic = slug(args.topic)
+    content = args.content.strip()
+    summary = args.summary.strip() or " ".join(content.split())[:320]
+    title = args.title.strip() or topic.replace("-", " ")
     item = {
+        "artifact_refs": sorted(set(args.artifact_ref)),
         "confidence": args.confidence,
-        "content": args.content.strip(),
+        "content": content,
         "created_at": now(),
         "id": candidate_id,
-        "read_when": args.read_when.strip() or f"when work involves {slug(args.topic)}",
+        "read_when": args.read_when.strip() or f"when work involves {topic}",
         "review_after_days": args.review_after_days,
+        "schema_version": 2,
         "source_session": args.source_session,
         "status": "candidate",
+        "summary": summary[:500],
         "tags": sorted(set(args.tag)),
-        "topic": slug(args.topic),
+        "title": title[:160],
+        "topic": topic,
         "updated_at": now(),
     }
     with lock(base / ".lock"):
@@ -197,6 +292,24 @@ def consolidate(base: Path, args: argparse.Namespace) -> dict:
     candidate_id = record_id(args.candidate_id)
     source = base / "memory/candidates" / f"{candidate_id}.json"
     with lock(base / ".lock"):
+        if not source.is_file():
+            promoted = list(
+                (base / "memory/topics").glob(f"*/{candidate_id}.json")
+            )
+            if args.classification == "topic" and len(promoted) == 1:
+                return {
+                    "classification": "topic",
+                    "idempotent": True,
+                    "memory": load(promoted[0]),
+                }
+            archived_path = base / "memory/archive" / f"candidate-{candidate_id}.json"
+            if archived_path.is_file():
+                return {
+                    "archived": load(archived_path),
+                    "classification": args.classification,
+                    "idempotent": True,
+                }
+            raise RuntimeError(f"Memory candidate was not found: {candidate_id}")
         item = load(source)
         classification = args.classification
         if classification == "discard":
@@ -214,24 +327,36 @@ def consolidate(base: Path, args: argparse.Namespace) -> dict:
         normalized = " ".join(item["content"].split()).casefold()
         for existing_path in sorted((base / "memory/topics" / topic).glob("*.json")):
             existing = load(existing_path)
+            if str(existing.get("id")) == candidate_id:
+                continue
             if existing.get("status") == "active" and " ".join(existing.get("content", "").split()).casefold() == normalized:
                 archived = archive_candidate(base, source, item, "duplicate")
                 rebuild_catalog(base)
                 return {"classification": "topic", "duplicate_of": existing["id"], "archived": archived}
 
         supersedes = record_id(args.supersedes) if args.supersedes else ""
+        if supersedes == candidate_id:
+            raise RuntimeError("A memory cannot supersede itself")
+        old_path: Path | None = None
+        old: dict | None = None
         if supersedes:
             matches = list((base / "memory/topics").glob(f"*/{supersedes}.json"))
-            if len(matches) != 1:
+            archived_old = base / "memory/archive" / f"memory-{supersedes}.json"
+            if len(matches) == 1:
+                old_path = matches[0]
+                old = load(old_path)
+            elif archived_old.is_file():
+                archived = load(archived_old)
+                if archived.get("superseded_by") != candidate_id:
+                    raise RuntimeError(
+                        f"Memory was superseded by another record: {supersedes}"
+                    )
+            else:
                 raise RuntimeError(f"Memory to supersede was not found: {supersedes}")
-            old_path = matches[0]
-            old = load(old_path)
-            old.update({"archived_at": now(), "status": "superseded", "superseded_by": candidate_id})
-            write_json(base / "memory/archive" / f"memory-{supersedes}.json", old)
-            old_path.unlink()
 
         verified_at = now()
         memory = {
+            "artifact_refs": item.get("artifact_refs", []),
             "confidence": item.get("confidence", "medium"),
             "content": item["content"],
             "created_at": verified_at,
@@ -239,14 +364,42 @@ def consolidate(base: Path, args: argparse.Namespace) -> dict:
             "last_verified_at": verified_at,
             "read_when": item.get("read_when") or f"when work involves {topic}",
             "review_after": review_after(int(item.get("review_after_days", 90))),
+            "schema_version": 2,
             "source_session": item.get("source_session", ""),
             "status": "active",
+            "summary": item.get("summary") or " ".join(item["content"].split())[:320],
             "supersedes": supersedes,
             "tags": item.get("tags", []),
+            "title": item.get("title") or topic.replace("-", " "),
             "topic": topic,
             "updated_at": now(),
         }
-        write_json(base / "memory/topics" / topic / f"{candidate_id}.json", memory)
+        target = base / "memory/topics" / topic / f"{candidate_id}.json"
+        if target.is_file():
+            existing_target = load(target)
+            if (
+                existing_target.get("id") != candidate_id
+                or existing_target.get("supersedes", "") != supersedes
+                or existing_target.get("content") != item["content"]
+            ):
+                raise RuntimeError(
+                    f"Memory target already exists with different content: {candidate_id}"
+                )
+            memory = existing_target
+        else:
+            write_json(target, memory)
+        if old_path is not None and old is not None:
+            archived_old = dict(old)
+            archived_old.update({
+                "archived_at": now(),
+                "status": "superseded",
+                "superseded_by": candidate_id,
+            })
+            write_json(
+                base / "memory/archive" / f"memory-{supersedes}.json",
+                archived_old,
+            )
+            old_path.unlink()
         archive_candidate(base, source, item, "promoted-to-topic")
         rebuild_catalog(base)
         return {"classification": "topic", "memory": memory}
@@ -264,15 +417,21 @@ def list_records(base: Path, status: str) -> list[dict]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--repo", default=".")
+    parser.add_argument("--project", "--repo", dest="project", default=".")
+    parser.add_argument("--project-id", default="")
+    parser.add_argument("--host", default="")
+    parser.add_argument("--host-project-id", default="")
     parser.add_argument("--json", action="store_true")
     sub = parser.add_subparsers(dest="command", required=True)
     p_candidate = sub.add_parser("candidate")
     p_candidate.add_argument("--topic", required=True)
     p_candidate.add_argument("--content", required=True)
+    p_candidate.add_argument("--title", default="")
+    p_candidate.add_argument("--summary", default="")
     p_candidate.add_argument("--source-session", default="")
     p_candidate.add_argument("--confidence", choices=("low", "medium", "high"), default="medium")
     p_candidate.add_argument("--tag", action="append", default=[])
+    p_candidate.add_argument("--artifact-ref", action="append", default=[])
     p_candidate.add_argument("--read-when", default="")
     p_candidate.add_argument("--review-after-days", type=int, default=90)
     p_candidate.add_argument("--id")
@@ -287,7 +446,9 @@ def main() -> int:
     if args.command == "candidate" and args.review_after_days < 1:
         parser.error("--review-after-days must be positive")
     try:
-        project_id, base = resolve(args.repo)
+        project_id, base = resolve(
+            args.project, args.project_id, args.host, args.host_project_id
+        )
         if args.command == "candidate":
             result = candidate(base, args)
         elif args.command == "consolidate":
