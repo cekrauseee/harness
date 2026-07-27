@@ -1,11 +1,11 @@
 ---
 name: harness-worktree
-description: Plan and create isolated Git worktrees with Harness branch semantics while delegating location, storage, and lifecycle to the active agent host. Use when planning, naming, creating, locating, validating, or adopting a worktree, or when a task needs the Harness `type/slug` branch convention.
+description: Plan, create, validate, adopt, and retire isolated Git worktrees with Harness-controlled semantics and lifecycle while delegating only physical path and storage to the active agent host. Use when naming, creating, locating, validating, adopting, reusing, or removing a worktree, or when a task needs the Harness `type/slug` branch convention.
 ---
 
 # Harness Worktree
 
-Apply portable Harness semantics and use the active host's native worktree workflow. Harness owns branch naming, base selection, isolation, and verification. The host owns the checkout path, storage layout, metadata, lifecycle, and cleanup.
+Apply a Harness-controlled creation protocol and lifecycle while using the active host's storage convention. Harness owns branch naming, base selection, creation, isolation, validation, adoption, reuse, and retirement. The host owns only the physical checkout path, storage layout, and native bookkeeping required to integrate that path.
 
 ## Plan a Worktree
 
@@ -24,15 +24,15 @@ Apply portable Harness semantics and use the active host's native worktree workf
 4. Use the returned `branch` and validated `base` exactly. The resolver derives the remote default or current branch when `--base` is omitted. It never chooses a worktree path.
 5. If the branch exists, adopt it only when the user requested adoption and its Git identity matches. Otherwise choose a distinct slug; never silently rename or reuse an existing branch.
 
-## Create Through the Host
+## Create with Host Storage
 
-1. Detect the active host and its worktree mechanism from system instructions, available tools, and repository guidance.
-2. Prefer that native mechanism and supply the resolved branch and base when its interface accepts them. In Codex, use the Codex-provided worktree flow when available.
-3. Let the host select and manage the physical checkout path. Do not redirect it into Harness global state or reproduce another host's storage convention.
-4. If the host creates a checkout before accepting a branch name, create or switch to the resolved branch inside that checkout only when worktree creation was authorized.
-5. Use ordinary `git worktree add` only when the host exposes no native mechanism. Follow explicit user, repository, and host path conventions; Harness provides no fallback storage root.
+1. Detect how the active host allocates and records worktree paths from system instructions, available tools, and repository guidance.
+2. Obtain or accept the path selected by that host. In Codex, use Codex path allocation; in Claude Code, use Claude Code path allocation. Never substitute a Harness global path.
+3. Create the worktree from the resolved base on the resolved branch. Prefer the host's native operation when it preserves that plan and native bookkeeping; otherwise use ordinary Git at the host-selected path.
+4. When a native operation combines path allocation and creation, treat it as the execution mechanism for the Harness plan, not as ownership of the creation protocol or lifecycle.
+5. Validate the result before starting task work. If the host cannot provide compatible storage or preserve the Harness plan, explain the incompatibility instead of weakening the semantics.
 
-If the host cannot preserve the resolved branch or create an isolated checkout, explain the incompatibility instead of silently weakening Harness semantics.
+Harness provides no fallback storage root. If the host exposes no allocator, follow explicit user, repository, and host path conventions while keeping the path outside Harness global state.
 
 ## Validate Isolation
 
@@ -43,6 +43,14 @@ After creation or adoption:
 - keep implementation, generated files, dependency setup, and verification inside the worktree;
 - run the relevant setup and tests from the worktree, then report the host-selected path and results;
 - leave the source checkout and unrelated worktrees unchanged.
+
+## Control the Lifecycle
+
+- Adopt or reuse an existing worktree only when requested and after its repository, branch, base, and path identity match the plan.
+- Keep the host-selected path in session or handoff context when continuity requires it; do not turn that path into a Harness storage convention.
+- Before retirement, inspect worktree registration and status. Never remove a checkout with uncommitted or untracked work.
+- Remove or prune only with explicit authorization. Prefer the host's native removal operation when it updates host bookkeeping; otherwise use ordinary Git.
+- Confirm retirement removed only the intended registration and checkout. Leave the branch intact unless branch deletion was separately authorized.
 
 ## Mutation Boundary
 
@@ -56,7 +64,7 @@ After creation or adoption:
 ```text
 branch:   <type>/<short-kebab-case-slug>
 base:     <validated repository revision>
-checkout: isolated and host-managed
+checkout: isolated, host-stored, Harness-managed
 ```
 
-Host, agent, and user names never appear in the Harness branch. Worktree directory names and locations are not part of the Harness contract.
+Host, agent, and user names never appear in the Harness branch. Worktree directory names and locations are selected by the host and are not part of the portable Harness contract.

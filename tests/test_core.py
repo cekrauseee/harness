@@ -65,8 +65,11 @@ class CoreHarnessTest(unittest.TestCase):
         ):
             self.assertTrue((base / path).exists(), path)
         worktree_policy = (base / "worktrees/policy.toml").read_text(encoding="utf-8")
-        self.assertIn('creation = "host-native"', worktree_policy)
-        self.assertIn("host_managed_path = true", worktree_policy)
+        self.assertIn('creation_protocol = "harness"', worktree_policy)
+        self.assertIn('lifecycle = "harness"', worktree_policy)
+        self.assertIn('path_provider = "host"', worktree_policy)
+        self.assertIn('storage_provider = "host"', worktree_policy)
+        self.assertNotIn('creation = "host-native"', worktree_policy)
         self.assertNotIn("directory_template", worktree_policy)
         self.assertNotIn('root = "project-container"', worktree_policy)
         self.assertTrue((self.root / "harness-home/charter.md").is_file())

@@ -27,9 +27,11 @@ Use `chore` only when no more specific type applies.
 - Configure the base branch per project; otherwise use `main`.
 - Treat long-lived base branches such as `main` as exceptions to task-branch naming.
 - Create a separate Git checkout for the task and keep task setup, edits, generated files, and verification inside it.
-- Prefer the active host's native worktree mechanism and lifecycle.
-- Let the host choose the directory name, storage root, metadata, and cleanup behavior.
-- Fall back to ordinary Git only when the host provides no worktree mechanism.
+- Let the active host choose the directory name, storage root, and native bookkeeping.
+- Keep creation, validation, adoption, reuse, and retirement under the Harness protocol.
+- Prefer host-native create and remove operations when they preserve the Harness plan and update native bookkeeping.
+- Fall back to ordinary Git at the host-selected path when a native operation is unavailable or incompatible.
 - Never place a worktree under Harness global state merely to satisfy this skill.
+- Never remove a dirty worktree or delete its branch without separate authorization.
 
-Conventional Commits specifies commit messages, not branches. The `type/slug` branch convention is a Harness extension using the same vocabulary. Physical worktree storage is deliberately host-specific.
+Conventional Commits specifies commit messages, not branches. The `type/slug` branch convention is a Harness extension using the same vocabulary. Physical worktree storage is host-specific; creation and lifecycle semantics remain portable Harness concerns.

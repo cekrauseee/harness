@@ -9,7 +9,8 @@ flowchart LR
   Skills --> Git["Git repository"]
   State --> Memory["Memory and sessions"]
   State --> Policy["Worktree policy"]
-  Host --> Worktrees["Host-managed worktrees"]
+  Host --> Storage["Worktree paths and storage"]
+  Skills --> Worktrees["Worktree creation and lifecycle"]
   Git --> Docs["Versioned docs and artifacts"]
 ```
 
@@ -35,9 +36,9 @@ Adapters fail open. They do not persist raw host messages, change product files,
 
 ## Worktrees
 
-Harness defines portable branch, base, isolation, and verification semantics. The active host creates worktrees through its native mechanism and owns checkout paths, storage layout, metadata, lifecycle, and cleanup. Codex therefore uses Codex worktree behavior, while another host uses its own compatible behavior.
+Harness defines and controls portable branch, base, creation, isolation, validation, adoption, reuse, and retirement semantics. The active host owns physical checkout paths, storage layout, and the native bookkeeping required to integrate those paths. Codex therefore uses Codex storage behavior, while Claude Code uses Claude Code storage behavior.
 
-Task branches use `type/slug`. Harness derives and validates the repository base revision, then verifies that implementation and tests run in the isolated checkout. When no host mechanism exists, the agent may use ordinary Git without imposing a Harness storage root. Host and user names never appear in Harness task branches.
+Task branches use `type/slug`. Harness derives and validates the repository base revision, orchestrates creation at the host-selected path, verifies that implementation and tests run in the isolated checkout, and governs safe retirement. Host-native create and remove operations are preferred when they preserve the Harness plan and update native bookkeeping. Otherwise, the agent may use ordinary Git at the host-selected path. Harness never imposes a storage root, and host or user names never appear in Harness task branches.
 
 ## Delivery
 

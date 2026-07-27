@@ -43,7 +43,7 @@ Harness stores machine-local state under `${HARNESS_HOME:-~/.harness}`:
         policy.toml
 ```
 
-A Git repository stores only a local, non-versioned project identifier in Git configuration. Harness adds no state files to the checkout. Linked worktrees resolve the same project identifier and global container. Physical worktree checkouts live wherever the active host manages them; the global `worktrees/` directory stores policy only.
+A Git repository stores only a local, non-versioned project identifier in Git configuration. Harness adds no state files to the checkout. Linked worktrees resolve the same project identifier and global container. Physical worktree paths and storage follow the active host; Harness controls their creation and lifecycle. The global `worktrees/` directory stores policy only.
 
 Lifecycle adapters automate the normal flow:
 
@@ -61,12 +61,12 @@ Managed defaults refresh by schema version. Machine-local overrides live under `
 
 ## Engineering standards
 
-Harness uses Conventional Commits for commits and pull request titles. Task branches extend the same vocabulary while worktree storage stays host-native:
+Harness uses Conventional Commits for commits and pull request titles. Task branches extend the same vocabulary while worktree paths and storage stay host-native:
 
 ```text
 commit:  docs(harness): document artifact routing
 branch:  docs/artifact-routing
-checkout: isolated and host-managed
+checkout: isolated, host-stored, Harness-managed
 ```
 
 Repository-facing documentation is always English, simple, objective, coherent, concise, and factual. Reviews contain only evidence-backed, actionable findings classified from `P0` through `P3`.
@@ -99,7 +99,7 @@ Artifacts are static, self-contained HTML visualizations for users. They use a n
 | `harness-remember` | Capture and consolidate project memory. |
 | `harness-session` | Maintain concise continuation and handoff state. |
 | `harness-audit` | Check identity, memory, sessions, cleanup, and repository boundaries. |
-| `harness-worktree` | Apply Harness branch and isolation semantics through host-native worktrees. |
+| `harness-worktree` | Control creation and lifecycle while using host-selected worktree storage. |
 | `harness-commit` | Organize authorized changes into Conventional Commits. |
 | `harness-pr` | Draft or publish conventional pull requests. |
 | `harness-review` | Report evidence-backed findings with calibrated severity. |

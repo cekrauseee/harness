@@ -1,4 +1,4 @@
 interface:
   display_name: "Harness Worktree"
-  short_description: "Create isolated host-native worktrees"
-  default_prompt: "Use $harness-worktree to plan Harness branch semantics and create an isolated worktree through the active host."
+  short_description: "Manage host-stored worktree lifecycles"
+  default_prompt: "Use $harness-worktree to create and manage an isolated worktree while letting the active host choose its storage path."

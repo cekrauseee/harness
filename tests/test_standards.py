@@ -39,6 +39,19 @@ class SkillPackagingTests(unittest.TestCase):
                 self.assertNotIn("TODO", content)
                 self.assertTrue((skill / "scripts" / script).is_file())
                 self.assertTrue((skill / "references" / reference).is_file())
+                if name == "harness-worktree":
+                    self.assertIn(
+                        "Harness owns branch naming, base selection, creation",
+                        content,
+                    )
+                    self.assertIn(
+                        "The host owns only the physical checkout path",
+                        content,
+                    )
+                    self.assertNotIn(
+                        "The host owns the checkout path, storage layout, metadata, lifecycle",
+                        content,
+                    )
 
 
 class WorktreeResolverTests(unittest.TestCase):
