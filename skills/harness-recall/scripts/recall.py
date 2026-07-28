@@ -455,13 +455,19 @@ def modern_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     target_arguments(parser)
     sub = parser.add_subparsers(dest="command", required=True)
-    p_search = sub.add_parser("search")
+    p_search = sub.add_parser(
+        "search",
+        help="Search semantic cards without hydrating record content.",
+    )
     p_search.add_argument("--query", required=True)
     p_search.add_argument("--limit", type=int, default=3)
     p_search.add_argument("--budget-tokens", type=int, default=400)
     p_search.add_argument("--include-all", action="store_true")
     p_search.add_argument("--include-stale", action="store_true")
-    p_hydrate = sub.add_parser("hydrate")
+    p_hydrate = sub.add_parser(
+        "hydrate",
+        help="Hydrate one selected record by ID.",
+    )
     p_hydrate.add_argument("--id", required=True)
     p_hydrate.add_argument("--budget-tokens", type=int, default=1200)
     return parser
@@ -511,7 +517,11 @@ def positional_command(arguments: list[str]) -> str | None:
 
 
 def main() -> int:
-    modern = positional_command(sys.argv[1:]) is not None
+    arguments = sys.argv[1:]
+    modern = (
+        arguments in (["-h"], ["--help"])
+        or positional_command(arguments) is not None
+    )
     parser = modern_parser() if modern else legacy_parser()
     args = parser.parse_args()
     args.command = getattr(args, "command", "search")

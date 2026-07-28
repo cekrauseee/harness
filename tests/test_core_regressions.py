@@ -367,6 +367,33 @@ class CoreRegressionTests(unittest.TestCase):
         self.assertTrue(any(row["kind"] == "session" for row in catalog))
         self.assertTrue(all("content" not in row for row in catalog))
 
+    def test_recall_root_help_exposes_modern_commands_and_legacy_still_works(
+        self,
+    ) -> None:
+        for help_flag in ("-h", "--help"):
+            result = self.command(RECALL, help_flag)
+            self.assertEqual(0, result.returncode, result.stderr)
+            help_text = " ".join(result.stdout.split())
+            self.assertIn("{search,hydrate}", help_text)
+            self.assertIn(
+                "Search semantic cards without hydrating record content.",
+                help_text,
+            )
+            self.assertIn("Hydrate one selected record by ID.", help_text)
+
+        legacy = self.command(
+            RECALL,
+            "--project",
+            str(self.project),
+            "--query",
+            "anything",
+            "--budget-tokens",
+            "200",
+            "--json",
+        )
+        self.assertEqual(0, legacy.returncode, legacy.stderr)
+        self.assertEqual("anything", json.loads(legacy.stdout)["query"])
+
     def test_supersede_is_recoverable_and_retry_is_idempotent(self) -> None:
         old_id = str(uuid.uuid4())
         new_id = str(uuid.uuid4())
