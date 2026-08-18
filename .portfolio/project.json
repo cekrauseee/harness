@@ -1,0 +1,39 @@
+{
+  "slug": "harness",
+  "name": "cekrause/harness",
+  "description": "A file-native continuity and orchestration layer for agents.",
+  "repositoryUrl": "https://github.com/cekrauseee/harness",
+  "metaDescription": "Harness is a file-native toolkit for agent continuity, project handoffs, and bounded multi-agent orchestration.",
+  "summary": "Harness is a file-native toolkit that helps agents recover relevant project context, maintain concise handoffs, and coordinate bounded work across compatible hosts.",
+  "highlights": [
+    "Agent continuity",
+    "Project handoffs",
+    "Bounded orchestration",
+    "File-native state",
+    "Python",
+    "Git"
+  ],
+  "sections": [
+    {
+      "title": "Product",
+      "paragraphs": [
+        "Long-running agent work needs continuity, but loading every past conversation adds noise and cost. Harness keeps selected project context available without turning full transcripts into memory.",
+        "It works with Git and non-Git projects through Codex, Claude Code, and other skill-compatible hosts. Projects do not need to adopt an application framework or store Harness files in their repositories."
+      ]
+    },
+    {
+      "title": "What I built",
+      "paragraphs": [
+        "I built self-contained skills for project identity, selective recall, handoffs, worktrees, commits, pull requests, reviews, documentation, and artifacts.",
+        "The same toolkit can coordinate a bounded, depth-one graph of agents with explicit dependencies, budgets, and write ownership."
+      ]
+    },
+    {
+      "title": "Engineering choices",
+      "paragraphs": [
+        "Recall is pull-based. Agents search a compact catalog first, then load only the selected record under an explicit context budget.",
+        "State stays under a machine-local Harness directory, outside target projects. The system stores concise, scoped records instead of raw chat transcripts and requires no database, daemon, or network service."
+      ]
+    }
+  ]
+}
