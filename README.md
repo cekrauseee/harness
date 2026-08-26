@@ -64,10 +64,13 @@ Managed defaults refresh by schema version. Machine-local overrides live under `
 Harness uses Conventional Commits for commits and pull request titles. Task branches extend the same vocabulary while worktree paths and storage stay host-native:
 
 ```text
-commit:  docs(harness): document artifact routing
-branch:  docs/artifact-routing
-checkout: isolated, host-stored, Harness-managed
+branch:       docs/artifact-routing
+commit:       docs(harness): document artifact routing
+pull request: docs(harness): document artifact routing
+checkout:     isolated, host-stored, Harness-managed
 ```
+
+The branch and pull request share the task's primary type. Each cohesive commit classifies its actual change with the same vocabulary. Host-specific worktree directory names never become Git branch prefixes.
 
 These conventions load only for relevant engineering work. Repository-facing documentation is English, simple, objective, coherent, concise, and factual. Reviews contain only evidence-backed, actionable findings classified from `P0` through `P3`.
 

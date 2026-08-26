@@ -41,3 +41,10 @@ Classify the result, not every file type:
 - A pure CI workflow change is `ci`.
 
 Use a scope only when it is a stable project concept. Do not use a host, agent, contributor, ticket status, or temporary worktree as the scope.
+
+## Cross-surface semantics
+
+- Branches use the same allowed type vocabulary as commit headers.
+- Task branches use `<primary-type>/<short-kebab-case-slug>` without host, agent, user, or machine prefixes.
+- Each cohesive commit keeps the type that truthfully describes its own change. Supporting commits may differ from the task's primary type.
+- The pull request title and task branch must share the task's primary type.

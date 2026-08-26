@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import runpy
 import subprocess
 import sys
 import tempfile
@@ -52,6 +53,18 @@ class SkillPackagingTests(unittest.TestCase):
                         "The host owns the checkout path, storage layout, metadata, lifecycle",
                         content,
                     )
+
+    def test_git_skills_share_the_same_type_vocabulary(self) -> None:
+        scripts = (
+            "skills/harness-worktree/scripts/resolve_branch.py",
+            "skills/harness-commit/scripts/validate_conventional.py",
+            "skills/harness-pr/scripts/render_pr.py",
+        )
+        vocabularies = [
+            tuple(runpy.run_path(str(ROOT / script))["ALLOWED_TYPES"])
+            for script in scripts
+        ]
+        self.assertTrue(all(value == vocabularies[0] for value in vocabularies[1:]))
 
 
 class WorktreeResolverTests(unittest.TestCase):
@@ -152,6 +165,24 @@ class ConventionalCommitTests(unittest.TestCase):
         self.assertFalse(payload["ok"])
         self.assertGreaterEqual(len(payload["errors"]), 2)
 
+    def test_rejects_agent_and_host_branch_prefixes(self) -> None:
+        for branch in ("codex/authentication", "claude/authentication", "henrique/authentication"):
+            with self.subTest(branch=branch):
+                result = run_script(
+                    self.SCRIPT,
+                    "--message",
+                    "feat(api): add authentication",
+                    "--branch",
+                    branch,
+                    "--format",
+                    "json",
+                )
+                self.assertEqual(result.returncode, 1)
+                self.assertIn(
+                    "branch must match allowed-type/short-kebab-case-slug",
+                    json.loads(result.stdout)["errors"],
+                )
+
 
 class PullRequestRendererTests(unittest.TestCase):
     SCRIPT = "skills/harness-pr/scripts/render_pr.py"
@@ -159,6 +190,8 @@ class PullRequestRendererTests(unittest.TestCase):
     def test_renders_required_sections_as_json(self) -> None:
         result = run_script(
             self.SCRIPT,
+            "--branch",
+            "docs/artifact-routing",
             "--title",
             "docs(harness): define artifact routing",
             "--summary",
@@ -175,6 +208,7 @@ class PullRequestRendererTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         payload = json.loads(result.stdout)
         self.assertTrue(payload["ok"])
+        self.assertEqual(payload["branch"], "docs/artifact-routing")
         self.assertEqual(payload["title"], "docs(harness): define artifact routing")
         for section in ("Summary", "Changes", "Verification", "Risks"):
             self.assertIn(f"## {section}", payload["body"])
@@ -198,6 +232,56 @@ class PullRequestRendererTests(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 1)
         self.assertFalse(json.loads(result.stdout)["ok"])
+
+    def test_rejects_title_type_that_differs_from_head_branch(self) -> None:
+        result = run_script(
+            self.SCRIPT,
+            "--branch",
+            "feat/artifact-routing",
+            "--title",
+            "docs(harness): define artifact routing",
+            "--summary",
+            "Describe artifact routing.",
+            "--change",
+            "Add guidance.",
+            "--verification",
+            "Ran the standards unit tests.",
+            "--risk",
+            "None identified.",
+            "--format",
+            "json",
+        )
+        self.assertEqual(result.returncode, 1)
+        self.assertIn(
+            "pull request title type must match head branch type",
+            json.loads(result.stdout)["errors"],
+        )
+
+    def test_rejects_agent_prefixed_head_branch(self) -> None:
+        result = run_script(
+            self.SCRIPT,
+            "--branch",
+            "codex/artifact-routing",
+            "--title",
+            "docs(harness): define artifact routing",
+            "--summary",
+            "Describe artifact routing.",
+            "--change",
+            "Add guidance.",
+            "--verification",
+            "Ran the standards unit tests.",
+            "--risk",
+            "None identified.",
+            "--format",
+            "json",
+        )
+        self.assertEqual(result.returncode, 1)
+        self.assertTrue(
+            any(
+                "prefixes are not allowed" in error
+                for error in json.loads(result.stdout)["errors"]
+            )
+        )
 
 
 class ReviewValidatorTests(unittest.TestCase):

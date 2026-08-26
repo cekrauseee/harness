@@ -12,6 +12,8 @@ Allowed types are `feat`, `fix`, `docs`, `refactor`, `perf`, `test`, `build`, `c
 
 The title represents the principal outcome of the complete pull request, not necessarily the type of every included commit.
 
+The head branch must use `<type>/<short-kebab-case-slug>`, and that type must match the title's primary type. Never use host, agent, user, or machine prefixes such as `codex/` or `claude/`. Physical worktree directory names remain host-specific and do not affect the Git branch.
+
 ## Body
 
 - **Summary:** Explain the outcome and motivation in one short paragraph.

@@ -10,7 +10,7 @@ Apply a Harness-controlled creation protocol and lifecycle while using the activ
 ## Plan a Worktree
 
 1. Read applicable repository instructions and identify the task's primary intent.
-2. Choose an allowed Conventional Commit type and translate the task into a short English kebab-case slug. Read [references/worktrees.md](references/worktrees.md) when classification or collision behavior is unclear.
+2. Choose the task's primary allowed Conventional Commit type once and translate the outcome into a short English kebab-case slug. The same primary type governs the pull request title. Read [references/worktrees.md](references/worktrees.md) when classification or collision behavior is unclear.
 3. Run:
 
    ```bash
@@ -27,7 +27,7 @@ Apply a Harness-controlled creation protocol and lifecycle while using the activ
 ## Create with Host Storage
 
 1. Detect how the active host allocates and records worktree paths from system instructions, available tools, and repository guidance.
-2. Obtain or accept the path selected by that host. In Codex, use Codex path allocation; in Claude Code, use Claude Code path allocation. Never substitute a Harness global path.
+2. Obtain or accept the path selected by that host. In Codex, use Codex path allocation; in Claude Code, use Claude Code path allocation. Host-specific path or directory naming must not alter the resolved Harness branch. Never substitute a Harness global path.
 3. Create the worktree from the resolved base on the resolved branch. Prefer the host's native operation when it preserves that plan and native bookkeeping; otherwise use ordinary Git at the host-selected path.
 4. When a native operation combines path allocation and creation, treat it as the execution mechanism for the Harness plan, not as ownership of the creation protocol or lifecycle.
 5. Validate the result before starting task work. If the host cannot provide compatible storage or preserve the Harness plan, explain the incompatibility instead of weakening the semantics.
@@ -67,4 +67,4 @@ base:     <validated repository revision>
 checkout: isolated, host-stored, Harness-managed
 ```
 
-Host, agent, and user names never appear in the Harness branch. Worktree directory names and locations are selected by the host and are not part of the portable Harness contract.
+Host, agent, user, and machine names never appear in the Harness branch. Prefixes such as `codex/` and `claude/` are invalid even when the host uses similar names for physical worktree directories. Directory names and locations remain host-selected and are not part of the portable Harness contract.

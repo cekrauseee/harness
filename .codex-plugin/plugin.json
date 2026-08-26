@@ -1,6 +1,6 @@
 {
   "name": "harness",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Lean, file-native continuity and bounded agent orchestration for any project.",
   "author": {
     "name": "Henrique Krause",

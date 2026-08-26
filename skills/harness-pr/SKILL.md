@@ -9,13 +9,14 @@ Derive a truthful pull request title and body from the actual diff. Drafting is 
 
 ## Draft a Pull Request
 
-1. Read applicable repository instructions and identify the intended base branch.
+1. Read applicable repository instructions and identify the intended base and head branches.
 2. Inspect the complete diff against that base, the included commits, and relevant verification output. Do not rely on the conversation alone.
-3. Choose the primary Conventional Commit type and optional stable scope. Read [references/pull-requests.md](references/pull-requests.md) for the title and body rules.
+3. Choose the primary Conventional Commit type and optional stable scope. The title type must match the semantic type in the head branch. Read [references/pull-requests.md](references/pull-requests.md) for the title and body rules.
 4. Render a standard body:
 
    ```bash
    python3 scripts/render_pr.py \
+     --branch "docs/artifact-routing" \
      --title "docs(harness): define artifact routing" \
      --summary "Define where final user-facing HTML artifacts belong." \
      --change "Route final HTML files to docs/artifacts/." \
@@ -23,9 +24,10 @@ Derive a truthful pull request title and body from the actual diff. Drafting is 
      --risk "Existing project artifacts are not migrated."
    ```
 
-5. Compare every statement with the diff and verification evidence. State unrun checks explicitly with a reason.
-6. Return the draft when publication is not explicitly authorized.
-7. Open or update the pull request only when explicitly requested. Re-read the remote result and report its URL.
+5. Treat a failed branch check as a publication blocker. Never preserve or introduce host, agent, user, or machine prefixes such as `codex/` or `claude/` in the head branch.
+6. Compare every statement with the diff and verification evidence. State unrun checks explicitly with a reason.
+7. Return the draft when publication is not explicitly authorized.
+8. Open or update the pull request only when explicitly requested. Re-read the remote result and report its URL.
 
 ## Required Shape
 
@@ -48,6 +50,8 @@ The body contains exactly these sections:
 ```
 
 Use concise English and describe the resulting change rather than the work session. Never claim tests, review, compatibility, migration, or safety that was not verified.
+
+The head branch must use `<type>/<short-kebab-case-slug>`, and its type must match the pull request title type. Long-lived base branches such as `main` remain exempt because they are not head task branches.
 
 ## Authorization Boundary
 
