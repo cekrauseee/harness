@@ -1,6 +1,6 @@
 interface:
   display_name: "Harness Pull Request"
-  short_description: "Prepare evidence-based pull requests"
-  default_prompt: "Use $harness-pr to derive a truthful pull request from the actual diff and available verification."
+  short_description: "Prepare reviewer-ready pull requests"
+  default_prompt: "Use $harness-pr to derive a compact, truthful review context contract from the actual diff and verification."
 policy:
   allow_implicit_invocation: true

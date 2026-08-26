@@ -80,8 +80,17 @@ class CoreHarnessTest(unittest.TestCase):
         pull_requests_standard = (
             self.root / "harness-home/standards/pull-requests.md"
         ).read_text(encoding="utf-8")
+        reviews_standard = (
+            self.root / "harness-home/standards/reviews.md"
+        ).read_text(encoding="utf-8")
         self.assertIn("`codex/` or `claude/`", branches_standard)
         self.assertIn("primary type matches the head branch type", pull_requests_standard)
+        self.assertIn("Goal, Desired behavior, Change map", pull_requests_standard)
+        self.assertIn("routing context, not evidence", reviews_standard)
+        managed = json.loads(
+            (self.root / "harness-home/managed.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(6, managed["defaults_version"])
         again = json.loads(self.command(INIT, "init", "--repo", str(self.repo), "--json").stdout)
         self.assertFalse(again["created"])
         self.assertEqual(project_id, again["project"]["id"])

@@ -72,6 +72,8 @@ checkout:     isolated, host-stored, Harness-managed
 
 The branch and pull request share the task's primary type. Each cohesive commit classifies its actual change with the same vocabulary. Host-specific worktree directory names never become Git branch prefixes.
 
+Pull request bodies package Goal, Desired behavior, Change map, Verification, Review focus, and Risks into a bounded reviewer context. Reviewers use that contract to order inspection, verify the complete diff, and load broader repository context only when dependency or risk boundaries require it.
+
 These conventions load only for relevant engineering work. Repository-facing documentation is English, simple, objective, coherent, concise, and factual. Reviews contain only evidence-backed, actionable findings classified from `P0` through `P3`.
 
 ## Documentation and artifacts
@@ -105,8 +107,8 @@ Artifacts are static, self-contained HTML visualizations for users. They use a n
 | `harness-orchestrate` | Coordinate bounded, depth-one multi-agent work graphs. |
 | `harness-worktree` | Control creation and lifecycle while using host-selected worktree storage. |
 | `harness-commit` | Organize authorized changes into Conventional Commits. |
-| `harness-pr` | Draft or publish conventional pull requests. |
-| `harness-review` | Report evidence-backed findings with calibrated severity. |
+| `harness-pr` | Draft reviewer-ready pull request context contracts. |
+| `harness-review` | Route focused review and report evidence-backed findings. |
 | `harness-docs-init` | Create the canonical English documentation baseline. |
 | `harness-docs-maintain` | Maintain concise canonical documentation. |
 | `harness-docs-audit` | Check documentation routing, links, size, and drift. |
