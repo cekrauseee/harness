@@ -12,7 +12,7 @@ Prepare cohesive commits with English Conventional Commit messages. Message prep
 1. Read applicable repository instructions.
 2. Inspect `git status`, the relevant staged and unstaged diffs, and recent commit style. Do not stage unrelated user changes.
 3. Group changes by one primary intent. Prefer multiple cohesive commits over one message that hides unrelated changes.
-4. Choose the type and optional stable scope. Read [references/conventional-commits.md](references/conventional-commits.md) when classification is ambiguous.
+4. Choose the type and optional stable scope from the shared Harness vocabulary. Classify the cohesive commit by its actual change; the task branch and pull request title carry the primary delivery type. Read [references/conventional-commits.md](references/conventional-commits.md) when classification is ambiguous.
 5. Write a concise English imperative description, then validate it:
 
    ```bash
@@ -40,7 +40,7 @@ Prepare cohesive commits with English Conventional Commit messages. Message prep
 - Use `docs` only for documentation-only changes and `chore` only as a fallback.
 - Treat tests or documentation accompanying a feature or fix as part of that feature or fix.
 
-The validator enforces structure, allowed types, ASCII text, and branch syntax. The agent must still verify that the description is truthful, English, imperative, and aligned with the actual diff.
+The validator enforces structure, the shared type vocabulary, ASCII text, and branch syntax. It rejects agent- or host-prefixed branches because only `<type>/<slug>` is valid. The agent must still verify that the description is truthful, English, imperative, and aligned with the actual diff.
 
 ## Authorization Boundary
 

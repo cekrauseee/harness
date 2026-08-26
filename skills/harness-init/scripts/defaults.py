@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Callable
 
 
-DEFAULTS_VERSION = 4
+DEFAULTS_VERSION = 5
 CHARTER = """# Harness Charter
 
 - Keep Harness state outside project directories.
@@ -20,10 +20,10 @@ CHARTER = """# Harness Charter
 - Report verification and uncertainty honestly.
 """
 STANDARDS = {
-    "commits.md": "# Commits\n\nUse Conventional Commits: `type(scope): imperative description`. Use English, lowercase types, and no final period.\n",
-    "branches.md": "# Branches\n\nUse `type/short-kebab-case-description` with Conventional Commit types. Do not include an agent or person name.\n",
-    "worktrees.md": "# Worktrees\n\nUse a `type/short-kebab-case-description` branch in an isolated checkout. Let the active host choose physical storage while Harness controls creation, validation, adoption, and retirement. Git remains authoritative.\n",
-    "pull-requests.md": "# Pull requests\n\nUse a Conventional Commit title in English. Describe Summary, Changes, Verification, and Risks from actual evidence.\n",
+    "commits.md": "# Commits\n\nUse English Conventional Commits: `type(scope): imperative description`. Use the Harness type vocabulary, lowercase types, and no final period. Classify each cohesive commit by its actual change.\n",
+    "branches.md": "# Branches\n\nChoose the task's primary Conventional Commit type once. Use `type/short-kebab-case-description` for its branch. Never add an agent, host, person, or machine prefix such as `codex/` or `claude/`.\n",
+    "worktrees.md": "# Worktrees\n\nUse the task's semantic `type/short-kebab-case-description` branch in an isolated checkout. Let the active host choose the physical path, directory name, storage root, and native bookkeeping while Harness controls branch naming, creation, validation, adoption, and retirement. Host-specific directory names must not alter the branch. Git remains authoritative.\n",
+    "pull-requests.md": "# Pull requests\n\nUse an English Conventional Commit title whose primary type matches the head branch type. Describe Summary, Changes, Verification, and Risks from actual evidence. Do not publish a pull request from a host- or agent-prefixed branch.\n",
     "documentation.md": "# Documentation\n\nWrite canonical repository documentation in English with simple, direct, coherent, and concise language.\n",
     "reviews.md": "# Reviews\n\nReport only actionable findings with severity, evidence, impact, and a suggested direction. Review does not imply modification.\n",
     "continuity.md": "# Continuity\n\nFor material work that needs a handoff, use the Harness session skill without asking the user to record a concise title, summary, next step, and artifact references. Search Harness memory only when prior context can materially change the current work, then hydrate only selected records. Capture expensive-to-rediscover observations as candidates with the Harness memory skill. Never copy raw prompts, responses, transcripts, secrets, or routine tool output.\n",

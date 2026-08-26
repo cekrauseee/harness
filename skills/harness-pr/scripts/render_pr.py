@@ -23,7 +23,10 @@ ALLOWED_TYPES = (
     "revert",
 )
 TITLE_RE = re.compile(
-    rf"^(?:{'|'.join(ALLOWED_TYPES)})(?:\([a-z0-9][a-z0-9.-]*\))?!?: (?P<description>.+)$"
+    rf"^(?P<type>{'|'.join(ALLOWED_TYPES)})(?:\([a-z0-9][a-z0-9.-]*\))?!?: (?P<description>.+)$"
+)
+BRANCH_RE = re.compile(
+    rf"^(?P<type>{'|'.join(ALLOWED_TYPES)})/(?P<slug>[a-z0-9]+(?:-[a-z0-9]+)*)$"
 )
 
 
@@ -47,6 +50,25 @@ def validate_title(title: str) -> list[str]:
         errors.append("description must not end with a period")
     if description != description.strip() or "  " in description:
         errors.append("description must not contain leading, trailing, or repeated spaces")
+    return errors
+
+
+def validate_branch(title: str, branch: str) -> list[str]:
+    if not branch:
+        return []
+    errors: list[str] = []
+    if not branch.isascii():
+        errors.append("branch must use ASCII text")
+    branch_match = BRANCH_RE.fullmatch(branch)
+    if not branch_match:
+        errors.append(
+            "branch must match allowed-type/short-kebab-case-slug; "
+            "host, agent, user, and machine prefixes are not allowed"
+        )
+        return errors
+    title_match = TITLE_RE.fullmatch(title)
+    if title_match and title_match.group("type") != branch_match.group("type"):
+        errors.append("pull request title type must match head branch type")
     return errors
 
 
@@ -77,6 +99,11 @@ def render_body(args: argparse.Namespace) -> str:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--branch",
+        default="",
+        help="Optional head task branch; validates semantic naming and title alignment",
+    )
     parser.add_argument("--title", required=True)
     parser.add_argument("--summary", required=True)
     parser.add_argument("--change", action="append", required=True)
@@ -88,7 +115,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    errors = validate_title(args.title)
+    errors = validate_title(args.title) + validate_branch(args.title, args.branch)
     try:
         body = render_body(args)
     except ValueError as error:
@@ -103,7 +130,10 @@ def main() -> int:
         return 1
 
     if args.format == "json":
-        print(json.dumps({"ok": True, "title": args.title, "body": body}, indent=2))
+        payload = {"ok": True, "title": args.title, "body": body}
+        if args.branch:
+            payload["branch"] = args.branch
+        print(json.dumps(payload, indent=2))
     else:
         print(body, end="")
     return 0
