@@ -16,17 +16,19 @@ type(optional-scope)!: concise imperative description
 
 Allowed types are `feat`, `fix`, `docs`, `refactor`, `perf`, `test`, `build`, `ci`, `style`, `chore`, and `revert`. Use `chore` only when no specific type applies. Use `!` and a `BREAKING CHANGE:` footer for breaking changes.
 
+Choose the task's primary type once. Use it for the task branch and pull request title. Each cohesive commit uses the same allowed vocabulary but keeps the type that truthfully describes its own change, so a supporting commit may differ from the task's primary type.
+
 ## Branches and worktrees
 
-Use `type/short-kebab-case-slug` for task branches. Do not include host names, agent names, or usernames.
+Use `type/short-kebab-case-slug` for task branches. Do not include host, agent, user, or machine names. Prefixes such as `codex/` and `claude/` are invalid.
 
-Create task work in a separate checkout. Let the active host choose the directory, storage root, and native bookkeeping. Keep creation, validation, adoption, reuse, and retirement under the Harness protocol. Prefer host-native operations when they preserve the plan; otherwise use ordinary Git at the host-selected path. Keep task setup, edits, generated files, and verification inside that checkout.
+Create task work in a separate checkout. Let the active host choose the physical path, directory name, storage root, and native bookkeeping. Host-specific directory naming must not alter the semantic Git branch. Keep creation, validation, adoption, reuse, and retirement under the Harness protocol. Prefer host-native operations when they preserve the plan; otherwise use ordinary Git at the host-selected path. Keep task setup, edits, generated files, and verification inside that checkout.
 
 Long-lived base branches such as `main` are exempt from task-branch naming.
 
 ## Pull requests
 
-Use a Conventional Commit title and these body sections:
+Use a Conventional Commit title whose primary type matches the head task branch. Do not publish from a branch that violates the branch rule. Use these body sections:
 
 ```markdown
 ## Summary

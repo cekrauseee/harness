@@ -72,7 +72,16 @@ class CoreHarnessTest(unittest.TestCase):
         self.assertNotIn('creation = "host-native"', worktree_policy)
         self.assertNotIn("directory_template", worktree_policy)
         self.assertNotIn('root = "project-container"', worktree_policy)
+        self.assertIn("agent_prefix = false", worktree_policy)
         self.assertTrue((self.root / "harness-home/charter.md").is_file())
+        branches_standard = (
+            self.root / "harness-home/standards/branches.md"
+        ).read_text(encoding="utf-8")
+        pull_requests_standard = (
+            self.root / "harness-home/standards/pull-requests.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("`codex/` or `claude/`", branches_standard)
+        self.assertIn("primary type matches the head branch type", pull_requests_standard)
         again = json.loads(self.command(INIT, "init", "--repo", str(self.repo), "--json").stdout)
         self.assertFalse(again["created"])
         self.assertEqual(project_id, again["project"]["id"])
