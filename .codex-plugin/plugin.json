@@ -1,6 +1,6 @@
 {
   "name": "harness",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Lean, file-native continuity and bounded agent orchestration for any project.",
   "author": {
     "name": "Henrique Krause",
@@ -14,7 +14,7 @@
   "interface": {
     "displayName": "Harness",
     "shortDescription": "Lean continuity and bounded agent orchestration.",
-    "longDescription": "Harness gives agents project-native identity, pull-based semantic recall, concise handoffs, and bounded multi-agent orchestration for coding and non-coding work. Engineering workflows remain available on demand.",
+    "longDescription": "Harness gives agents project-native identity, pull-based semantic recall, concise handoffs, bounded multi-agent orchestration, and reviewer-ready pull request context for coding and non-coding work.",
     "developerName": "Henrique Krause",
     "category": "Productivity",
     "capabilities": ["Write"],
@@ -22,7 +22,7 @@
     "defaultPrompt": [
       "Continue this project from only the relevant stored context.",
       "Coordinate this authorized multi-agent task within a bounded work graph.",
-      "Review these changes using evidence-backed severity."
+      "Review this pull request from its context contract and actual diff."
     ]
   }
 }

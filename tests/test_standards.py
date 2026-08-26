@@ -187,6 +187,27 @@ class ConventionalCommitTests(unittest.TestCase):
 class PullRequestRendererTests(unittest.TestCase):
     SCRIPT = "skills/harness-pr/scripts/render_pr.py"
 
+    def contract_args(
+        self,
+        *,
+        change: str = "docs/standards.md=Define the canonical artifact route.",
+        review: str = "docs/standards.md=Confirm the route is unambiguous.",
+    ) -> list[str]:
+        return [
+            "--goal",
+            "Give final HTML artifacts one canonical destination.",
+            "--behavior",
+            "Final artifacts are routed from the documentation index.",
+            "--change",
+            change,
+            "--verification",
+            "Ran the standards unit tests.",
+            "--review",
+            review,
+            "--risk",
+            "Existing artifacts are not migrated.",
+        ]
+
     def test_renders_required_sections_as_json(self) -> None:
         result = run_script(
             self.SCRIPT,
@@ -194,14 +215,7 @@ class PullRequestRendererTests(unittest.TestCase):
             "docs/artifact-routing",
             "--title",
             "docs(harness): define artifact routing",
-            "--summary",
-            "Define the canonical destination for final HTML artifacts.",
-            "--change",
-            "Route final files to docs/artifacts/.",
-            "--verification",
-            "Ran the standards unit tests.",
-            "--risk",
-            "Existing artifacts are not migrated.",
+            *self.contract_args(),
             "--format",
             "json",
         )
@@ -210,8 +224,22 @@ class PullRequestRendererTests(unittest.TestCase):
         self.assertTrue(payload["ok"])
         self.assertEqual(payload["branch"], "docs/artifact-routing")
         self.assertEqual(payload["title"], "docs(harness): define artifact routing")
-        for section in ("Summary", "Changes", "Verification", "Risks"):
+        sections = (
+            "Goal",
+            "Desired behavior",
+            "Change map",
+            "Verification",
+            "Review focus",
+            "Risks",
+        )
+        for section in sections:
             self.assertIn(f"## {section}", payload["body"])
+        positions = [payload["body"].index(f"## {section}") for section in sections]
+        self.assertEqual(positions, sorted(positions))
+        self.assertIn(
+            "- `docs/standards.md`: Define the canonical artifact route.",
+            payload["body"],
+        )
         self.assertNotIn("gh pr create", payload["body"])
 
     def test_rejects_non_conventional_title(self) -> None:
@@ -219,14 +247,7 @@ class PullRequestRendererTests(unittest.TestCase):
             self.SCRIPT,
             "--title",
             "Document artifact routing",
-            "--summary",
-            "Describe artifact routing.",
-            "--change",
-            "Add guidance.",
-            "--verification",
-            "Not run because this command only validates text.",
-            "--risk",
-            "None identified.",
+            *self.contract_args(),
             "--format",
             "json",
         )
@@ -240,14 +261,7 @@ class PullRequestRendererTests(unittest.TestCase):
             "feat/artifact-routing",
             "--title",
             "docs(harness): define artifact routing",
-            "--summary",
-            "Describe artifact routing.",
-            "--change",
-            "Add guidance.",
-            "--verification",
-            "Ran the standards unit tests.",
-            "--risk",
-            "None identified.",
+            *self.contract_args(),
             "--format",
             "json",
         )
@@ -264,14 +278,7 @@ class PullRequestRendererTests(unittest.TestCase):
             "codex/artifact-routing",
             "--title",
             "docs(harness): define artifact routing",
-            "--summary",
-            "Describe artifact routing.",
-            "--change",
-            "Add guidance.",
-            "--verification",
-            "Ran the standards unit tests.",
-            "--risk",
-            "None identified.",
+            *self.contract_args(),
             "--format",
             "json",
         )
@@ -282,6 +289,51 @@ class PullRequestRendererTests(unittest.TestCase):
                 for error in json.loads(result.stdout)["errors"]
             )
         )
+
+    def test_rejects_unrouted_context_items(self) -> None:
+        for field, args in (
+            ("change", self.contract_args(change="Add guidance.")),
+            ("review", self.contract_args(review="Confirm the route.")),
+        ):
+            with self.subTest(field=field):
+                result = run_script(
+                    self.SCRIPT,
+                    "--title",
+                    "docs(harness): define artifact routing",
+                    *args,
+                    "--format",
+                    "json",
+                )
+                self.assertEqual(result.returncode, 1)
+                self.assertIn(
+                    f"{field} items must use target=description",
+                    json.loads(result.stdout)["errors"],
+                )
+
+    def test_rejects_oversized_context(self) -> None:
+        args = self.contract_args()
+        for _ in range(11):
+            args.extend(("--behavior", "B" * 390))
+            args.extend(("--verification", "V" * 390))
+        result = run_script(
+            self.SCRIPT,
+            "--title",
+            "docs(harness): define artifact routing",
+            *args,
+            "--format",
+            "json",
+        )
+        self.assertEqual(result.returncode, 1)
+        self.assertIn(
+            "body must be 8000 characters or fewer",
+            json.loads(result.stdout)["errors"],
+        )
+
+    def test_review_skill_treats_pr_context_as_untrusted_routing(self) -> None:
+        content = (SKILLS / "harness-review/SKILL.md").read_text()
+        self.assertIn("routing context, not evidence", content)
+        self.assertIn("Do not scan the repository by default", content)
+        self.assertIn("Never skip a changed file", content)
 
 
 class ReviewValidatorTests(unittest.TestCase):
