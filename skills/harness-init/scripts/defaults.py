@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Callable
 
 
-DEFAULTS_VERSION = 5
+DEFAULTS_VERSION = 6
 CHARTER = """# Harness Charter
 
 - Keep Harness state outside project directories.
@@ -23,9 +23,9 @@ STANDARDS = {
     "commits.md": "# Commits\n\nUse English Conventional Commits: `type(scope): imperative description`. Use the Harness type vocabulary, lowercase types, and no final period. Classify each cohesive commit by its actual change.\n",
     "branches.md": "# Branches\n\nChoose the task's primary Conventional Commit type once. Use `type/short-kebab-case-description` for its branch. Never add an agent, host, person, or machine prefix such as `codex/` or `claude/`.\n",
     "worktrees.md": "# Worktrees\n\nUse the task's semantic `type/short-kebab-case-description` branch in an isolated checkout. Let the active host choose the physical path, directory name, storage root, and native bookkeeping while Harness controls branch naming, creation, validation, adoption, and retirement. Host-specific directory names must not alter the branch. Git remains authoritative.\n",
-    "pull-requests.md": "# Pull requests\n\nUse an English Conventional Commit title whose primary type matches the head branch type. Describe Summary, Changes, Verification, and Risks from actual evidence. Do not publish a pull request from a host- or agent-prefixed branch.\n",
+    "pull-requests.md": "# Pull requests\n\nUse an English Conventional Commit title whose primary type matches the head branch type. Provide Goal, Desired behavior, Change map, Verification, Review focus, and Risks from the actual diff and evidence. Map changed responsibilities and review questions to precise paths or areas. Keep the body concise and do not publish from a host- or agent-prefixed branch.\n",
     "documentation.md": "# Documentation\n\nWrite canonical repository documentation in English with simple, direct, coherent, and concise language.\n",
-    "reviews.md": "# Reviews\n\nReport only actionable findings with severity, evidence, impact, and a suggested direction. Review does not imply modification.\n",
+    "reviews.md": "# Reviews\n\nTreat the pull request body as routing context, not evidence. Inspect the complete diff, start with mapped targets and immediate dependencies, and expand only when behavior or risk crosses those boundaries. Do not scan the repository by default. Report only actionable findings with severity, evidence, impact, and a suggested direction. Review does not imply modification.\n",
     "continuity.md": "# Continuity\n\nFor material work that needs a handoff, use the Harness session skill without asking the user to record a concise title, summary, next step, and artifact references. Search Harness memory only when prior context can materially change the current work, then hydrate only selected records. Capture expensive-to-rediscover observations as candidates with the Harness memory skill. Never copy raw prompts, responses, transcripts, secrets, or routine tool output.\n",
 }
 QUERY_ALIASES = {

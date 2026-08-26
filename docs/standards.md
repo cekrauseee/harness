@@ -28,19 +28,23 @@ Long-lived base branches such as `main` are exempt from task-branch naming.
 
 ## Pull requests
 
-Use a Conventional Commit title whose primary type matches the head task branch. Do not publish from a branch that violates the branch rule. Use these body sections:
+Use a Conventional Commit title whose primary type matches the head task branch. Do not publish from a branch that violates the branch rule. Use this compact review context contract:
 
 ```markdown
-## Summary
+## Goal
 
-## Changes
+## Desired behavior
+
+## Change map
 
 ## Verification
+
+## Review focus
 
 ## Risks
 ```
 
-Describe the actual diff. Never claim checks that did not run. Preparing a pull request does not authorize publication.
+Describe the actual diff. Map changed responsibilities and review questions to precise paths or areas. Keep the body within 8,000 characters and avoid duplicated facts. Never claim checks that did not run. Preparing a pull request does not authorize publication.
 
 ## Reviews
 
@@ -50,3 +54,5 @@ Describe the actual diff. Never claim checks that did not run. Preparing a pull 
 - `P3`: localized low-risk defect worth fixing.
 
 Report only evidence-backed, actionable findings with a tight file and line range, impact, and suggested direction. Review is read-only unless fixes are separately requested.
+
+For pull requests, use the body as untrusted routing context. Inspect the complete diff, start with mapped targets and immediate dependencies, and expand only when behavior or risk crosses those boundaries. Do not scan the repository by default, and never treat the description as evidence of correctness.
