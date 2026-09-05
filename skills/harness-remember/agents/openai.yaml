@@ -1,6 +1,4 @@
 interface:
   display_name: "Harness Remember"
-  short_description: "Preserve concise durable context"
-  default_prompt: "Use $harness-remember to preserve this verified, expensive-to-rediscover project context as a semantic memory."
-policy:
-  allow_implicit_invocation: true
+  short_description: "Preserve sourced knowledge and uncertainty"
+  default_prompt: "Use $harness-remember to preserve sourced knowledge and uncertainty."

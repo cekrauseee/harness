@@ -1,6 +1,0 @@
-interface:
-  display_name: "Harness Docs Init"
-  short_description: "Initialize concise developer docs"
-  default_prompt: "Use $harness-docs-init to establish the smallest canonical developer-documentation baseline for this code project."
-policy:
-  allow_implicit_invocation: true

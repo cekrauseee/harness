@@ -1,6 +1,4 @@
 interface:
   display_name: "Harness Recall"
-  short_description: "Pull only relevant project context"
-  default_prompt: "Use $harness-recall to search semantic cards and hydrate only the project context this task needs."
-policy:
-  allow_implicit_invocation: true
+  short_description: "Recover relevant project knowledge and updates"
+  default_prompt: "Use $harness-recall to recover relevant project knowledge and updates."

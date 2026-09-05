@@ -1,6 +1,0 @@
-interface:
-  display_name: "Harness Review"
-  short_description: "Review changes with focused context"
-  default_prompt: "Use $harness-review to route from the PR context, verify the complete diff, and report only evidence-backed actionable findings."
-policy:
-  allow_implicit_invocation: true

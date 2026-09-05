@@ -4,22 +4,13 @@
   "groupings": [
     {
       "title": "Harness",
-      "description": "Lean project continuity, bounded orchestration, and on-demand engineering workflows.",
+      "description": "Project identity, knowledge, tasks and continuity.",
       "skills": [
         "harness-init",
         "harness-recall",
+        "harness-task",
         "harness-remember",
-        "harness-session",
-        "harness-audit",
-        "harness-orchestrate",
-        "harness-worktree",
-        "harness-commit",
-        "harness-pr",
-        "harness-review",
-        "harness-docs-init",
-        "harness-docs-maintain",
-        "harness-docs-audit",
-        "harness-artifact"
+        "harness-maintain"
       ]
     }
   ]

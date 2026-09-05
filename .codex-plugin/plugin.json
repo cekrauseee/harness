@@ -1,7 +1,7 @@
 {
   "name": "harness",
-  "version": "0.5.0",
-  "description": "Lean, file-native continuity and bounded agent orchestration for any project.",
+  "version": "0.6.0",
+  "description": "Shared project continuity, knowledge and cooperative task coordination in local files.",
   "author": {
     "name": "Henrique Krause",
     "url": "https://github.com/cekrauseee"
@@ -9,20 +9,29 @@
   "homepage": "https://github.com/cekrauseee/harness",
   "repository": "https://github.com/cekrauseee/harness",
   "license": "MIT",
-  "keywords": ["agents", "continuity", "memory", "orchestration", "projects", "skills"],
+  "keywords": [
+    "agents",
+    "continuity",
+    "memory",
+    "tasks",
+    "projects",
+    "skills"
+  ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Harness",
-    "shortDescription": "Lean continuity and bounded agent orchestration.",
-    "longDescription": "Harness gives agents project-native identity, pull-based semantic recall, concise handoffs, bounded multi-agent orchestration, and reviewer-ready pull request context for coding and non-coding work.",
+    "shortDescription": "Shared project context, tasks and continuity.",
+    "longDescription": "Harness gives agents portable project identity, selective knowledge recall, shared tasks, cooperative scope claims and reliable checkpoints for coding and non-coding projects.",
     "developerName": "Henrique Krause",
     "category": "Productivity",
-    "capabilities": ["Write"],
+    "capabilities": [
+      "Write"
+    ],
     "websiteURL": "https://github.com/cekrauseee/harness",
     "defaultPrompt": [
-      "Continue this project from only the relevant stored context.",
-      "Coordinate this authorized multi-agent task within a bounded work graph.",
-      "Review this pull request from its context contract and actual diff."
+      "Continue this project from relevant knowledge and checkpoints.",
+      "Record the scope and outcome of this shared task.",
+      "Check Harness integrity and preview legacy migration."
     ]
   }
 }

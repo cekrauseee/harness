@@ -1,6 +1,0 @@
-interface:
-  display_name: "Harness Audit"
-  short_description: "Audit continuity health and noise"
-  default_prompt: "Use $harness-audit to verify this project's Harness identity, semantic records, session noise, recall budget accounting, and storage health."
-policy:
-  allow_implicit_invocation: true

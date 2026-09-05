@@ -1,6 +1,4 @@
 interface:
   display_name: "Harness Init"
-  short_description: "Bind any local project to Harness"
-  default_prompt: "Use $harness-init to initialize, resolve, or repair this local project's Harness identity without requiring Git."
-policy:
-  allow_implicit_invocation: true
+  short_description: "Set up project identity and host integration"
+  default_prompt: "Use $harness-init to set up project identity and host integration."

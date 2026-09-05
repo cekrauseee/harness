@@ -1,6 +1,0 @@
-interface:
-  display_name: "Harness Orchestrate"
-  short_description: "Run bounded multi-agent work graphs"
-  default_prompt: "Use $harness-orchestrate to coordinate this authorized multi-agent task with a bounded dependency graph."
-policy:
-  allow_implicit_invocation: true

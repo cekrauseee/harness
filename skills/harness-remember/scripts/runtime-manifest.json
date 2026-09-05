@@ -1,0 +1,11 @@
+{
+  "generator": "scripts/build_dist.py",
+  "sha256": {
+    "__init__.py": "1ef614c6c2f17561485a35db3313816d4fded98e5c20f047656937bd15a1e966",
+    "cli.py": "7a3a31ee8a5f2b91814af2b9fa1feee99270309bb328afd9d945776a38eb481d",
+    "core.py": "f632d32943083fac9550a6a9e3de51e804387027ff04ccc9da68a45f93676889",
+    "integration.py": "3bedd3ce30ac2c948f37aa4f8abd1e2174059281f85fc65f5542b8e547cd381f",
+    "legacy/fingerprints.json": "aa453a6ae3ee25e783e23dea19cdebc8a9e143afc33f6a76187b05b003267817",
+    "migration.py": "5ed337f1895c3b3c38484ca687e939a1dbe3c121be67dc19ec5fdb4dd0ced581"
+  }
+}

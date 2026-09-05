@@ -1,0 +1,4 @@
+interface:
+  display_name: "Harness Maintain"
+  short_description: "Diagnose state and migrate with recovery"
+  default_prompt: "Use $harness-maintain to diagnose state and migrate with recovery."

@@ -1,6 +1,0 @@
-interface:
-  display_name: "Harness Worktree"
-  short_description: "Control isolated Git worktrees"
-  default_prompt: "Use $harness-worktree to plan and control this isolated Git checkout while preserving host-selected storage."
-policy:
-  allow_implicit_invocation: true

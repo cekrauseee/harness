@@ -1,6 +1,0 @@
-interface:
-  display_name: "Harness Commit"
-  short_description: "Organize safe Conventional Commits"
-  default_prompt: "Use $harness-commit to group these changes and prepare only the authorized Conventional Commits."
-policy:
-  allow_implicit_invocation: true
