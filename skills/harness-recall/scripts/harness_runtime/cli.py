@@ -34,7 +34,7 @@ GUIDES = {
     'integration.status': {'required': ['file'], 'next': 'Verify managed block integrity and selected installed runtime.'},
     'integration.remove': {'required': ['file', 'expected_sha256'], 'next': 'Remove only the intact managed block. Obtain current sha256 from integration.status.'},
     'migrate.preview': {'required': [], 'next': 'Inspect the full-home migration plan and fingerprint before apply; no state changes.'},
-    'migrate.apply': {'required': ['fingerprint', 'old_agents_stopped'], 'next': 'Only after authorization for this state. Stop all old agents first. A verified backup precedes migration.'},
+    'migrate.apply': {'required': ['fingerprint', 'old_agents_stopped'], 'optional': ['backup'], 'next': 'Only after authorization for this state. Stop old agents first. Backup defaults to true; set false only when the user explicitly declines a backup. A no-backup receipt cannot restore files.'},
     'migrate.restore': {'required': ['backup_dir', 'old_agents_stopped'], 'next': 'Restore is rejected if new state has changed since migration. Preserve new work before manual recovery.'},
     'legacy.scan': {'required': [], 'optional': ['skill_roots', 'hook_files'], 'next': 'Inspect explicit installation/configuration paths. Modified files are never assumed managed.'},
     'legacy.clean': {'required': ['fingerprint', 'old_agents_stopped'], 'optional': ['skill_roots', 'hook_files'], 'next': 'Only after authorization for these paths. Clean only recognized unchanged legacy files.'},

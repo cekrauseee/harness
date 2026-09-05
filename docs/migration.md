@@ -38,6 +38,14 @@ Each project receives `projects/<project-id>/state.json` with schema 3 and defau
 
 Reapplying the same fingerprint returns the completed import without replacing subsequent schema 3 writes. Running a fresh preview after a completed import reports the projects as already migrated. Added or edited legacy files after migration require inspection; continuing to run the old scripts is unsupported.
 
+## Explicit migration without backup
+
+The default still creates and verifies a backup. If the user explicitly declines it, pass `"backup": false` to `migrate.apply` along with the current fingerprint and stopped-writer acknowledgement. Strings such as `"false"` are rejected.
+
+This mode copies no source files into a backup. It writes a small transaction receipt containing hashes, paths and status beside the Harness home under `<home-name>-migration-receipts/`. The result returns `backup_dir: null` and `migration_receipt`. Original legacy sources remain in place except for recognized execution defaults removed by migration. Successful imports remain verifiable and exact retries preserve newer state.
+
+A receipt is not a backup and cannot be used with `migrate.restore`. An incomplete no-backup migration stops for explicit reconciliation of its receipt and preserved sources; there is no automatic rollback. Do not select this mode merely to shorten a workflow.
+
 ## What the import means
 
 - Each legacy session becomes a task, participant and checkpoint. Tasks and participants begin `blocked` with presence unknown. Original lifecycle status, summaries, pending next steps and artifact references remain available. A legacy `closed` value does not establish delivery, user acceptance, a commit or publication.

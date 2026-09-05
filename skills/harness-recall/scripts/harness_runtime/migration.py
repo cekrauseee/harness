@@ -321,11 +321,12 @@ def _plan(home):
             if not state.get("legacy", {}).get("migration_fingerprint"):
                 _error("existing_state_conflict", f"Legacy manifest and unrelated v3 state coexist: {destination}")
             backup = state["legacy"].get("backup_dir")
-            if not isinstance(backup, str):
-                _error("migration_history_missing", "Imported state has no backup provenance; inspect it before another migration.")
-            metadata = _json(Path(backup) / "backup.json")
+            receipt = state["legacy"].get("migration_receipt")
+            if not receipt and not isinstance(backup, str):
+                _error("migration_history_missing", "Imported state has no migration provenance; inspect it before another migration.")
+            metadata = _json(Path(receipt) if receipt else Path(backup) / "backup.json")
             if metadata.get("status") != "complete":
-                _error("migration_incomplete", "An earlier import did not complete; inspect its backup and use guarded restore before retrying.", backup_dir=backup)
+                _error("migration_incomplete", "An earlier import did not complete; inspect its migration receipt. Use guarded restore only if a backup exists; otherwise reconcile preserved sources explicitly.", backup_dir=backup)
             prefix = f"projects/{identifier}/"
             def legacy_scope(files):
                 return {name: info for name, info in files.items() if
@@ -367,6 +368,25 @@ def _plan(home):
 
 def _backup_root(home):
     return home.parent / ("." + home.name + "-migration-backups")
+
+
+def _receipt_root(home):
+    return home.parent / (home.name + "-migration-receipts")
+
+
+def _create_receipt(home, plan):
+    """Record hashes and transaction status without copying source file bytes."""
+    root = _receipt_root(home)
+    if root.is_symlink():
+        _error("unsafe_receipt", "Migration receipt root cannot be a symlink.")
+    root.mkdir(mode=0o700, parents=True, exist_ok=True)
+    directory = Path(tempfile.mkdtemp(prefix="migrate-", dir=root))
+    os.chmod(directory, 0o700)
+    metadata = {"schema_version": 1, "operation": "migrate", "home": str(home),
+                "fingerprint": plan["fingerprint"], "before": plan["inventory"],
+                "backup_created": False, "status": "prepared"}
+    core.atomic_json(directory / "receipt.json", metadata)
+    return directory, metadata
 
 
 def _create_backup(home, plan, operation):
@@ -420,7 +440,8 @@ def _without_states(inventory):
 
 
 def _previous_apply(home, fingerprint):
-    for path in sorted(_backup_root(home).glob("migrate-*/backup.json")):
+    receipts = list(_backup_root(home).glob("migrate-*/backup.json")) + list(_receipt_root(home).glob("migrate-*/receipt.json"))
+    for path in sorted(receipts):
         metadata = _json(path)
         if metadata.get("fingerprint") != fingerprint or metadata.get("home") != str(home) or metadata.get("status") != "complete":
             continue
@@ -430,12 +451,16 @@ def _previous_apply(home, fingerprint):
             current = core.read_state(core.state_path(home, identifier))
             if current.get("legacy", {}).get("migration_fingerprint") != fingerprint:
                 _error("existing_state_conflict", "Migration state no longer matches its recorded import.")
-        return {"success": True, "idempotent": True, "backup_dir": str(path.parent), "project_ids": metadata["project_ids"], "fingerprint": fingerprint}
+        return {"success": True, "idempotent": True, "backup_dir": str(path.parent) if metadata.get("backup_created", True) else None,
+                "migration_receipt": str(path), "project_ids": metadata["project_ids"], "fingerprint": fingerprint}
     return None
 
 
 def _apply(home, data):
     _acknowledge(data)
+    backup = data.get("backup", True)
+    if type(backup) is not bool:
+        _error("invalid_input", "backup must be a JSON boolean; omit it to keep the default backup.")
     fingerprint = data.get("fingerprint")
     if not isinstance(fingerprint, str) or not fingerprint:
         _error("preview_required", "Provide the fingerprint from migrate.preview.")
@@ -448,11 +473,14 @@ def _apply(home, data):
             _error("source_changed", "Legacy files changed since preview; preview again before applying.")
         if not plan["states"] and not plan["remove_defaults"]:
             return {"success": True, "idempotent": True, "backup_dir": None, "project_ids": [], "fingerprint": fingerprint}
-        directory, metadata = _create_backup(home, plan, "migrate")
+        directory, metadata = _create_backup(home, plan, "migrate") if backup else _create_receipt(home, plan)
+        receipt = directory / ("backup.json" if backup else "receipt.json")
+        metadata["backup_created"] = backup
         expected = copy.deepcopy(plan["inventory"])
         output = {}
         for identifier, state in plan["states"].items():
-            state["legacy"]["backup_dir"] = str(directory)
+            state["legacy"]["backup_dir"] = str(directory) if backup else None
+            state["legacy"]["migration_receipt"] = str(receipt)
             def add_backup_sources(value):
                 if isinstance(value, dict):
                     if "relative_path" in value and "sha256" in value and "path" in value:
@@ -463,7 +491,8 @@ def _apply(home, data):
                 elif isinstance(value, list):
                     for child in value:
                         add_backup_sources(child)
-            add_backup_sources(state)
+            if backup:
+                add_backup_sources(state)
             path = core.state_path(home, identifier)
             content = (json.dumps(state, indent=2, sort_keys=True, ensure_ascii=False) + "\n").encode()
             relative = path.relative_to(home).as_posix()
@@ -472,22 +501,22 @@ def _apply(home, data):
         for relative in plan["remove_defaults"]:
             expected["files"].pop(relative)
         metadata.update({"after": expected, "project_ids": list(plan["states"]), "removed_defaults": plan["remove_defaults"], "status": "applying"})
-        core.atomic_json(directory / "backup.json", metadata)
+        core.atomic_json(receipt, metadata)
         if _inventory(home, ignore_lock=True) != plan["inventory"]:
-            _error("source_changed", "Source changed immediately before application; no migration writes were made.", backup_dir=str(directory))
+            _error("source_changed", "Source changed immediately before application; no migration writes were made.", backup_dir=str(directory) if backup else None, migration_receipt=str(receipt))
         for path, content in output.items():
             _write_bytes(path, content)
         # Remove only exact known execution defaults after all canonical states are durable.
         for relative in plan["remove_defaults"]:
             path = home / relative
             if _hash(path.read_bytes()) != plan["inventory"]["files"][relative]["sha256"]:
-                _error("source_changed", "An execution default changed during migration; preserve it and inspect the backup.", backup_dir=str(directory))
+                _error("source_changed", "An execution default changed during migration; preserve it and inspect the migration receipt.", backup_dir=str(directory) if backup else None, migration_receipt=str(receipt))
             path.unlink()
         if _inventory(home, ignore_lock=True) != expected:
-            _error("source_changed", "Home changed during migration; backup retained for inspection and guarded restore.", backup_dir=str(directory))
+            _error("source_changed", "Home changed during migration; inspect the migration receipt and preserved sources before continuing.", backup_dir=str(directory) if backup else None, migration_receipt=str(receipt))
         metadata["status"] = "complete"
-        core.atomic_json(directory / "backup.json", metadata)
-        return {"success": True, "idempotent": False, "backup_dir": str(directory), "project_ids": list(plan["states"]),
+        core.atomic_json(receipt, metadata)
+        return {"success": True, "idempotent": False, "backup_dir": str(directory) if backup else None, "migration_receipt": str(receipt), "project_ids": list(plan["states"]),
                 "fingerprint": fingerprint, "removed_defaults": plan["remove_defaults"], "findings": plan["findings"]}
 
 
