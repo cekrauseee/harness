@@ -112,6 +112,34 @@ class MigrationTests(unittest.TestCase):
         self.assertTrue((self.home / "overrides/standards/branches.md").is_file())
         self.assertEqual((backup / "source" / "projects" / self.project_id / "unrecognized.bin").read_bytes(), b"\x00\xfflegacy bytes\r\n")
 
+    def test_explicit_no_backup_keeps_receipt_and_repeatable_preview(self):
+        preview = self.call("migrate.preview")
+        with mock.patch.object(migration, "_create_backup", side_effect=AssertionError("Backup forbidden")):
+            result = self.call("migrate.apply", fingerprint=preview["fingerprint"], old_agents_stopped=True, backup=False)
+        self.assertIsNone(result["backup_dir"])
+        self.assertFalse(migration._backup_root(self.home).exists())
+        receipt = Path(result["migration_receipt"])
+        self.assertEqual(["receipt.json"], [p.name for p in receipt.parent.iterdir()])
+        self.assertFalse(json.loads(receipt.read_text())["backup_created"])
+        state = core.read_state(core.state_path(self.home, self.project_id))
+        self.assertIsNone(state["legacy"]["backup_dir"])
+        self.assertNotIn("backup_path", json.dumps(state))
+        self.assertEqual(self.project_id, state["project"]["id"])
+        self.assertTrue(self.call("migrate.apply", fingerprint=preview["fingerprint"], old_agents_stopped=True, backup=False)["idempotent"])
+        self.assertEqual("already_migrated", self.call("migrate.preview")["projects"][0]["status"])
+        core.execute("task.start", {"project": str(self.project), "objective": "New work", "resources": [], "request_id": "new"}, home=self.home)
+        current = core.state_path(self.home, self.project_id).read_bytes()
+        self.call("migrate.apply", fingerprint=preview["fingerprint"], old_agents_stopped=True, backup=False)
+        self.assertEqual(current, core.state_path(self.home, self.project_id).read_bytes())
+        self.write_text(self.base / "project.md", "Concurrent legacy edit")
+        self.assert_error("source_changed", "migrate.preview")
+
+    def test_backup_option_requires_explicit_boolean(self):
+        preview = self.call("migrate.preview")
+        for value in ("false", None, 0):
+            self.assert_error("invalid_input", "migrate.apply", fingerprint=preview["fingerprint"], old_agents_stopped=True, backup=value)
+        self.assertFalse(core.state_path(self.home, self.project_id).exists())
+
     def test_acknowledgement_required(self):
         preview = self.call("migrate.preview")
         self.assert_error("old_agents_running", "migrate.apply", fingerprint=preview["fingerprint"])
