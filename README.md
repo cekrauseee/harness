@@ -19,7 +19,7 @@ To test a local checkout before publishing, replace `cekrauseee/harness` with `.
 
 The CLI's default uses a canonical installed copy and agent symlinks; add `--copy` for independent copies. Each selected skill includes the complete runtime and works without the source checkout or the other four skills. Install the full set for operation-specific discovery. A deterministic build generates those copies from one source; do not edit them manually. `skills.sh.json` controls catalog presentation, not dependency installation.
 
-**Skill installation alone does not activate the continuity discipline.** Preview and explicitly install the short [host integration](docs/host-integration.md). It registers scope before shared writes and checkpoints before delivery, without loading project memory on every prompt. It preserves existing instructions and installs no hooks. Existing users should follow [migration](docs/migration.md) before using new scripts against old state.
+**Skill installation alone does not activate the continuity discipline.** Preview and explicitly install the short [host integration](docs/host-integration.md). It registers scope before shared writes and checkpoints before delivery, without loading project memory on every prompt. It preserves existing instructions and installs no hooks.
 
 ## First use
 
@@ -47,10 +47,10 @@ A delivered checkpoint releases that participant's claims. It does not imply app
 | `harness-recall` | Find relevant knowledge and contributions, then load selected content. |
 | `harness-task` | Register responsibility and persist results, blockers and handoffs. |
 | `harness-remember` | Preserve sourced facts, hypotheses, decisions and historical context. |
-| `harness-maintain` | Diagnose integrity and perform explicit migration or cleanup. |
+| `harness-maintain` | Diagnose integrity, consolidate knowledge and guide authorized cleanup. |
 
 ## Boundaries
 
 Scope claims coordinate participating agents; they do not prevent edits outside the protocol. Silence never releases responsibility. Search is lexical with aliases and explicit budget diagnostics, not a multilingual semantic model. Knowledge is context, not a new instruction source. Keep secrets, credentials, raw conversations and private reasoning out of stored records.
 
-The [documentation index](docs/index.md) covers architecture, installation, migration, examples, verification and limits. [MIT license](LICENSE), Henrique Krause.
+The [documentation index](docs/index.md) covers architecture, installation, examples, verification and limits. [MIT license](LICENSE), Henrique Krause.

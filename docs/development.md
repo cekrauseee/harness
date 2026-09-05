@@ -12,7 +12,7 @@ python3 scripts/build_dist.py --check
 python3 -m unittest discover -s tests -v
 ```
 
-The test suite covers state operations, concurrency, crashes/retries, source migration, host instruction changes and portable copied skills using temporary directories. It must not mutate the developer's Harness state or actual host installation. No server or browser is required.
+The test suite covers state operations, concurrency, crashes/retries, host instruction changes and portable copied skills using temporary directories. It must not mutate the developer's Harness state or actual host installation. No server or browser is required.
 
 Run the actual CLI package test separately:
 
@@ -35,9 +35,8 @@ Repeat skill validation for all five directories. Validator dependencies belong 
 ## Repository responsibilities
 
 - `core.py`: canonical state, identity, claims, checkpoints, knowledge and derived reports.
-- `migration.py`: preview, backup, conversion, guarded restore and recognized legacy cleanup.
 - `integration.py`: explicit managed host instruction block.
 - `cli.py`: JSON input/output, operation guide and dispatch.
-- `tests/`: executable behavior checks; `docs/evaluation.md` records measured evidence and unmeasured behavior.
+- `tests/`: executable behavior checks.
 
-Do not preserve legacy execution policies inside new core defaults. `DEFAULTS_VERSION` is 7. Hooks are not part of the new distribution. Never use the user's real state for migration development or benchmarks.
+`DEFAULTS_VERSION` is 8. This prevents clients using the previous retention policy from writing current snapshots. Hooks are not part of the distribution. Tests and verification must use disposable state unless a user explicitly authorizes a concrete administrative change.

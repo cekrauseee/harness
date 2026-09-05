@@ -54,6 +54,32 @@ class DistributionTests(unittest.TestCase):
             self.assertEqual(result.returncode,0,result.stdout+result.stderr)
             self.assertIn('request_id',json.loads(result.stdout)['guide']['required'])
 
+    def test_removed_operations_are_not_dispatched_or_documented(self):
+        script = ROOT / 'skills/harness-maintain/scripts/harness.py'
+        self.assertFalse((ROOT / 'src/harness_runtime/migration.py').exists())
+        self.assertFalse((ROOT / 'src/harness_runtime/legacy/fingerprints.json').exists())
+        self.assertFalse((ROOT / 'skills/harness-maintain/references/migration.md').exists())
+        for name in SKILLS:
+            bundled = ROOT / 'skills' / name / 'scripts/harness_runtime'
+            self.assertFalse((bundled / 'migration.py').exists())
+            self.assertFalse((bundled / 'legacy/fingerprints.json').exists())
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            project = root / 'project'
+            project.mkdir()
+            env = dict(os.environ, HARNESS_HOME=str(root / 'state'))
+            guide = subprocess.run([sys.executable, str(script), 'guide'], cwd=root, env=env,
+                                   capture_output=True, text=True)
+            self.assertEqual(guide.returncode, 0, guide.stdout + guide.stderr)
+            operations = json.loads(guide.stdout)['operations']
+            self.assertFalse(any(name.startswith(('migrate.', 'legacy.')) for name in operations))
+            for operation in ('migrate.preview', 'migrate.apply', 'migrate.restore', 'legacy.scan', 'legacy.clean'):
+                with self.subTest(operation=operation):
+                    result = subprocess.run([sys.executable, str(script), operation, '--project', str(project)],
+                                            cwd=root, env=env, capture_output=True, text=True)
+                    self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+                    self.assertEqual(json.loads(result.stdout)['error']['code'], 'unknown_operation')
+
 
 if __name__ == '__main__':
     unittest.main()
