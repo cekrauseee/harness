@@ -17,8 +17,7 @@ from harness_runtime.cli import main
 if __name__ == "__main__":
     raise SystemExit(main())
 '''
-REFERENCES = {'harness-init': {'host-integration.md': 'docs/host-integration.md'},
-              'harness-maintain': {'migration.md': 'docs/migration.md'}}
+REFERENCES = {'harness-init': {'host-integration.md': 'docs/host-integration.md'}}
 
 
 def outputs() -> dict[Path, bytes]:
@@ -35,10 +34,6 @@ def outputs() -> dict[Path, bytes]:
             result[base / 'scripts/harness_runtime' / relative] = raw
         for relative, source_path in REFERENCES.get(skill, {}).items():
             raw = (ROOT / source_path).read_text(encoding='utf-8')
-            if relative == 'migration.md':
-                raw = raw.replace('../src/harness_runtime/legacy/fingerprints.json', '../scripts/harness_runtime/legacy/fingerprints.json')
-                raw = raw.replace('These examples use a repository checkout:', 'Run these examples from this installed skill directory:')
-                raw = raw.replace('python3 skills/harness-init/scripts/harness.py', 'python3 scripts/harness.py')
             result[base / 'references' / relative] = raw.encode('utf-8')
     return result
 
@@ -51,11 +46,14 @@ def main() -> int:
     drift = [str(path.relative_to(ROOT)) for path, raw in expected.items() if not path.is_file() or path.read_bytes() != raw]
     extras = []
     for skill in SKILLS:
-        scripts = ROOT / 'skills' / skill / 'scripts'
-        extras.extend(path for path in scripts.rglob('*') if path.is_file() and path not in expected and '__pycache__' not in path.parts)
+        base = ROOT / 'skills' / skill
+        for generated in (base / 'scripts', base / 'references'):
+            if generated.exists():
+                extras.extend(path for path in generated.rglob('*')
+                              if path.is_file() and path not in expected and '__pycache__' not in path.parts)
     if args.check:
         if drift or extras:
-            print(json.dumps({'generated_drift': drift, 'unexpected_scripts': [str(p.relative_to(ROOT)) for p in extras]}))
+            print(json.dumps({'generated_drift': drift, 'unexpected_generated_files': [str(p.relative_to(ROOT)) for p in extras]}))
             return 1
         print('Generated skill runtimes match canonical source.')
         return 0
@@ -66,6 +64,20 @@ def main() -> int:
     for path, raw in expected.items():
         if not path.is_file() or path.read_bytes() != raw:
             replace_file(path, raw)
+    for skill in SKILLS:
+        base = ROOT / 'skills' / skill
+        for generated in (base / 'scripts', base / 'references'):
+            if generated.exists():
+                for directory in sorted((path for path in generated.rglob('*') if path.is_dir()),
+                                        key=lambda path: len(path.parts), reverse=True):
+                    try:
+                        directory.rmdir()
+                    except OSError:
+                        pass
+                try:
+                    generated.rmdir()
+                except OSError:
+                    pass
     print(f'Generated {len(SKILLS)} self-contained skills from one runtime source.')
     return 0
 

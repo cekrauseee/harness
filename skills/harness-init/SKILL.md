@@ -21,7 +21,7 @@ python3 scripts/harness.py init --project /path/to/project
 
 The result identifies the project and workspace. Two chats in the same folder share a workspace. Git worktrees share a project through their common Git directory and retain separate workspaces. Matching remote URLs do not join clones. Repeating initialization does not create a second identity.
 
-For an explicitly identified existing project or a moved folder, inspect `guide` for `project.bind` or `project.move` before changing bindings. Do not infer an identity from a similar name. A `migration_required` error means existing state needs migration, not that the project is empty; use the migration operations described by `harness-maintain` if available, or `guide` from this runtime.
+For an explicitly identified existing project or a moved folder, inspect `guide` for `project.bind` or `project.move` before changing bindings. Do not infer an identity from a similar name. Missing, incomplete or unsupported state is an error to inspect, not permission to initialize a replacement identity.
 
 ## Make continuity part of the host workflow
 

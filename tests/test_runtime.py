@@ -68,7 +68,7 @@ class RuntimeTest(unittest.TestCase):
 
     def remember(self, **data):
         payload = {"title": "Authentication endpoint", "summary": "The endpoint needs source verification.",
-                   "content": "Mobile authentication currently uses a legacy endpoint.", "kind": "hypothesis",
+                   "content": "Mobile authentication currently uses an unverified endpoint.", "kind": "hypothesis",
                    "sources": ["notes/auth.md"], "scope": "project", "aliases": ["autenticação", "móvel"]}
         payload.update(data)
         return self.run_op("remember", **payload)
@@ -118,7 +118,7 @@ class RuntimeTest(unittest.TestCase):
         self.assertEqual(str(self.project), resolved["workspace"]["path"])
         self.assertEqual(["drafts"], [path.name for path in self.project.iterdir()])
         self.assertEqual(3, self.snapshot()["schema_version"])
-        self.assertEqual(7, self.snapshot()["defaults_version"])
+        self.assertEqual(core.DEFAULTS_VERSION, self.snapshot()["defaults_version"])
 
     def test_home_inside_scoped_project_is_rejected_before_creating_files(self):
         home = self.project / ".harness"
@@ -177,29 +177,38 @@ class RuntimeTest(unittest.TestCase):
         separate = self.run_op("init", project=str(cloned))
         self.assertNotEqual(initialized["project_id"], separate["project_id"])
 
-    def test_migrated_git_path_and_worktree_keep_legacy_uuid(self):
-        from harness_runtime import migration
+    def test_directory_project_keeps_identity_when_it_becomes_git(self):
+        initialized = self.initialize()
         self.setup_git()
         worktree = self.root / "worktree"
-        self.git("worktree", "add", "-qb", "migrated-chapter", str(worktree))
-        identifier = str(uuid.uuid4())
-        legacy = self.home / "projects" / identifier
-        legacy.mkdir(parents=True)
-        (legacy / "manifest.json").write_text(json.dumps({"id": identifier, "schema_version": 2,
-            "display_name": "Existing Git project", "bindings": [{"type": "path", "value": str(self.project)}]}))
-        preview = migration.execute("migrate.preview", {}, self.home)
-        migration.execute("migrate.apply", {"fingerprint": preview["fingerprint"], "old_agents_stopped": True}, self.home)
-        snapshot = legacy / "state.json"
-        original = snapshot.read_bytes()
-        self.assertEqual(identifier, self.run_op("resolve")["project_id"])
-        self.assertEqual(identifier, self.run_op("resolve", project=str(worktree))["project_id"])
-        self.assertEqual(original, snapshot.read_bytes(), "Resolving migrated topology must remain read-only.")
-        initialized = self.run_op("init")
-        self.assertFalse(initialized["created"])
-        self.assertEqual(identifier, initialized["project_id"])
-        self.assertEqual("git", initialized["workspace"]["kind"])
-        self.assertEqual(1, len(list((self.home / "projects").iterdir())))
-        self.assertEqual(identifier, self.start(project=str(worktree))["project_id"])
+        self.git("worktree", "add", "-qb", "chapter", str(worktree))
+        original = self.snapshot()
+        self.assertEqual(initialized["project_id"], self.run_op("resolve")["project_id"])
+        self.assertEqual(initialized["project_id"], self.run_op("resolve", project=str(worktree))["project_id"])
+        self.assertEqual(original, self.snapshot(), "Resolving changed topology must remain read-only.")
+        enrolled = self.run_op("init")
+        self.assertFalse(enrolled["created"])
+        self.assertEqual("git", enrolled["workspace"]["kind"])
+        self.assertEqual(initialized["project_id"], self.start(project=str(worktree))["project_id"])
+
+    def test_revision_zero_snapshot_with_canonical_memory_supports_new_work(self):
+        initialized = self.initialize()
+        state = core.new_state(initialized["project_id"], "Clean project")
+        state["project"] = copy.deepcopy(self.snapshot()["project"])
+        state["workspaces"] = copy.deepcopy(self.snapshot()["workspaces"])
+        memory_id = str(uuid.uuid4())
+        state["memories"][memory_id] = {
+            "id": memory_id, "title": "Canonical source", "summary": "Use the current design note.",
+            "content": "The design note is the maintained source.", "kind": "decision", "status": "current",
+            "sources": ["docs/design.md"], "scope": "project", "aliases": ["design source"],
+            "created_at": core.utc_now(), "updated_at": core.utc_now(), "revision": 0,
+            "review_after": None, "superseded_by": None,
+        }
+        core.atomic_json(core.state_path(self.home, initialized["project_id"]), state)
+        self.assertEqual(memory_id, self.run_op("recall", query="design source")["entries"][0]["id"])
+        started = self.start("new-work.md")
+        self.assertEqual(1, started["revision"])
+        self.assertEqual(memory_id, next(iter(self.snapshot()["memories"])))
 
     def test_ancestor_init_bind_and_move_cannot_create_overlapping_identities(self):
         child = self.project / "child"
@@ -441,12 +450,58 @@ class RuntimeTest(unittest.TestCase):
         self.assertEqual("hypothesis", updated["kind"])
         self.assertEqual("stale", updated["status"])
         self.assertEqual(memory["sources"], updated["sources"])
-        self.assertEqual(memory["content"], updated["history"][0]["content"])
+        self.assertNotIn("history", updated)
         self.assert_error("revision_conflict", "memory.update", id=memory["id"], expected_revision=memory["revision"], kind="fact")
         newer = self.remember(title="Verified authentication", kind="fact")["memory"]
         superseded = self.run_op("memory.update", id=memory["id"], expected_revision=updated["revision"], status="superseded", superseded_by=newer["id"])["memory"]
         self.assertEqual(newer["id"], superseded["superseded_by"])
         self.assert_error("invalid_supersession", "memory.update", id=newer["id"], expected_revision=newer["revision"], status="superseded", superseded_by=memory["id"])
+
+    def test_memory_receipts_are_compact_and_replays_never_restore_old_content(self):
+        self.initialize()
+        original = {
+            "title": "Unique obsolete title", "summary": "Unique obsolete summary",
+            "content": "Unique obsolete content", "kind": "hypothesis",
+            "sources": ["unique-obsolete-source.md"], "scope": "project",
+            "aliases": ["unique-obsolete-alias"], "request_id": "memory-create",
+        }
+        created = self.remember(**original)["memory"]
+        self.assertEqual("Unique obsolete content", created["content"])
+        update = {
+            "id": created["id"], "expected_revision": created["revision"],
+            "title": "Current title", "summary": "Current summary", "content": "Current content",
+            "sources": ["current-source.md"], "aliases": ["current-alias"],
+            "request_id": "memory-update",
+        }
+        current = self.run_op("memory.update", **update)["memory"]
+        self.assertEqual("Current content", current["content"])
+        serialized = json.dumps(self.snapshot(), sort_keys=True)
+        for obsolete in ("Unique obsolete title", "Unique obsolete summary", "Unique obsolete content",
+                         "unique-obsolete-source.md", "unique-obsolete-alias"):
+            self.assertNotIn(obsolete, serialized)
+        receipts = self.snapshot()["receipts"]
+        for request_id, memory_revision in (("memory-create", created["revision"]),
+                                            ("memory-update", current["revision"])):
+            self.assertEqual({"id": created["id"], "revision": memory_revision},
+                             receipts[request_id]["result"]["memory"])
+            self.assertNotIn("content", receipts[request_id]["result"]["memory"])
+
+        before = core.state_path(self.home, self.initialized["project_id"]).read_bytes()
+        replay_create = self.remember(**original)
+        replay_update = self.run_op("memory.update", **update)
+        self.assertEqual(before, core.state_path(self.home, self.initialized["project_id"]).read_bytes())
+        for replay, memory_revision in ((replay_create, created["revision"]),
+                                        (replay_update, current["revision"])):
+            self.assertTrue(replay["replayed"])
+            self.assertEqual({"id": created["id"], "revision": memory_revision}, replay["memory"])
+            self.assertEqual("Use hydrate with memory.id to read the current canonical record.", replay["next"])
+            self.assertNotIn("content", replay["memory"])
+        self.assertEqual(created["revision"], replay_create["original_revision"])
+        self.assertEqual(current["revision"], replay_update["original_revision"])
+        self.assertEqual(current["revision"], replay_create["revision"])
+        self.assertEqual(current["revision"], replay_update["revision"])
+        self.assertEqual("Current content", self.run_op("hydrate", id=created["id"])["entry"]["content"])
+        self.assert_error("request_id_reused", "remember", **{**original, "content": "Different input"})
 
     def test_multilingual_lexical_recall_and_budgets_distinguish_absence(self):
         self.initialize()
@@ -479,7 +534,7 @@ class RuntimeTest(unittest.TestCase):
         self.assertEqual({first["id"], second["id"]}, {card["id"] for card in cards["entries"]})
         self.assertTrue(next(card for card in cards["entries"] if card["id"] == first["id"])["stale"])
 
-    def test_corruption_future_schema_and_legacy_state_fail_loud(self):
+    def test_corruption_unsupported_schema_and_incomplete_state_fail_loud(self):
         self.initialize()
         path = core.state_path(self.home, self.initialized["project_id"])
         original = path.read_bytes()
@@ -489,10 +544,10 @@ class RuntimeTest(unittest.TestCase):
             self.assert_error(error, "init")
             self.assertEqual(1, len(list((self.home / "projects").iterdir())))
         path.write_bytes(original)
-        legacy = self.home / "projects" / str(uuid.uuid4())
-        legacy.mkdir()
-        (legacy / "manifest.json").write_text("{}")
-        self.assert_error("migration_required", "resolve")
+        incomplete = self.home / "projects" / str(uuid.uuid4())
+        incomplete.mkdir()
+        (incomplete / "unrecognized.json").write_text("{}")
+        self.assert_error("incomplete_state", "resolve")
 
     def test_malformed_records_and_missing_journal_revisions_are_structured_errors(self):
         self.initialize()

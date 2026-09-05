@@ -1,6 +1,6 @@
 ---
 name: harness-maintain
-description: Diagnose damaged, stale or legacy Harness state and perform explicit migration or installation cleanup with previews and recovery. Use for integrity failures, outdated state or a concrete maintenance need.
+description: Diagnose Harness integrity, consolidate project knowledge, and guide explicitly authorized operational cleanup. Use for damaged state, stale or duplicate knowledge, or a concrete cleanup request.
 ---
 
 # Harness Maintain
@@ -13,8 +13,10 @@ python3 scripts/harness.py maintain --project /path/to/project
 
 The report identifies structural problems, uncertain participation and knowledge needing review. Cards and journal views are derived from the canonical snapshot, so no separately authoritative index needs repair. Repeating a diagnostic does not rewrite timestamps or create work.
 
-Silence is not completion. Do not release claims, approve tasks or erase pending actions because a record is old. Reconcile ownership with evidence before allowing another writer into the same resources. Mechanical cleanup must not make semantic decisions.
+For cognitive consolidation, search and hydrate the relevant records, verify their sources, and select the smallest current account of the project. Use `memory.update` to correct a canonical record, improve its sources or aliases, or mark it stale, superseded or retracted. The update replaces that record; it does not append a copy of the prior payload. Create a new record only when the knowledge is meaningfully distinct. Do not preserve duplicate text solely because it is old.
 
-For legacy state, old skill installations or hook configuration, read [migration.md](references/migration.md). Begin with `migrate.preview` or `legacy.scan`. Applying a migration requires its current fingerprint, stopped legacy writers and authorization for the selected state. A verified backup is the default; use the documented no-backup option only when the user explicitly declines a backup. Development tests should use temporary homes. Do not test a migration against the user's real state.
+Silence is not completion. Do not release active claims or erase pending work because a record is old. Reconcile ownership with evidence before allowing another writer into the same resources.
 
-Use `guide` to inspect operation inputs. An invalid schema, damaged file or changed source is an error to investigate; it is never treated as an empty project. Future schema versions must be opened with a compatible runtime. Report what was checked, what changed and which semantic questions remain unresolved. Maintenance does not run in the background.
+Operational cleanup is separate from the read-only `maintain` operation; Harness has no built-in reset. Perform cleanup only when the user explicitly authorizes the exact project and records, after participating writers have stopped. A user-scoped one-off administrative helper may hold the shared runtime lock and replace the snapshot atomically while preserving project identity and every collection outside the authorized scope. Do not treat cleanup as schema conversion or create an automatic backup. Validate the resulting snapshot before reporting success.
+
+Use `guide` to inspect supported operation inputs. An unsupported schema or damaged file is an error to investigate; it is never treated as an empty project. Report what was checked, what changed and which semantic questions remain unresolved. Maintenance does not run in the background.

@@ -11,7 +11,7 @@ from .core import HarnessError
 
 GUIDES = {
     'init': {'required': [], 'optional': ['title', 'host', 'host_project_id'], 'next': 'Save project/workspace IDs; task.start before shared writes.'},
-    'resolve': {'required': [], 'next': 'Read identity without initialization. migration_required is not an empty project.'},
+    'resolve': {'required': [], 'next': 'Read identity without initialization. Missing or unsupported state is an error, not an empty project.'},
     'task.start': {'required': ['objective', 'resources', 'request_id'], 'example': {'objective': 'Update the introduction', 'resources': ['notes/introduction.md'], 'request_id': 'introduction-start'}, 'next': 'Save session_id. If conflict, inspect owners and continue only independent work.'},
     'task.join': {'required': ['task_id', 'resources', 'request_id'], 'next': 'Creates a separate participant; does not reuse another participant\'s claims.'},
     'task.claim': {'required': ['session_id', 'resources', 'request_id'], 'next': 'Claim additional resources atomically before writing. Resources are project/workspace-relative paths, not globs.'},
@@ -24,8 +24,8 @@ GUIDES = {
     'changes': {'required': ['since'], 'optional': ['limit', 'budget_chars', 'cursor'], 'next': 'Use returned next_cursor as cursor until caught up. A truncated page is not absence of further updates.'},
     'recall': {'required': ['query'], 'optional': ['limit', 'budget_chars'], 'next': 'Inspect compact cards then hydrate selected IDs. Lexical retrieval with aliases does not guarantee multilingual semantic equivalence. Reformulate or supply translations for a relevant gap.'},
     'hydrate': {'required': ['id'], 'optional': ['budget_chars'], 'next': 'Inspect omitted/truncated diagnostics before concluding content is complete.'},
-    'remember': {'required': ['title', 'summary', 'content', 'kind', 'sources', 'scope', 'request_id'], 'optional': ['aliases', 'review_after'], 'example': {'title': 'Source ownership', 'summary': 'The archive is the source for quotations.', 'content': 'Use the cited archive when checking quotations.', 'kind': 'decision', 'sources': ['notes/editorial-decisions.md'], 'scope': 'project', 'aliases': ['fontes', 'citacoes'], 'request_id': 'source-decision'}, 'next': 'kind is fact, hypothesis, decision or historical. Keep canonical document content in that source; store only useful additional context.'},
-    'memory.update': {'required': ['id', 'expected_revision', 'request_id'], 'next': 'Use the current memory record revision. Make reclassification or supersession explicit; retain provenance.'},
+    'remember': {'required': ['title', 'summary', 'content', 'kind', 'sources', 'scope', 'request_id'], 'optional': ['aliases', 'review_after'], 'example': {'title': 'Source ownership', 'summary': 'The archive is the source for quotations.', 'content': 'Use the cited archive when checking quotations.', 'kind': 'decision', 'sources': ['notes/editorial-decisions.md'], 'scope': 'project', 'aliases': ['fontes', 'citacoes'], 'request_id': 'source-decision'}, 'next': 'kind is fact, hypothesis, decision or historical. Keep canonical document content in that source; store only useful additional context. Exact retries return record identity only; hydrate the ID for current content.'},
+    'memory.update': {'required': ['id', 'expected_revision', 'request_id'], 'next': 'Use the current memory record revision. Make reclassification or supersession explicit; retain provenance. Exact retries return record identity only; hydrate the ID for current content.'},
     'maintain': {'required': [], 'next': 'Read integrity, stale presence, duplicate and broken-reference diagnostics. It does not infer semantic truth or delete active work.'},
     'project.bind': {'required': ['project_id', 'evidence', 'request_id'], 'next': 'Bind an explicitly identified existing project. Never infer project equality from a remote URL.'},
     'project.move': {'required': ['project_id', 'from_path', 'evidence', 'request_id'], 'next': 'Use guide/reference to confirm the move, including old path and preservation of claims.'},
@@ -33,11 +33,6 @@ GUIDES = {
     'integration.install': {'required': ['file', 'expected_sha256'], 'optional': ['runtime'], 'next': 'Only after authorization to modify this instruction file. Reinstall is idempotent; user edits are preserved or reported.'},
     'integration.status': {'required': ['file'], 'next': 'Verify managed block integrity and selected installed runtime.'},
     'integration.remove': {'required': ['file', 'expected_sha256'], 'next': 'Remove only the intact managed block. Obtain current sha256 from integration.status.'},
-    'migrate.preview': {'required': [], 'next': 'Inspect the full-home migration plan and fingerprint before apply; no state changes.'},
-    'migrate.apply': {'required': ['fingerprint', 'old_agents_stopped'], 'optional': ['backup'], 'next': 'Only after authorization for this state. Stop old agents first. Backup defaults to true; set false only when the user explicitly declines a backup. A no-backup receipt cannot restore files.'},
-    'migrate.restore': {'required': ['backup_dir', 'old_agents_stopped'], 'next': 'Restore is rejected if new state has changed since migration. Preserve new work before manual recovery.'},
-    'legacy.scan': {'required': [], 'optional': ['skill_roots', 'hook_files'], 'next': 'Inspect explicit installation/configuration paths. Modified files are never assumed managed.'},
-    'legacy.clean': {'required': ['fingerprint', 'old_agents_stopped'], 'optional': ['skill_roots', 'hook_files'], 'next': 'Only after authorization for these paths. Clean only recognized unchanged legacy files.'},
 }
 
 
@@ -57,7 +52,7 @@ def main(argv: list[str] | None = None) -> int:
         parser.add_argument('--version', action='store_true')
         args = parser.parse_args(argv)
         if args.version:
-            print(json.dumps({'version': __version__, 'schema_version': 3, 'defaults_version': 7}))
+            print(json.dumps({'version': __version__, 'schema_version': 3, 'defaults_version': 8}))
             return 0
         raw = args.data or '{}'
         if args.input:
@@ -79,8 +74,6 @@ def main(argv: list[str] | None = None) -> int:
             if args.operation.startswith('integration.'):
                 from .integration import execute
                 data.setdefault('runtime', str(Path(sys.argv[0]).resolve()))
-            elif args.operation.startswith(('migrate.', 'legacy.')):
-                from .migration import execute
             else:
                 from .core import execute
             result = execute(args.operation, data)

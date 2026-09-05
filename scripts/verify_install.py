@@ -72,9 +72,12 @@ def main():
                         install.append('--copy')
                     probe = source / 'skills' / name / 'install-verification.txt'
                     probe.write_text('first installed version\n')
+                    removed_probe = source / 'skills' / name / 'removed-file.txt'
+                    removed_probe.write_text('File removed by the next version\n')
                     run(command + install, project, env)
                     # Reinstall changed bytes, not merely identical content.
                     probe.write_text('updated installed version\n')
+                    removed_probe.unlink()
                     run(command + install, project, env)
                     listing = run(command + ['list', '-g', '--json'], project, env)
                     if name not in listing.stdout:
@@ -88,6 +91,8 @@ def main():
                         installed = candidates[0]
                     if (installed / 'install-verification.txt').read_text() != 'updated installed version\n':
                         raise RuntimeError(f'Local update did not replace installed content: {name}')
+                    if (installed / 'removed-file.txt').exists():
+                        raise RuntimeError(f'Removed source file remains installed: {name}')
                     script = installed / 'scripts/harness.py'
                     if script.exists():
                         def harness(op, data=None):

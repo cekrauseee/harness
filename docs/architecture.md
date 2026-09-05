@@ -12,9 +12,9 @@ The snapshot is canonical: project bindings, workspaces, tasks, participants, cl
 
 Mutations take a short operating-system advisory lock on the Harness home, then read, validate and atomically replace a snapshot with filesystem synchronization. The operating system releases the lock when a process dies. The lock protects Harness files; cooperative claims protect project work. A timestamp is never grounds for breaking either protection. Serialization across the local home simplifies cross-project identity checks at the cost of brief contention among unrelated projects.
 
-A `request_id` identifies a semantic mutation. An exact retry returns its prior receipt instead of repeating the action; changed input under the same key fails. The receipt and data commit together. Expected revisions detect stale updates. The journal records state operations and checkpoint references, not tool transcripts; revision cursors prevent skipped update pages. A returned success means the operation completed its persistence path. Inspect failed or uncertain responses before changing a retry key.
+A `request_id` identifies a semantic mutation. An exact retry returns its prior receipt instead of repeating the action; changed input under the same key fails. Memory receipts retain only record identity and revision, so retry metadata cannot preserve superseded knowledge content. Hydration reads the current canonical record. The receipt and data commit together. Expected revisions detect stale updates. The journal records state operations and checkpoint references, not tool transcripts; revision cursors prevent skipped update pages. A returned success means the operation completed its persistence path. Inspect failed or uncertain responses before changing a retry key.
 
-This is deliberately a small file system, not a database service. Reading and rewriting a snapshot costs time proportional to its project history. Current history and receipts are retained rather than silently discarded; large archives need an explicit future storage evolution. The implementation targets local macOS/Linux filesystems with advisory locking and atomic replacement. Network filesystem locking semantics and automatic machine synchronization are not supported guarantees.
+This is deliberately a small file system, not a database service. Reading and rewriting a snapshot costs time proportional to its task journal. Checkpoints, task events and retry receipts support coordination and exact retries for new work. A knowledge update replaces that record's canonical content instead of retaining hidden copies of earlier payloads. The implementation targets local macOS/Linux filesystems with advisory locking and atomic replacement. Network filesystem locking semantics and automatic machine synchronization are not supported guarantees.
 
 ## Responsibility and delivery
 
@@ -24,7 +24,7 @@ Checkpoints explain results, evidence and next actions with session and workspac
 
 A consolidation report alone is a read. Acquire an exclusive `.` claim before a stable consolidation, then inspect the real files and checks. Claims cannot stop an editor or a nonparticipating agent. Even a stable cooperative report is not proof that a commit includes every contribution; the Git diff and actual artifact state remain evidence.
 
-Acceptance, commit, publication and follow-up resolution are explicit events backed by evidence. A resolution names the checkpoint follow-ups or released predecessors being reconciled; the old records remain history. Delivery does not invent those events. Migration preserves unknown historical completion as uncertainty, not approval.
+Acceptance, commit, publication and follow-up resolution are explicit events backed by evidence. A resolution names the checkpoint follow-ups or released predecessors being reconciled; those operational records remain available for coordination. Delivery does not invent those events.
 
 ## Knowledge and context
 
@@ -36,4 +36,4 @@ Recall ranks compact cards lexically, with aliases including a limited Portugues
 
 The host loads a short explicitly installed instruction block. It routes substantive entry/resume, shared writes, significant outcomes and consolidation to the runtime. All skills have the same standalone runtime, so selective installation does not create hidden skill dependencies. The host controls tools, models and permissions; Harness launches no agents.
 
-There are no default hooks, prompt injections, model calls or background maintenance. Diagnostic maintenance is incremental in the sense that the caller chooses when a concrete need warrants it; it reports duplicates, stale information and integrity problems without deleting active work or reclassifying knowledge. Safe repairs and legacy cleanup require their documented explicit operation. Outside invocations, nothing runs.
+There are no default hooks, prompt injections, model calls or background maintenance. Diagnostic maintenance runs only when requested and reports duplicates, stale information and integrity problems without mutating state. Agents consolidate knowledge through explicit record updates after checking sources. Removing operational history is an administrative filesystem change that requires specific authorization and stopped participating writers; it is not a runtime operation. Outside invocations, nothing runs.
