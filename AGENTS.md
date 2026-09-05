@@ -2,7 +2,7 @@
 
 ## Scope
 
-Harness is a file-native behavior and continuity layer for coding agents. It is not an application, daemon, database, deployment tool, or infrastructure manager.
+Harness is a file-native project continuity and coordination layer for agents. It is not an application, daemon, database, deployment tool, or infrastructure manager.
 
 ## Language
 
@@ -12,12 +12,12 @@ Harness is a file-native behavior and continuity layer for coding agents. It is 
 
 ## Engineering conventions
 
-- Use Conventional Commits and the Harness type vocabulary.
+- Use English Conventional Commits for repository contributions. Execution conventions belong to Workflows, not the Harness runtime.
 - Keep every published skill self-contained under `skills/<skill-name>/`.
 - Use Python standard library only for bundled scripts.
 - Make filesystem mutations atomic and idempotent.
 - Bump `DEFAULTS_VERSION` when managed Harness defaults change.
-- Fail open in lifecycle hooks; hook failure must not block the host agent.
+- Do not add default lifecycle hooks or automatic prompt-context injection.
 - Never store secrets, raw chat transcripts, or chain-of-thought in Harness state.
 - Never add Harness state to a target repository.
 

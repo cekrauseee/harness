@@ -1,6 +1,0 @@
-interface:
-  display_name: "Harness Session"
-  short_description: "Maintain episodic project handoffs"
-  default_prompt: "Use $harness-session to maintain a concise handoff only if this material work needs future continuation."
-policy:
-  allow_implicit_invocation: true
