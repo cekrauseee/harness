@@ -1,11 +1,9 @@
 {
   "generator": "scripts/build_dist.py",
   "sha256": {
-    "__init__.py": "792907679d7c273b731362b65eb1241d7d253a4fb6345e554b0970b005016f8b",
-    "cli.py": "0c8d12ed747d1b451fa8216a91d1f15ad46521369cfb395b96fff0e1bc9d08ed",
-    "core.py": "f632d32943083fac9550a6a9e3de51e804387027ff04ccc9da68a45f93676889",
-    "integration.py": "3bedd3ce30ac2c948f37aa4f8abd1e2174059281f85fc65f5542b8e547cd381f",
-    "legacy/fingerprints.json": "aa453a6ae3ee25e783e23dea19cdebc8a9e143afc33f6a76187b05b003267817",
-    "migration.py": "7b3fac159b4d55b9295d4fefe1d588e6afd2164544e59db91676afeacf1abb83"
+    "__init__.py": "3c7a82a1fc5a4c943490f037709a783842810d3b412477a4857939e7f9e0bf34",
+    "cli.py": "708fd7ba821c39c6658b76749b2c119cc5a1c88e2370a2f740834e45ad521a11",
+    "core.py": "7956bbae32e9160b5fcb4b415bf5ec3025819689786131a111ed1836cbae6f1f",
+    "integration.py": "3bedd3ce30ac2c948f37aa4f8abd1e2174059281f85fc65f5542b8e547cd381f"
   }
 }

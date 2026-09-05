@@ -26,7 +26,7 @@
         {
           "title": "What I built",
           "paragraphs": [
-            "I built five self-contained skills for project identity, selective recall, shared task context, sourced knowledge, and safe maintenance or migration. Each skill includes a generated Python standard-library runtime and works independently after installation.",
+            "I built five self-contained skills for project identity, selective recall, shared task context, sourced knowledge, and knowledge consolidation and maintenance. Each skill includes a generated Python standard-library runtime and works independently after installation.",
             "The task model records responsibilities and checkpoints for participating agents. Claims help them detect overlapping work, while acceptance, commits, and publication remain separate decisions backed by their own evidence."
           ]
         },
@@ -62,7 +62,7 @@
         {
           "title": "O que construí",
           "paragraphs": [
-            "Construí cinco skills autocontidas para identidade de projetos, recuperação seletiva, contexto compartilhado de tarefas, conhecimento com fontes e manutenção ou migração segura. Cada skill inclui um runtime gerado apenas com a biblioteca padrão do Python e funciona de forma independente após a instalação.",
+            "Construí cinco skills autocontidas para identidade de projetos, recuperação seletiva, contexto compartilhado de tarefas, conhecimento com fontes e consolidação de conhecimento e manutenção. Cada skill inclui um runtime gerado apenas com a biblioteca padrão do Python e funciona de forma independente após a instalação.",
             "O modelo de tarefas registra responsabilidades e checkpoints dos agentes participantes. As reivindicações de escopo ajudam a detectar trabalhos sobrepostos, enquanto aceitação, commits e publicação continuam sendo decisões separadas, sustentadas por evidências próprias."
           ]
         },
@@ -98,7 +98,7 @@
         {
           "title": "構築したもの",
           "paragraphs": [
-            "プロジェクトID、選択的な情報検索、共有タスク文脈、出典付き知識、安全な保守と移行を担う5つの自己完結型スキルを構築しました。各スキルにはPython標準ライブラリだけで動く生成済みランタイムが含まれ、インストール後は単独で利用できます。",
+            "プロジェクトID、選択的な情報検索、共有タスク文脈、出典付き知識、知識の整理と保守を担う5つの自己完結型スキルを構築しました。各スキルにはPython標準ライブラリだけで動く生成済みランタイムが含まれ、インストール後は単独で利用できます。",
             "タスクモデルは、参加するエージェントの担当範囲とチェックポイントを記録します。スコープの申告は作業の重複を見つける助けとなり、承認、コミット、公開はそれぞれ固有の根拠を持つ別の判断として扱います。"
           ]
         },

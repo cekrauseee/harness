@@ -27,4 +27,4 @@ The block routes substantive entry/resume to a compact coordination report, shar
 
 When consolidating work, reserve the workspace through a `.` claim and inspect real files. Claims coordinate participating agents only. They cannot prevent an editor or agent outside the protocol from changing files. Presence age never proves a writer has stopped.
 
-No automatic global instruction changes happen during skill installation, initialization or updates. Existing legacy hooks are diagnosed and removed only through the explicit migration/cleanup path. Without invocations, no background maintenance occurs.
+No automatic global instruction changes happen during skill installation, initialization or updates. Without invocations, no background maintenance occurs.

@@ -23,7 +23,7 @@ import uuid
 
 
 SCHEMA_VERSION = 3
-DEFAULTS_VERSION = 7
+DEFAULTS_VERSION = 8
 PRESENCE_SECONDS = 1800
 KINDS = {"fact", "hypothesis", "decision", "historical"}
 MEMORY_STATUSES = {"current", "stale", "superseded", "retracted"}
@@ -150,10 +150,10 @@ def read_state(path: Path) -> dict:
     if not isinstance(value, dict):
         _fail("corrupt_state", "Project snapshot must be a JSON object.", path=str(path))
     if value.get("schema_version") != SCHEMA_VERSION:
-        _fail("unsupported_schema", "This runtime requires schema 3; use explicit migration or a compatible runtime.",
+        _fail("unsupported_schema", "This runtime supports only schema 3 snapshots.",
               path=str(path), found=value.get("schema_version"), supported=SCHEMA_VERSION)
     if not isinstance(value.get("defaults_version"), int) or value["defaults_version"] > DEFAULTS_VERSION:
-        _fail("unsupported_defaults", "Snapshot defaults require a compatible Harness runtime.", path=str(path))
+        _fail("unsupported_defaults", "Snapshot defaults version is invalid or newer than this runtime supports.", path=str(path))
     if not isinstance(value.get("revision"), int) or isinstance(value["revision"], bool) or value["revision"] < 0:
         _fail("corrupt_state", "Snapshot revision is invalid.", path=str(path))
     for key in ("project", "workspaces", "tasks", "sessions", "checkpoints", "claims", "memories", "receipts"):
@@ -302,8 +302,6 @@ def _scan(home: Path) -> list[dict]:
         snapshot = folder / "state.json"
         if snapshot.exists():
             result.append(read_state(snapshot))
-        elif (folder / "manifest.json").exists():
-            _fail("migration_required", "Legacy Harness state needs explicit migration before identity resolution.", path=str(folder))
         elif not folder.name.startswith("."):
             _fail("incomplete_state", "A project directory has no canonical snapshot; inspect or restore it before initialization.", path=str(folder))
     return result
@@ -334,8 +332,8 @@ def _matches(state: dict, path: Path, probe: dict, host: str, host_project_id: s
         if workspace.get("kind") == "directory" and not common and _contains(root, path):
             candidates.append(workspace)
         elif common and workspace.get("kind") == "directory" and root.is_dir():
-            # A migrated path or a directory later initialized as Git remains
-            # the same project. Verify actual topology before enrolling it.
+            # A registered directory that later becomes Git can remain the same
+            # project when its current physical topology proves the relationship.
             registered = _probe(root)
             if registered["path"] == str(root) and registered["git_common_dir"] == common:
                 return True, _workspace(state, probe)
@@ -423,7 +421,10 @@ def _replay(state: dict, operation: str, data: dict) -> dict | None:
     if previous.get("digest") != _digest(operation, data):
         _fail("request_id_reused", "This request ID was already used for different input. Use a new request ID for a new action.", request_id=request_id)
     result = copy.deepcopy(previous["result"])
-    return {**result, "original_revision": result["revision"], "revision": state["revision"], "replayed": True}
+    replayed = {**result, "original_revision": result["revision"], "revision": state["revision"], "replayed": True}
+    if operation in {"remember", "memory.update"}:
+        replayed["next"] = "Use hydrate with memory.id to read the current canonical record."
+    return replayed
 
 
 def _commit(home: Path, state: dict, operation: str, data: dict, values: dict, details: dict) -> dict:
@@ -433,7 +434,13 @@ def _commit(home: Path, state: dict, operation: str, data: dict, values: dict, d
                             "created_at": utc_now(), "details": details})
     result = _result(state, **values)
     if data.get("request_id"):
-        state["receipts"][data["request_id"]] = {"digest": _digest(operation, data), "result": copy.deepcopy(result)}
+        receipt_result = copy.deepcopy(result)
+        if operation in {"remember", "memory.update"}:
+            receipt_result = _result(
+                state,
+                memory={"id": result["memory"]["id"], "revision": result["memory"]["revision"]},
+            )
+        state["receipts"][data["request_id"]] = {"digest": _digest(operation, data), "result": receipt_result}
     atomic_json(state_path(home, state["project"]["id"]), state)
     return result
 
@@ -767,7 +774,6 @@ def _memory_mutation(state: dict, operation: str, data: dict) -> tuple[dict, dic
         fields = {"title", "summary", "content", "kind", "status", "sources", "scope", "aliases", "review_after", "superseded_by"}
         if not fields.intersection(data):
             _fail("invalid_input", "Provide an explicit memory field or status to update.")
-        previous = {key: copy.deepcopy(value) for key, value in memory.items() if key != "history"}
         for field in ("title", "summary", "content", "scope", "kind", "status"):
             if field in data:
                 memory[field] = _text(data, field)
@@ -797,7 +803,7 @@ def _memory_mutation(state: dict, operation: str, data: dict) -> tuple[dict, dic
                     _fail("corrupt_state", "An existing memory has a missing supersession target.")
         elif memory.get("superseded_by"):
             _fail("invalid_supersession", "superseded_by is only valid when status is superseded. Clear it explicitly when changing status.")
-        memory.setdefault("history", []).append(previous)
+        memory.pop("history", None)
         memory["updated_at"] = now
         memory["revision"] = state["revision"] + 1
     if memory.get("review_after") is not None:
