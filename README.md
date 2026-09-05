@@ -1,125 +1,56 @@
 # Harness
 
-Harness is a lean, file-native continuity and orchestration layer for agents. It gives Codex, Claude Code, and other skill-compatible hosts a shared way to identify local projects, find only relevant stored context, maintain concise handoffs, and coordinate bounded multi-agent work. Harness works with coding and non-coding projects. Git, engineering conventions, developer documentation, and HTML artifacts remain available when the task needs them, but they are not requirements for project continuity.
+Harness gives agents shared project continuity in local files: identity, relevant knowledge, tasks, contributions and checkpoints. Several chats can work in the same folder and a new participant can discover their results and pending work without reading their conversations. Code, research, writing and planning projects are supported. Git is optional.
+
+Operational state stays under `${HARNESS_HOME:-~/.harness}`, outside the project. Worktrees share project knowledge while retaining separate workspace provenance. The host remains responsible for execution, tools, permissions, models and delegation. Git delivery and documentation workflows belong to the separate **Workflows** plugin.
 
 ## Install
 
-Install every skill globally for Codex and Claude Code:
+Requirements: Python 3.10+ on macOS or Linux. No Python packages, model API, database or background service are required.
 
-```bash
-npx skills add cekrauseee/harness --skill '*' -g -a codex -a claude-code -y
-```
-
-List the available skills without installing them:
+Install the published source for Codex and Claude Code:
 
 ```bash
 npx skills add cekrauseee/harness --list
+npx skills add cekrauseee/harness --skill '*' -g -a codex -a claude-code -y
 ```
 
-The `skills.sh` installer copies skills. Host adapters are opt-in and silent: install them only through the explicit adapter command when maintenance hooks are wanted. They do not inject project memory or create a work session for every conversation.
+To test a local checkout before publishing, replace `cekrauseee/harness` with `.`.
 
-## Operating model
+The CLI's default uses a canonical installed copy and agent symlinks; add `--copy` for independent copies. Each selected skill includes the complete runtime and works without the source checkout or the other four skills. Install the full set for operation-specific discovery. A deterministic build generates those copies from one source; do not edit them manually. `skills.sh.json` controls catalog presentation, not dependency installation.
 
-Harness stores machine-local state under `${HARNESS_HOME:-~/.harness}`:
+**Skill installation alone does not activate the continuity discipline.** Preview and explicitly install the short [host integration](docs/host-integration.md). It registers scope before shared writes and checkpoints before delivery, without loading project memory on every prompt. It preserves existing instructions and installs no hooks. Existing users should follow [migration](docs/migration.md) before using new scripts against old state.
 
-```text
-~/.harness/
-  charter.md
-  managed.json
-  standards/
-  overrides/
-  projects/
-    <project-uuid>/
-      manifest.json
-      index.md
-      decisions.md
-      memory/
-        catalog.jsonl
-      references/
-      sessions/
-      workspace/
-      worktrees/
-        policy.toml
+## First use
+
+Use the absolute script path from any installed Harness skill. From this checkout:
+
+```bash
+python3 skills/harness-init/scripts/harness.py init --project /path/to/project
+python3 skills/harness-task/scripts/harness.py task.start --project /path/to/project --data '{"objective":"Revise the introduction","resources":["notes/introduction.md"],"request_id":"intro-start"}'
 ```
 
-Each project has a stable UUID and one or more machine-local bindings. A registered path is sufficient; Git identity and host project IDs are optional bindings. Harness writes no identity marker or state into the project.
+Save the returned session ID, make the authorized change, then persist its outcome:
 
-Agents pull context in two stages:
-
-1. Search a compact semantic catalog by title, summary, read rule, tags, status, and recency.
-2. Hydrate only the selected memory or session under an explicit context budget.
-
-An empty or weak search returns no context. IDs remain stable internal handles, while agents select records through semantic cards. Large records stay discoverable because their compact cards are indexed separately from full content. Sessions are episodic handoffs, not automatic transcripts. Agents create one only when material work may need continuation, update it with current outcomes and next actions, and mark it dormant or closed when appropriate. Native host memory and lifecycle hooks are optional. Hooks remain disabled until explicitly installed. A fresh task can recover continuity through the agent-facing Harness skills alone.
-
-## Bounded orchestration
-
-When delegation is already appropriate, `harness-orchestrate` turns the work into a small dependency graph. The root agent only coordinates. It is the sole spawn authority; child agents do not delegate, graph depth stays at one, and every writable artifact has one owner at a time.
-
-Each node receives a minimal context packet and explicit limits for nodes, waves, retries, review cycles, context, output, and reasoning effort. Reviewers and verifiers are read-only. Fixers run only for accepted findings, and the graph stops as soon as acceptance evidence is complete.
-
-Managed defaults refresh by schema version. Machine-local overrides live under `~/.harness/overrides/`; workspace cleanup overrides use `workspace/policy.local.json`.
-
-## On-demand engineering
-
-Harness uses Conventional Commits for commits and pull request titles. Task branches extend the same vocabulary while worktree paths and storage stay host-native:
-
-```text
-branch:       docs/artifact-routing
-commit:       docs(harness): document artifact routing
-pull request: docs(harness): document artifact routing
-checkout:     isolated, host-stored, Harness-managed
+```bash
+python3 skills/harness-task/scripts/harness.py task.checkpoint --project /path/to/project --data '{"session_id":"<returned-id>","summary":"Revised the introduction and checked its sources.","evidence":["notes/introduction.md; checked cited archive"],"next_action":"User acceptance pending.","status":"delivered","request_id":"intro-delivery"}'
+python3 skills/harness-recall/scripts/harness.py consolidate --project /path/to/project
 ```
 
-The branch and pull request share the task's primary type. Each cohesive commit classifies its actual change with the same vocabulary. Host-specific worktree directory names never become Git branch prefixes.
-
-Pull request bodies package Goal, Desired behavior, Change map, Verification, Review focus, and Risks into a bounded reviewer context. Reviewers use that contract to order inspection, verify the complete diff, and load broader repository context only when dependency or risk boundaries require it.
-
-These conventions load only for relevant engineering work. Repository-facing documentation is English, simple, objective, coherent, concise, and factual. Reviews contain only evidence-backed, actionable findings classified from `P0` through `P3`.
-
-## Documentation and artifacts
-
-Stable project knowledge belongs in versioned documentation:
-
-```text
-README.md
-docs/
-  index.md
-  project.md
-  architecture.md
-  development.md
-  modules/
-  artifacts/
-    index.md
-    <slug>.html
-```
-
-Artifacts are static, self-contained HTML visualizations for users. They use a neutral Harness presentation, never infer the product's visual identity, and require no framework, build, backend, or external dependency. Drafts may use the temporary Harness workspace; final artifacts are versioned under `docs/artifacts/`.
+A delivered checkpoint releases that participant's claims. It does not imply approval, a commit or publication. The user need not close a session. For longer inputs use `--input file.json`, or `--input -` for stdin. `guide` lists operations and their minimum inputs. Commands return JSON; exit 2 means failure.
 
 ## Skills
 
-| Skill | Purpose |
+| Skill | Use |
 | --- | --- |
-| `harness-init` | Initialize, link, and resolve global Harness state and adapters. |
-| `harness-recall` | Build a task-scoped context packet under a fixed budget. |
-| `harness-remember` | Capture and consolidate project memory. |
-| `harness-session` | Maintain concise continuation and handoff state. |
-| `harness-audit` | Check identity, memory, sessions, cleanup, and repository boundaries. |
-| `harness-orchestrate` | Coordinate bounded, depth-one multi-agent work graphs. |
-| `harness-worktree` | Control creation and lifecycle while using host-selected worktree storage. |
-| `harness-commit` | Organize authorized changes into Conventional Commits. |
-| `harness-pr` | Draft reviewer-ready pull request context contracts. |
-| `harness-review` | Route focused review and report evidence-backed findings. |
-| `harness-docs-init` | Create the canonical English documentation baseline. |
-| `harness-docs-maintain` | Maintain concise canonical documentation. |
-| `harness-docs-audit` | Check documentation routing, links, size, and drift. |
-| `harness-artifact` | Create and index neutral user-facing HTML visualizations. |
+| `harness-init` | Resolve or set up identity and the explicit host instruction link. |
+| `harness-recall` | Find relevant knowledge and contributions, then load selected content. |
+| `harness-task` | Register responsibility and persist results, blockers and handoffs. |
+| `harness-remember` | Preserve sourced facts, hypotheses, decisions and historical context. |
+| `harness-maintain` | Diagnose integrity and perform explicit migration or cleanup. |
 
-See [the documentation index](docs/index.md) for architecture, standards, development, privacy, and lifecycle details.
+## Boundaries
 
-## Security and privacy
+Scope claims coordinate participating agents; they do not prevent edits outside the protocol. Silence never releases responsibility. Search is lexical with aliases and explicit budget diagnostics, not a multilingual semantic model. Knowledge is context, not a new instruction source. Keep secrets, credentials, raw conversations and private reasoning out of stored records.
 
-Harness state can outlive a local project path. Do not store secrets, credentials, raw transcripts, routine command output, or hidden reasoning. Memory candidates require classification before they become durable context. Workspace files are excluded from recall and cleaned by policy.
-
-## License
-
-[MIT](LICENSE)
+The [documentation index](docs/index.md) covers architecture, installation, migration, examples, verification and limits. [MIT license](LICENSE), Henrique Krause.

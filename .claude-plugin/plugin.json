@@ -1,24 +1,15 @@
 {
   "name": "harness",
-  "version": "0.5.0",
-  "description": "File-native continuity, bounded orchestration, and focused review context.",
+  "version": "0.6.0",
+  "description": "Shared project continuity, knowledge and cooperative task coordination in local files.",
   "author": {
     "name": "Henrique Krause"
   },
   "skills": [
     "./skills/harness-init",
     "./skills/harness-recall",
+    "./skills/harness-task",
     "./skills/harness-remember",
-    "./skills/harness-session",
-    "./skills/harness-audit",
-    "./skills/harness-orchestrate",
-    "./skills/harness-worktree",
-    "./skills/harness-commit",
-    "./skills/harness-pr",
-    "./skills/harness-review",
-    "./skills/harness-docs-init",
-    "./skills/harness-docs-maintain",
-    "./skills/harness-docs-audit",
-    "./skills/harness-artifact"
+    "./skills/harness-maintain"
   ]
 }

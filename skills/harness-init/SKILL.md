@@ -1,50 +1,32 @@
 ---
 name: harness-init
-description: Initialize, link, resolve, or repair a local project's Harness identity without writing project metadata. Use for first setup, moved paths, host bindings, or unresolved continuity in Git and non-Git projects.
+description: Set up or repair shared Harness identity for a local project, including non-Git folders, worktrees and moved paths. Use for first setup, an unlinked project or host integration.
 ---
 
 # Harness Init
 
-Initialize the global, file-native Harness without adding metadata to the project. Treat this skill as setup, binding, and repair. Normal recall is agent-initiated and does not depend on hooks.
+Give the project a stable identity outside its files. Git and host IDs are optional. Commands below are relative to this installed skill directory; use its absolute `scripts/harness.py` path when working elsewhere. Python 3.10+ on macOS or Linux is required.
 
-## Initialize
-
-Run:
+Inspect identity first:
 
 ```bash
-python3 scripts/init.py init --project <project-path> --json
+python3 scripts/harness.py resolve --project /path/to/project
 ```
 
-The command:
-
-- uses `${HARNESS_HOME:-~/.harness}`;
-- assigns an opaque UUID;
-- stores all Harness state under `projects/<uuid>/`;
-- registers the project path as a machine-local binding;
-- can also register host identity and retain a legacy Git link when available;
-- creates no project files;
-- is idempotent when the path already resolves to a valid project.
-
-Use `link --project-id <uuid>` only when an existing Harness project has been selected. Use `resolve` to inspect identity without mutation. Resolution priority is explicit UUID, host binding, nearest registered path ancestor, then legacy Git identity.
-
-`--repo` remains a compatibility alias for `--project`.
-
-## Optional lifecycle adapters
-
-Harness does not require hooks. When a host supports silent lifecycle maintenance, install or refresh its adapters explicitly:
+If the result is `not_initialized`, initialize the intended project:
 
 ```bash
-python3 scripts/install_hooks.py --host codex --host claude-code --json
+python3 scripts/harness.py init --project /path/to/project
 ```
 
-The explicit command is the only supported installation path. It is idempotent and preserves unrelated host configuration.
+The result identifies the project and workspace. Two chats in the same folder share a workspace. Git worktrees share a project through their common Git directory and retain separate workspaces. Matching remote URLs do not join clones. Repeating initialization does not create a second identity.
 
-Adapters must fail open and remain model-silent. They may maintain timestamps or clean temporary workspace files. They must not inject memory, create empty sessions, initialize an unrelated path, persist raw host messages, or promote durable memory.
+For an explicitly identified existing project or a moved folder, inspect `guide` for `project.bind` or `project.move` before changing bindings. Do not infer an identity from a similar name. A `migration_required` error means existing state needs migration, not that the project is empty; use the migration operations described by `harness-maintain` if available, or `guide` from this runtime.
 
-## Boundaries
+## Make continuity part of the host workflow
 
-- Never create `.harness`, `.project-harness`, or any other Harness file in the project.
-- Never infer two projects are identical when multiple remote matches exist.
-- Do not require Git, a remote, or a lifecycle hook.
-- Never ask routine lifecycle questions; report an actionable warning and let the host continue.
-- Read [references/layout.md](references/layout.md) when inspecting or repairing storage.
+Installing skills alone does not ensure they are called. Read [host-integration.md](references/host-integration.md) to preview, install, verify or remove a short instruction block in the explicitly selected host instruction file. Apply it only within the user's authorization to change that file. Installation preserves unrelated instructions and rejects edited or duplicate managed blocks. Hooks are not installed.
+
+The integration calls for scope registration before shared writes and checkpoints after meaningful results and before delivery. Generic questions require no task administration. The scripts enforce consistency when called; agent participation remains cooperative.
+
+Setup is complete when identity resolves and, if integration was requested, its status confirms an intact block and available runtime. No project metadata or operational state is written into the project.
