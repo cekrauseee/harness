@@ -4,109 +4,109 @@
   "repositoryUrl": "https://github.com/cekrauseee/harness",
   "translations": {
     "en": {
-      "description": "A file-native continuity and orchestration layer for agents.",
-      "metaDescription": "Harness is a file-native toolkit for agent continuity, project handoffs, and bounded multi-agent orchestration.",
-      "summary": "Harness is a file-native toolkit that helps agents recover relevant project context, maintain concise handoffs, and coordinate bounded work across compatible hosts.",
+      "description": "File-native continuity for agents working across sessions and workspaces.",
+      "metaDescription": "Harness gives agents shared project identity, selective recall, task context, sourced knowledge, and safe maintenance in local files.",
+      "summary": "Harness keeps useful project context available across agent sessions without putting operational state in the project or loading entire conversation histories.",
       "highlights": [
-        "Agent continuity",
-        "Project handoffs",
-        "Bounded orchestration",
-        "File-native state",
-        "Python",
-        "Git"
+        "Project identity",
+        "Selective recall",
+        "Shared task context",
+        "Sourced knowledge",
+        "Safe maintenance",
+        "Git optional"
       ],
       "sections": [
         {
           "title": "Product",
           "paragraphs": [
-            "Long-running agent work needs continuity, but loading every past conversation adds noise and cost. Harness keeps selected project context available without turning full transcripts into memory.",
-            "It works with Git and non-Git projects through Codex, Claude Code, and other skill-compatible hosts. Projects do not need to adopt an application framework or store Harness files in their repositories."
+            "Agent work often spans several sessions, participants, and folders. Harness gives them one canonical project record for identity, knowledge, task claims, contributions, and checkpoints, stored outside the project itself.",
+            "Git projects, non-Git folders, and worktrees are supported. Worktrees share project context while keeping their workspace provenance distinct, so an agent can find prior results without assuming that another checkout contains the same files."
           ]
         },
         {
           "title": "What I built",
           "paragraphs": [
-            "I built self-contained skills for project identity, selective recall, handoffs, worktrees, commits, pull requests, reviews, documentation, and artifacts.",
-            "The same toolkit can coordinate a bounded, depth-one graph of agents with explicit dependencies, budgets, and write ownership."
+            "I built five self-contained skills for project identity, selective recall, shared task context, sourced knowledge, and safe maintenance or migration. Each skill includes a generated Python standard-library runtime and works independently after installation.",
+            "The task model records responsibilities and checkpoints for participating agents. Claims help them detect overlapping work, while acceptance, commits, and publication remain separate decisions backed by their own evidence."
           ]
         },
         {
           "title": "Engineering choices",
           "paragraphs": [
-            "Recall is pull-based. Agents search a compact catalog first, then load only the selected record under an explicit context budget.",
-            "State stays under a machine-local Harness directory, outside target projects. The system stores concise, scoped records instead of raw chat transcripts and requires no database, daemon, or network service."
+            "Recall starts with compact lexical search, including aliases, and loads only selected records within an explicit budget. Sources, scope, status, and the distinction between facts, hypotheses, decisions, and history stay attached to the knowledge.",
+            "State updates use locking and atomic file replacement. A short, explicit host integration connects the workflow without default hooks, a daemon, an external API dependency, or model coupling; the host continues to control execution, permissions, and delegation."
           ]
         }
       ]
     },
     "pt": {
-      "description": "Uma camada baseada em arquivos para continuidade e orquestração de agentes.",
-      "metaDescription": "Harness é um conjunto de ferramentas baseado em arquivos para continuidade de agentes, transferências de contexto entre sessões e orquestração multiagente limitada.",
-      "summary": "Harness é um conjunto de ferramentas baseado em arquivos que ajuda agentes a recuperar o contexto relevante de um projeto, manter transferências concisas e coordenar trabalho limitado entre ambientes compatíveis.",
+      "description": "Continuidade baseada em arquivos para agentes que trabalham entre sessões e espaços de trabalho.",
+      "metaDescription": "Harness oferece identidade compartilhada de projeto, recuperação seletiva, contexto de tarefas, conhecimento com fontes e manutenção segura em arquivos locais.",
+      "summary": "Harness mantém o contexto útil de um projeto disponível entre sessões de agentes, sem colocar estado operacional no projeto nem carregar históricos completos de conversas.",
       "highlights": [
-        "Continuidade de agentes",
-        "Transferências de contexto",
-        "Orquestração limitada",
-        "Estado baseado em arquivos",
-        "Python",
-        "Git"
+        "Identidade de projeto",
+        "Recuperação seletiva",
+        "Contexto compartilhado de tarefas",
+        "Conhecimento com fontes",
+        "Manutenção segura",
+        "Git opcional"
       ],
       "sections": [
         {
           "title": "Produto",
           "paragraphs": [
-            "Trabalhos longos com agentes precisam de continuidade, mas carregar todas as conversas anteriores aumenta o ruído e o custo. Harness mantém disponível apenas o contexto selecionado do projeto, sem transformar transcrições completas em memória.",
-            "Ele funciona com projetos Git e não Git por meio do Codex, Claude Code e outros ambientes compatíveis com skills. Os projetos não precisam adotar um framework de aplicação nem armazenar arquivos do Harness em seus repositórios."
+            "O trabalho com agentes costuma atravessar várias sessões, participantes e pastas. Harness oferece um registro canônico por projeto para identidade, conhecimento, responsabilidades, contribuições e checkpoints, armazenado fora do próprio projeto.",
+            "Projetos Git, pastas sem Git e worktrees são compatíveis. As worktrees compartilham o contexto do projeto, mas mantêm a procedência de cada espaço de trabalho, para que um agente encontre resultados anteriores sem presumir que outro checkout contenha os mesmos arquivos."
           ]
         },
         {
           "title": "O que construí",
           "paragraphs": [
-            "Construí skills autocontidas para identidade de projetos, recuperação seletiva, transferências, worktrees, commits, pull requests, revisões, documentação e artefatos.",
-            "O mesmo conjunto de ferramentas coordena um grafo limitado de agentes com profundidade máxima de um nível, dependências explícitas, orçamentos e propriedade de escrita."
+            "Construí cinco skills autocontidas para identidade de projetos, recuperação seletiva, contexto compartilhado de tarefas, conhecimento com fontes e manutenção ou migração segura. Cada skill inclui um runtime gerado apenas com a biblioteca padrão do Python e funciona de forma independente após a instalação.",
+            "O modelo de tarefas registra responsabilidades e checkpoints dos agentes participantes. As reivindicações de escopo ajudam a detectar trabalhos sobrepostos, enquanto aceitação, commits e publicação continuam sendo decisões separadas, sustentadas por evidências próprias."
           ]
         },
         {
           "title": "Decisões de engenharia",
           "paragraphs": [
-            "A recuperação é feita sob demanda. Os agentes pesquisam primeiro um catálogo compacto e carregam apenas o registro selecionado dentro de um orçamento explícito de contexto.",
-            "O estado permanece em um diretório local do Harness, fora dos projetos de destino. O sistema armazena registros concisos e delimitados em vez de transcrições brutas e não requer banco de dados, daemon ou serviço de rede."
+            "A recuperação começa por uma busca lexical compacta, com aliases, e carrega apenas os registros selecionados dentro de um limite explícito. Fontes, escopo, estado e a distinção entre fatos, hipóteses, decisões e histórico permanecem vinculados ao conhecimento.",
+            "As atualizações de estado usam bloqueio e substituição atômica de arquivos. Uma integração curta e explícita com o host conecta o fluxo sem hooks padrão, daemon, dependência de API externa ou de modelo; o host continua responsável por execução, permissões e delegação."
           ]
         }
       ]
     },
     "ja": {
-      "description": "エージェントの継続作業とオーケストレーションを支えるファイルベースのレイヤーです。",
-      "metaDescription": "Harnessは、エージェントの継続性、プロジェクトの引き継ぎ、制限付きマルチエージェントオーケストレーションのためのファイルベースのツールキットです。",
-      "summary": "Harnessは、関連するプロジェクト文脈の復元、簡潔な引き継ぎの維持、互換ホスト間での制限付き作業の調整を支援するファイルベースのツールキットです。",
+      "description": "セッションやワークスペースをまたぐエージェント作業に、ファイルベースの継続性を提供します。",
+      "metaDescription": "Harnessは、共有プロジェクトID、選択的な情報検索、タスクの文脈、出典付き知識、安全な保守をローカルファイルで提供します。",
+      "summary": "Harnessは、運用状態をプロジェクト内に置いたり会話履歴全体を読み込んだりせず、エージェントのセッション間で有用なプロジェクト文脈を引き継ぎます。",
       "highlights": [
-        "エージェントの継続性",
-        "プロジェクトの引き継ぎ",
-        "制限付きオーケストレーション",
-        "ファイルベースの状態管理",
-        "Python",
-        "Git"
+        "プロジェクトID",
+        "選択的な情報検索",
+        "共有タスク文脈",
+        "出典付き知識",
+        "安全な保守",
+        "Gitは任意"
       ],
       "sections": [
         {
           "title": "プロダクト",
           "paragraphs": [
-            "長期間にわたるエージェント作業には継続性が必要ですが、過去の会話をすべて読み込むとノイズとコストが増えます。Harnessは会話全文を記憶に変えることなく、選択したプロジェクト文脈だけを利用可能にします。",
-            "Codex、Claude Code、その他のスキル互換ホストを通じて、Gitプロジェクトと非Gitプロジェクトの両方で動作します。対象プロジェクトはアプリケーションフレームワークを導入したり、Harnessのファイルをリポジトリに保存したりする必要がありません。"
+            "エージェントの作業は、複数のセッション、参加者、フォルダにまたがることがあります。Harnessは、プロジェクトID、知識、担当範囲、成果、チェックポイントを一つの正規レコードにまとめ、プロジェクトの外部に保存します。",
+            "Gitプロジェクト、Gitを使わないフォルダ、worktreeに対応しています。worktree間ではプロジェクト文脈を共有しながら各ワークスペースの来歴を区別するため、別のチェックアウトに同じファイルがあると決めつけずに過去の成果を確認できます。"
           ]
         },
         {
           "title": "構築したもの",
           "paragraphs": [
-            "プロジェクト識別、選択的な記憶の呼び出し、引き継ぎ、worktree、コミット、プルリクエスト、レビュー、ドキュメント、成果物のための自己完結型スキルを構築しました。",
-            "同じツールキットで、依存関係、予算、書き込み所有権を明示した深さ1の制限付きエージェントグラフを調整できます。"
+            "プロジェクトID、選択的な情報検索、共有タスク文脈、出典付き知識、安全な保守と移行を担う5つの自己完結型スキルを構築しました。各スキルにはPython標準ライブラリだけで動く生成済みランタイムが含まれ、インストール後は単独で利用できます。",
+            "タスクモデルは、参加するエージェントの担当範囲とチェックポイントを記録します。スコープの申告は作業の重複を見つける助けとなり、承認、コミット、公開はそれぞれ固有の根拠を持つ別の判断として扱います。"
           ]
         },
         {
           "title": "設計上の選択",
           "paragraphs": [
-            "記憶の呼び出しはプル型です。エージェントは最初にコンパクトなカタログを検索し、明示された文脈予算の範囲で選択したレコードだけを読み込みます。",
-            "状態は対象プロジェクトの外にあるマシンローカルなHarnessディレクトリに保持されます。生の会話記録ではなく、簡潔で範囲を限定したレコードを保存し、データベース、デーモン、ネットワークサービスを必要としません。"
+            "情報検索は、別名を含む簡潔な字句検索から始め、明示した上限内で選択したレコードだけを読み込みます。出典、対象範囲、状態に加え、事実、仮説、決定、履歴の区別も知識とともに保持します。",
+            "状態の更新にはロックとファイルのアトミックな置換を使います。短く明示的なホスト連携により、標準フック、デーモン、外部API、特定モデルへの依存なしでワークフローに接続し、実行、権限、委任の管理はホストに残します。"
           ]
         }
       ]

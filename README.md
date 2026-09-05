@@ -2,7 +2,7 @@
 
 Harness gives agents shared project continuity in local files: identity, relevant knowledge, tasks, contributions and checkpoints. Several chats can work in the same folder and a new participant can discover their results and pending work without reading their conversations. Code, research, writing and planning projects are supported. Git is optional.
 
-Operational state stays under `${HARNESS_HOME:-~/.harness}`, outside the project. Worktrees share project knowledge while retaining separate workspace provenance. The host remains responsible for execution, tools, permissions, models and delegation. Git delivery and documentation workflows belong to the separate **Workflows** plugin.
+Operational state stays under `${HARNESS_HOME:-~/.harness}`, outside the project. Worktrees share project knowledge while retaining separate workspace provenance. The host remains responsible for execution, tools, permissions, models and delegation. Git delivery and documentation workflows belong to the separate [Workflows](https://github.com/cekrauseee/workflows) plugin.
 
 ## Install
 
