@@ -1,9 +1,0 @@
-{
-  "generator": "scripts/build_dist.py",
-  "sha256": {
-    "__init__.py": "3c7a82a1fc5a4c943490f037709a783842810d3b412477a4857939e7f9e0bf34",
-    "cli.py": "708fd7ba821c39c6658b76749b2c119cc5a1c88e2370a2f740834e45ad521a11",
-    "core.py": "7956bbae32e9160b5fcb4b415bf5ec3025819689786131a111ed1836cbae6f1f",
-    "integration.py": "3bedd3ce30ac2c948f37aa4f8abd1e2174059281f85fc65f5542b8e547cd381f"
-  }
-}

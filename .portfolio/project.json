@@ -26,15 +26,15 @@
         {
           "title": "What I built",
           "paragraphs": [
-            "I built five self-contained skills for project identity, selective recall, shared task context, sourced knowledge, and knowledge consolidation and maintenance. Each skill includes a generated Python standard-library runtime and works independently after installation.",
+            "I designed five agentic skills for project identity, selective context, cooperative ownership, knowledge writing and maintenance. Agents use ordinary Markdown and their existing tools; each independently installable skill carries the same small transactional helper.",
             "The task model records responsibilities and checkpoints for participating agents. Claims help them detect overlapping work, while acceptance, commits, and publication remain separate decisions backed by their own evidence."
           ]
         },
         {
           "title": "Engineering choices",
           "paragraphs": [
-            "Recall starts with compact lexical search, including aliases, and loads only selected records within an explicit budget. Sources, scope, status, and the distinction between facts, hypotheses, decisions, and history stay attached to the knowledge.",
-            "State updates use locking and atomic file replacement. A short, explicit host integration connects the workflow without default hooks, a daemon, an external API dependency, or model coupling; the host continues to control execution, permissions, and delegation."
+            "Agents search and read relevant Markdown documents, then decide what to retain or rewrite. Sources, scope, uncertainty and meaningful dates remain readable prose, without a ranking engine, classifier or metadata schema for knowledge.",
+            "The helper handles project identity, atomic reservations, current handoff publication and document writes checked against observed content. Its success confirms those operations; the agent still investigates, judges and verifies the outcome. A short host instruction connects the workflow without hooks, a daemon or an external API dependency."
           ]
         }
       ]
@@ -62,15 +62,15 @@
         {
           "title": "O que construí",
           "paragraphs": [
-            "Construí cinco skills autocontidas para identidade de projetos, recuperação seletiva, contexto compartilhado de tarefas, conhecimento com fontes e consolidação de conhecimento e manutenção. Cada skill inclui um runtime gerado apenas com a biblioteca padrão do Python e funciona de forma independente após a instalação.",
+            "Projetei cinco skills agênticas para identidade de projetos, contexto seletivo, responsabilidade compartilhada, escrita de conhecimento e manutenção. Os agentes usam Markdown comum e as ferramentas já disponíveis; cada skill instalável de forma independente inclui o mesmo pequeno auxiliar transacional.",
             "O modelo de tarefas registra responsabilidades e checkpoints dos agentes participantes. As reivindicações de escopo ajudam a detectar trabalhos sobrepostos, enquanto aceitação, commits e publicação continuam sendo decisões separadas, sustentadas por evidências próprias."
           ]
         },
         {
           "title": "Decisões de engenharia",
           "paragraphs": [
-            "A recuperação começa por uma busca lexical compacta, com aliases, e carrega apenas os registros selecionados dentro de um limite explícito. Fontes, escopo, estado e a distinção entre fatos, hipóteses, decisões e histórico permanecem vinculados ao conhecimento.",
-            "As atualizações de estado usam bloqueio e substituição atômica de arquivos. Uma integração curta e explícita com o host conecta o fluxo sem hooks padrão, daemon, dependência de API externa ou de modelo; o host continua responsável por execução, permissões e delegação."
+            "Os agentes pesquisam e leem os documentos Markdown relevantes e decidem o que manter ou reescrever. Fontes, escopo, incertezas e datas importantes ficam em texto legível, sem motor de ranking, classificador ou esquema obrigatório de metadados para o conhecimento.",
+            "O auxiliar cuida da identidade do projeto, reservas atômicas, publicação do handoff atual e gravações conferidas contra o conteúdo observado. Seu sucesso confirma essas operações; investigar, julgar e verificar o resultado continua sendo trabalho do agente. Uma instrução curta no host conecta o fluxo sem hooks, daemon ou dependência de API externa."
           ]
         }
       ]
@@ -98,15 +98,15 @@
         {
           "title": "構築したもの",
           "paragraphs": [
-            "プロジェクトID、選択的な情報検索、共有タスク文脈、出典付き知識、知識の整理と保守を担う5つの自己完結型スキルを構築しました。各スキルにはPython標準ライブラリだけで動く生成済みランタイムが含まれ、インストール後は単独で利用できます。",
+            "プロジェクトID、必要な文脈の選択、共同作業の担当範囲、知識の記述、保守を支える5つのエージェント向けスキルを設計しました。エージェントは通常のMarkdownと既存のツールを使い、単独でインストールできる各スキルに同じ小さなトランザクション補助ツールを同梱しています。",
             "タスクモデルは、参加するエージェントの担当範囲とチェックポイントを記録します。スコープの申告は作業の重複を見つける助けとなり、承認、コミット、公開はそれぞれ固有の根拠を持つ別の判断として扱います。"
           ]
         },
         {
           "title": "設計上の選択",
           "paragraphs": [
-            "情報検索は、別名を含む簡潔な字句検索から始め、明示した上限内で選択したレコードだけを読み込みます。出典、対象範囲、状態に加え、事実、仮説、決定、履歴の区別も知識とともに保持します。",
-            "状態の更新にはロックとファイルのアトミックな置換を使います。短く明示的なホスト連携により、標準フック、デーモン、外部API、特定モデルへの依存なしでワークフローに接続し、実行、権限、委任の管理はホストに残します。"
+            "エージェントが関連するMarkdown文書を検索して読み、残す内容や書き直す内容を判断します。出典、適用範囲、不確実性、重要な日付は読みやすい文章で保持し、知識のランキングエンジン、分類器、必須のメタデータ形式は設けていません。",
+            "補助ツールはプロジェクトID、アトミックな予約、現在の引き継ぎ内容の保存、読み取った内容との照合を伴う文書更新を担当します。操作の成功だけでは作業の正しさは決まらず、調査、判断、結果の検証はエージェントの役割です。短いホスト指示で作業に組み込み、フック、デーモン、外部APIへの依存はありません。"
           ]
         }
       ]
