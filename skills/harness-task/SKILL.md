@@ -19,6 +19,8 @@ To extend your reservation, call `claim` with your `--owner`, its observed `--ex
 
 While working, keep a concise current handoff after meaningful outcomes or blockers: result, evidence, remaining work and next action. It is prose written by the agent, not a status graph. Use `handoff` without `--release` while actively continuing to use the reservation. `--input -` accepts Markdown on stdin; each update replaces the previous account.
 
+Use agent messages for transient coordination and immediate dependencies. Persist a handoff when a meaningful result or blocker changes what another agent needs to continue, not for every message, tool call or unchanged status. Keep one current account with concise evidence references; do not copy the conversation. This does not replace each independent writer's reservation or the delivery procedure below.
+
 ## Before every delivery
 
 Complete this work before the final response, without waiting for the user to say the session is over. Finishing authorized work includes retiring its temporary coordination records; no separate cleanup request is needed. An explicitly read-only request does not authorize maintenance writes or a new contribution.
