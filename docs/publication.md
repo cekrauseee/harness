@@ -1,6 +1,8 @@
 # Publication preparation
 
-Harness `0.8.0` provides project continuity independently from the Workflows package. Workflows is not required for Harness operation. A merge to the main branch does not create a tagged release. Commit, push, PR publication, merge, release and remote metadata changes are separate authorized actions.
+Harness provides project continuity independently from the Workflows package. Workflows is not required for Harness operation. A merge to the main branch does not create a tagged release. Commit, push, PR publication, merge, release and remote metadata changes are separate authorized actions.
+
+The plugin package version is recorded in the aligned Codex and Claude manifests. Instruction-only package updates do not change the helper/API version.
 
 Harness repository description:
 

@@ -1,6 +1,6 @@
 {
   "name": "harness",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "Agent-led project knowledge with atomic resource reservations and current handoffs.",
   "author": {
     "name": "Henrique Krause"

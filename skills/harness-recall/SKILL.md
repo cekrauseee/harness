@@ -13,6 +13,8 @@ Carry forward only guidance grounded in the user's explicit choices, within its 
 
 Use the host's file search and reading tools to inspect Markdown filenames, titles and introductions, then read selected documents. Start with the missing fact. Try concrete synonyms or a translation when a relevant query misses; do not infer absence of knowledge from one search or load everything by default. There is no programmatic ranking, translation or context-budget system.
 
+For a delegated assignment, scope recall to that assignment. Read applicable project guidelines and only the knowledge and handoffs needed for the assigned result. Reuse supplied, current evidence instead of repeating the coordinator's broad investigation; verify its source or freshness when that could affect the work. A fresh conversation does not require a project-wide survey.
+
 For shared work, run `status --project /path/to/project` to inspect all current reservations and handoffs. This is a read, not a reservation. Work from another workspace is context; inspect actual files before treating it as available here. Do not substitute document search for checking ownership.
 
 An inactive contribution may represent pending work or interrupted delivery cleanup. Read its handoff and check actual results before deciding which. When resuming authorized work, carry forward genuine pending context and retire its superseded records during delivery. Recall alone and read-only requests do not authorize cleanup; old timestamps do not authorize releasing another writer.
