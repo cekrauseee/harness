@@ -14,7 +14,7 @@ npx skills add cekrauseee/harness --skill '*' -g -a codex -a claude-code -y
 
 Use `npx skills add . --list` to inspect a local checkout. Add `--copy` when independent copies are needed. Every skill contains the same helper generated from `src/harness.py`; installing one skill does not require the repository or other skills. The helper uses Python 3.10+ standard library on macOS or Linux. Workflows is a [separate instruction-only package](https://github.com/cekrauseee/workflows).
 
-Install or update the short [host instruction](skills/harness-init/references/host-integration.md) through the host's normal file tools. It provides the triggers for reading context, reserving shared files and leaving a handoff. No hooks or configuration installer are included.
+Install or update the short [host instruction](skills/harness-init/references/host-integration.md) through the host's normal file tools. It provides the triggers for recalling guidelines and context, retaining confirmed guidance, reserving shared files and leaving a handoff. It can also route relevant tasks to an installed Workflows package. No hooks or configuration installer are included.
 
 ## Start working
 
@@ -41,13 +41,15 @@ State stays under `${HARNESS_HOME:-~/.harness}/projects/<id>/`:
 - `knowledge/*.md` holds documents written and curated by agents.
 - `references/` may contain useful source documents or assets.
 
+Within knowledge, `guidelines.md` retains confirmed durable project guidance when there is any to keep. Agents read it when entering or resuming substantive work. [Harness Remember](skills/harness-remember/SKILL.md#durable-project-guidance) defines what belongs there and how to keep its source, scope and current wording clear.
+
 Git worktrees share project identity through their common Git directory and preserve workspace provenance. Ordinary folders use explicit path bindings. Reference-only projects can be selected by project ID. Remote URLs never join identities automatically.
 
 | Skill | Responsibility |
 | --- | --- |
 | `harness-init` | Locate, establish or explicitly rebind project storage. |
-| `harness-recall` | Find and read the smallest relevant set of documents and handoffs. |
-| `harness-remember` | Write or consolidate sourced Markdown knowledge. |
+| `harness-recall` | Recall confirmed guidelines and relevant documents and handoffs. |
+| `harness-remember` | Preserve durable project guidance and sourced Markdown knowledge. |
 | `harness-task` | Reserve shared resources and leave current handoffs. |
 | `harness-maintain` | Review and remove explicitly authorized obsolete material. |
 

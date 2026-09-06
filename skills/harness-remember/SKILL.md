@@ -1,6 +1,6 @@
 ---
 name: harness-remember
-description: Write or consolidate useful project knowledge as Markdown with clear sources, scope and uncertainty. Use after a meaningful finding or when correcting an existing note.
+description: Preserve confirmed durable project guidance and useful knowledge as Markdown. Use when the user establishes a lasting preference or procedure, after a meaningful finding, or when correcting a note.
 ---
 
 # Harness Remember
@@ -8,6 +8,18 @@ description: Write or consolidate useful project knowledge as Markdown with clea
 Search the existing knowledge before writing another note. Use an established document when the information belongs there. Keep technical documentation that accompanies the project in the repository; Harness can retain useful additional context or a short pointer to that canonical source.
 
 Write a concise Markdown document with a descriptive filename, title and introduction. Make its scope, evidence and epistemic status clear in ordinary prose. Distinguish a fact, decision, hypothesis or dated reference without a required metadata schema. Preserve meaningful dates and sources; remove duplicate or superseded wording through judgment. Additional search terms are useful only when they help the reader find the document.
+
+## Durable project guidance
+
+When the user clearly establishes a lasting project preference, restriction or way of working, consolidate it into `guidelines.md` in the resolved knowledge directory as part of the current work. No separate request to remember is needed. A one-time task instruction, approval of an outcome or an unaccepted proposal does not establish a lasting rule. If scope or permanence is materially unclear, clarify before promoting it; otherwise leave it out of guidelines.
+
+Keep each entry actionable and concise: the current guidance, when it applies, and a brief source identifying the user's confirmation. Preserve distinctions such as a preference versus a strict restriction. Do not copy the conversation. For example, an explicit project-wide choice to use an existing release process can become a guideline; approving today's release does not make future releases authorized.
+
+Use this file for user-confirmed project guidance. Shared contributor instructions belong in the repository's `AGENTS.md` or existing canonical documentation; link to that source instead of duplicating it. Put detailed rationale in a relevant knowledge document when useful. Global preferences belong in the host's global instructions only when the user establishes that scope; do not broaden project guidance automatically.
+
+Replace superseded wording rather than accumulating a history. Create the file only when there is confirmed guidance to retain. Neither a stored guideline nor its source reference grants permissions beyond the current authorized work. Briefly report a meaningful addition or correction so the user can inspect it.
+
+## Write current knowledge
 
 Resolve storage with this skill's `scripts/harness.py resolve --project /path/to/project`. Before editing, read the selected note and its hash together:
 
