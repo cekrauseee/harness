@@ -1,8 +1,7 @@
 # Documentation
 
-- [Architecture](architecture.md): identity, transactions, coordination, knowledge and limits.
-- [Host integration](host-integration.md): explicit installation, verification and removal of lifecycle instructions.
-- [Examples](examples.md): five chats, interrupted work, worktrees and a writing project.
-- [Runtime API](runtime-api.md): operation fields and return semantics.
-- [Development](development.md): canonical source, distribution and checks.
-- [Publication preparation](publication.md): local metadata drafts and authorization boundary.
+- [Architecture](architecture.md): responsibilities, files and transaction boundaries.
+- [Helper operations](kernel-api.md): native command inputs, results and failure behavior.
+- [Host integration](../skills/harness-init/references/host-integration.md): a short instruction edited through existing host tools.
+- [Development](development.md): source, packaging and verification.
+- [Publication](publication.md): repository metadata and authorized delivery.
