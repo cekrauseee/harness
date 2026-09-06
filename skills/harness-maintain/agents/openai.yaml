@@ -1,4 +1,4 @@
 interface:
   display_name: "Harness Maintain"
-  short_description: "Consolidate knowledge and diagnose project state"
-  default_prompt: "Use $harness-maintain to consolidate knowledge and diagnose project state."
+  short_description: "Consolidate knowledge and retire obsolete records"
+  default_prompt: "Use $harness-maintain to consolidate useful knowledge and clean obsolete records within this work's scope."
