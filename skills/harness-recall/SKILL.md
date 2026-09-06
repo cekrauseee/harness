@@ -15,6 +15,8 @@ Use the host's file search and reading tools to inspect Markdown filenames, titl
 
 For shared work, run `status --project /path/to/project` to inspect all current reservations and handoffs. This is a read, not a reservation. Work from another workspace is context; inspect actual files before treating it as available here. Do not substitute document search for checking ownership.
 
+An inactive contribution may represent pending work or interrupted delivery cleanup. Read its handoff and check actual results before deciding which. When resuming authorized work, carry forward genuine pending context and retire its superseded records during delivery. Recall alone and read-only requests do not authorize cleanup; old timestamps do not authorize releasing another writer.
+
 Other knowledge supplies context. Preserve the distinction between sourced facts, decisions, hypotheses and dated references when using a note. Expand only when a missing constraint or piece of evidence could change the work.
 
 Before editing a selected knowledge file, use `read --project /path/to/project --file note.md` to obtain its content and hash together. That hash protects the later write; a separate file read and hash command can observe different versions.

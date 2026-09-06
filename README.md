@@ -14,7 +14,7 @@ npx skills add cekrauseee/harness --skill '*' -g -a codex -a claude-code -y
 
 Use `npx skills add . --list` to inspect a local checkout. Add `--copy` when independent copies are needed. Every skill contains the same helper generated from `src/harness.py`; installing one skill does not require the repository or other skills. The helper uses Python 3.10+ standard library on macOS or Linux. Workflows is a [separate instruction-only package](https://github.com/cekrauseee/workflows).
 
-Install or update the short [host instruction](skills/harness-init/references/host-integration.md) through the host's normal file tools. It provides the triggers for recalling guidelines and context, retaining confirmed guidance, reserving shared files and leaving a handoff. It can also route relevant tasks to an installed Workflows package. No hooks or configuration installer are included.
+Install or update the short [host instruction](skills/harness-init/references/host-integration.md) through the host's normal file tools. It provides the triggers for recall, confirmed guidance, shared ownership and delivery cleanup. It can also route relevant tasks to an installed Workflows package. No hooks or configuration installer are included.
 
 ## Start working
 
@@ -25,13 +25,21 @@ python3 scripts/harness.py init --project /path/to/project
 python3 scripts/harness.py claim --project /path/to/project --purpose 'Revise introduction' --resource introduction.md
 ```
 
-Keep the returned contribution ID and version. After the authorized work, write the outcome, evidence and next action as Markdown, then publish it and release the reservation together:
+Keep the returned contribution ID and version. Before the final response, consolidate useful knowledge, then publish the current outcome and release the reservation together:
 
 ```bash
 python3 scripts/harness.py handoff --project /path/to/project --owner <id> --expect <version> --input /path/to/handoff.md --release
 ```
 
 Use `--input -` for stdin. Without `--release`, the writer retains its resources. A handoff replaces the current account; it does not append previous versions or imply user acceptance/publication. `status` shows current contributions and reservations.
+
+If the work is complete and no continuation needs that handoff, remove it using the version returned by the release:
+
+```bash
+python3 scripts/harness.py drop --project /path/to/project --owner <id> --expect <released-version>
+```
+
+Retire superseded records for the same work and verify the resulting state before delivery. The user never needs to announce session closure. Genuine pending work keeps one current handoff; unrelated records and other writers' reservations remain intact. [Harness Task](skills/harness-task/SKILL.md#before-every-delivery) defines the complete delivery procedure. This is agent behavior; an interrupted execution must reconcile unfinished cleanup on resumption.
 
 ## Storage and skills
 
@@ -50,8 +58,8 @@ Git worktrees share project identity through their common Git directory and pres
 | `harness-init` | Locate, establish or explicitly rebind project storage. |
 | `harness-recall` | Recall confirmed guidelines and relevant documents and handoffs. |
 | `harness-remember` | Preserve durable project guidance and sourced Markdown knowledge. |
-| `harness-task` | Reserve shared resources and leave current handoffs. |
-| `harness-maintain` | Review and remove explicitly authorized obsolete material. |
+| `harness-task` | Coordinate shared work and complete delivery cleanup. |
+| `harness-maintain` | Consolidate knowledge and retire obsolete records within scope. |
 
 Reservations coordinate participating agents; they cannot stop external editors. Silence never releases ownership. Knowledge-file hashes prevent overwriting an unobserved change. Sources, uncertainty and semantic decisions remain the agent's responsibility. Do not store secrets, transcripts or private reasoning.
 

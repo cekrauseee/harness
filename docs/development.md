@@ -12,6 +12,8 @@ The local suite in `tests/test_kernel.py` checks the helper's mechanical guarant
 
 It covers project identity, resource contention, current handoff persistence, observed-content writes, failures before and after replacement, and filesystem boundaries. These tests do not evaluate what an agent should remember or how it interprets a skill. Instruction changes need review of scope, clarity and realistic usage; automated checks cannot establish that semantic behavior.
 
+For changes to delivery behavior, exercise a small set of real agent tasks in disposable projects: completed work, a genuine blocker and a read-only request. Include unrelated ownership and a superseded handoff where relevant. Inspect the resulting files, retained knowledge and contribution records, not just the agent's final message. These runs provide evidence for the evaluated scenarios; do not turn them into assertions about exact skill wording or a guarantee for every model and interruption.
+
 Keep validation proportional to the change. Run the local suite for helper or test changes and check generated copies when the helper changes. For skill edits, use the host's skill validators and review the actual instructions; for manifest edits, use its plugin validator. Before publication, validate all skills and the manifest, run `python3 scripts/build_dist.py --check`, and inspect discovery with `npx skills add . --list`.
 
 Verify actual skills CLI distribution separately when installation or packaging changes, or before publishing a changed distribution:

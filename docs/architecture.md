@@ -6,9 +6,9 @@ Knowledge lives in ordinary Markdown files. Agents decide what matters, search w
 
 The optional `knowledge/guidelines.md` is an agent convention for confirmed durable project guidance. [Harness Remember](../skills/harness-remember/SKILL.md#durable-project-guidance) defines its curation boundaries; Harness Recall reads it on substantive entry or resumption. It uses the same observed-content writes as any other knowledge document. The helper neither recognizes guidance nor decides its authority.
 
-One current contribution represents a writer's purpose, workspace, reserved resources and latest handoff. The agent writes the handoff as Markdown. There are no separate sessions, checkpoint histories, acceptance graphs, execution journals or retry archives. Once useful information is consolidated, an explicitly authorized inactive contribution can be removed.
+One current contribution represents a writer's purpose, workspace, reserved resources and latest handoff. The agent writes the handoff as Markdown. There are no separate sessions, checkpoint histories, acceptance graphs, execution journals or retry archives. Before final delivery, the agent consolidates useful knowledge, releases its reservations and removes completed or superseded records for that work. A genuine continuation keeps one current handoff. Unrelated records and other writers' ownership are preserved. The [delivery procedure](../skills/harness-task/SKILL.md#before-every-delivery) makes this part of completing authorized work rather than a separate user cleanup request.
 
-The host owns execution tools, permissions and agent creation. A short host instruction supplies the lifecycle triggers; editing that instruction is ordinary authorized file work. No hooks, installer or background maintenance subsystem is required.
+The host owns execution tools, permissions and agent creation. A short host instruction supplies the lifecycle triggers; editing that instruction is ordinary authorized file work. No hooks, installer or background maintenance subsystem is required. Closing a chat runs no cleanup process: the agent verifies consolidation before replying. If execution is interrupted, remaining state must be reconciled on resumption. Separate atomic helper operations do not make that whole semantic sequence atomic or guarantee agent compliance.
 
 ## Mechanical guarantees
 
