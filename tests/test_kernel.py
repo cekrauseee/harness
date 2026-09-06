@@ -37,6 +37,7 @@ class KernelTest(unittest.TestCase):
     def initialize(self):
         self.identity = self.call("init")
         self.snapshot = Path(self.identity["project_dir"]) / "project.json"
+        self.knowledge = Path(self.identity["knowledge_dir"])
         return self.identity
 
     def claim(self, resource="src", **data):
@@ -54,7 +55,9 @@ class KernelTest(unittest.TestCase):
         return caught.exception
 
     def git(self, directory, *arguments):
-        completed = subprocess.run(["git", "-C", str(directory), *arguments], capture_output=True, text=True)
+        env = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
+        completed = subprocess.run(["git", "-C", str(directory), *arguments],
+                                   capture_output=True, text=True, timeout=20, env=env)
         self.assertEqual(completed.returncode, 0, completed.stderr)
         return completed.stdout.strip()
 
@@ -66,13 +69,19 @@ class KernelTest(unittest.TestCase):
     def concurrent_cli(self, commands):
         barrier = threading.Barrier(len(commands))
         def run(arguments):
-            barrier.wait()
-            result = subprocess.run([sys.executable, str(HELPER), "--home", str(self.home), *arguments],
-                                    text=True, capture_output=True, timeout=20)
-            self.assertIn(result.returncode, (0, 1), result.stderr)
-            return json.loads(result.stdout)
+            barrier.wait(timeout=20)
+            return self.cli(*arguments)
         with ThreadPoolExecutor(max_workers=len(commands)) as pool:
             return list(pool.map(run, commands))
+
+    def cli(self, *arguments, content=None):
+        result = subprocess.run([sys.executable, str(HELPER), "--home", str(self.home), *arguments],
+                                input=content, text=True, capture_output=True, timeout=20)
+        self.assertIn(result.returncode, (0, 1), result.stderr)
+        output = json.loads(result.stdout)
+        self.assertEqual(result.returncode, int("error" in output), output)
+        self.assertEqual(result.stderr, "")
+        return output
 
     def test_unknown_reads_do_not_initialize(self):
         for operation in ("resolve", "status", "read"):
@@ -176,6 +185,11 @@ class KernelTest(unittest.TestCase):
         self.assertEqual(self.call("bind", project=str(moved), project_id=first["project_id"], replace=old), rebound)
         self.assertEqual(self.call("resolve", project=str(moved)), rebound)
         self.assertFalse(Path(old).exists())
+        self.project.mkdir()
+        recreated = self.call("bind", project=str(self.project), project_id=first["project_id"])
+        self.assertNotEqual(recreated["workspace"]["workspace_id"], rebound["workspace"]["workspace_id"])
+        self.assertEqual(self.call("resolve"), recreated)
+        self.assertEqual(self.call("resolve", project=str(moved)), rebound)
 
     def test_reference_only_project_read_and_status(self):
         project_id = str(uuid.uuid4())
@@ -190,45 +204,26 @@ class KernelTest(unittest.TestCase):
         self.error("invalid_input", "claim", project_id=project_id, purpose="Read", resource=["notes.md"])
         self.assertFalse((self.home / "projects" / project_id / ".runtime.lock").exists())
 
-    def test_reusing_a_moved_root_path_gets_a_distinct_workspace(self):
-        first = self.initialize()
-        moved = self.project.with_name("moved")
-        self.project.rename(moved)
-        rebound = self.call("bind", project=str(moved), project_id=first["project_id"], replace=str(self.project))
-        self.project.mkdir()
-        recreated = self.call("bind", project=str(self.project), project_id=first["project_id"])
-        self.assertNotEqual(recreated["workspace"]["workspace_id"], rebound["workspace"]["workspace_id"])
-        self.assertEqual(self.call("resolve"), recreated)
-        self.assertEqual(self.call("resolve", project=str(moved)), rebound)
-
-    def test_corrupt_and_incomplete_state_are_not_empty_projects(self):
-        self.initialize()
-        self.snapshot.write_text("{")
-        self.error("invalid_state", "status")
-        self.error("invalid_state", "init")
-        self.snapshot.unlink()
-        self.error("project_unknown", "init")
-
-    def test_previous_format_is_rejected(self):
-        self.initialize()
-        state = json.loads(self.snapshot.read_text())
-        state["format"] = 0
-        self.snapshot.write_text(json.dumps(state))
-        self.error("invalid_state", "resolve")
-
-    def test_duplicate_json_keys_and_nonstandard_constants_are_rejected(self):
+    def test_invalid_state_is_rejected_without_resetting_ownership(self):
         self.initialize()
         self.claim()
         original = self.snapshot.read_text()
-        damaged = [original.rstrip()[:-1] + ', "contributions": {}}',
-                   original.replace('"active": true', '"active": true, "active": false')]
-        damaged.extend(original.rstrip()[:-1] + ', "extra": ' + constant + '}'
-                       for constant in ("NaN", "Infinity", "-Infinity"))
-        for content in damaged:
-            with self.subTest(content=content):
+        damaged = {
+            "truncated": "{",
+            "unsupported format": original.replace('"format": 1', '"format": 0'),
+            "duplicate collection": original.rstrip()[:-1] + ', "contributions": {}}',
+            "duplicate ownership flag": original.replace('"active": true', '"active": true, "active": false'),
+        }
+        for constant in ("NaN", "Infinity", "-Infinity"):
+            damaged[constant] = original.rstrip()[:-1] + ', "extra": ' + constant + '}'
+        for case, content in damaged.items():
+            with self.subTest(case=case):
                 self.snapshot.write_text(content)
                 self.error("invalid_state", "status")
-                self.error("invalid_state", "claim", purpose="Other", resource=["docs"])
+                self.error("invalid_state", "init")
+                self.assertEqual(self.snapshot.read_text(), content)
+        self.snapshot.unlink()
+        self.error("project_unknown", "init")
 
     def test_simultaneous_overlapping_claims_have_one_owner(self):
         self.initialize()
@@ -308,69 +303,58 @@ class KernelTest(unittest.TestCase):
         self.claim("file.md")
         self.error("resource_conflict", "claim", purpose="Other writer", resource=["hardlink.md"])
 
-    def test_existing_case_aliases_respect_filesystem_identity(self):
+    def test_case_aliases_respect_file_and_directory_identity(self):
         self.initialize()
-        source = self.project / "File.md"
-        source.write_text("Original")
-        alias = self.project / "file.md"
-        self.claim("File.md")
-        if alias.exists() and source.samefile(alias):
-            self.error("resource_conflict", "claim", purpose="Other writer", resource=["file.md"])
-        else:
-            alias.write_text("Separate file on a case-sensitive filesystem")
-            self.claim("file.md")
-            self.assertEqual(len(self.call("status")["contributions"]), 2)
+        (self.project / "File.md").touch()
+        (self.project / "MixedCase").mkdir()
+        for existing, reserved, requested in (
+            ("File.md", "File.md", "file.md"),
+            ("MixedCase", "MixedCase/future", "mixedcase/future/file.py"),
+        ):
+            with self.subTest(existing=existing):
+                source, alias = self.project / existing, self.project / existing.lower()
+                owner = self.claim(reserved)
+                if alias.exists() and source.samefile(alias):
+                    self.error("resource_conflict", "claim", purpose="Other writer", resource=[requested])
+                else:
+                    alias.mkdir() if source.is_dir() else alias.touch()
+                    other = self.claim(requested)
+                    records = self.call("status")["contributions"]
+                    self.assertIn(owner["id"], records)
+                    self.assertIn(other["id"], records)
 
-    def test_existing_directory_aliases_cover_future_descendants(self):
-        self.initialize()
-        directory = self.project / "MixedCase"
-        directory.mkdir()
-        alias = self.project / "mixedcase"
-        self.claim("MixedCase/future")
-        if alias.exists() and directory.samefile(alias):
-            self.error("resource_conflict", "claim", purpose="Other writer",
-                       resource=["mixedcase/future/file.py"])
-        else:
-            alias.mkdir()
-            self.claim("mixedcase/future/file.py")
-            self.assertEqual(len(self.call("status")["contributions"]), 2)
-
-    def test_handoff_release_is_one_atomic_cas_update(self):
+    def test_handoff_retains_ownership_until_delivery_and_rejects_stale_changes(self):
         self.initialize()
         owner = self.claim()
+        first = self.input_file("Current progress")
+        current = self.call("handoff", owner=owner["id"], expect=1, input=first)["contribution"]
+        self.assertTrue(current["active"])
+        self.assertEqual(len(self.call("status")["reservations"]), 1)
         content = "# Done\nEvidence and next action.\n"
         input_path = self.input_file(content)
-        released = self.call("handoff", owner=owner["id"], expect=1, input=input_path, release=True)
+        self.error("version_conflict", "handoff", owner=owner["id"], expect=1, input=input_path, release=True)
+        self.error("version_conflict", "release", owner=owner["id"], expect=1, reason="Stale")
+        self.assertEqual(self.call("status")["contributions"][owner["id"]], current)
+        released = self.call("handoff", owner=owner["id"], expect=2, input=input_path, release=True)
         record = released["contribution"]
-        self.assertEqual(record["version"], 2)
+        self.assertEqual(record["version"], 3)
         self.assertFalse(record["active"])
         self.assertEqual(record["handoff"], content)
         self.assertEqual(self.call("status")["reservations"], [])
-        self.assertFalse(self.call("handoff", owner=owner["id"], expect=1, input=input_path, release=True)["changed"])
-        self.error("owner_closed", "handoff", owner=owner["id"], expect=2, input=input_path)
-        self.error("owner_closed", "claim", owner=owner["id"], expect=2, resource=["src"])
+        self.assertFalse(self.call("handoff", owner=owner["id"], expect=2, input=input_path, release=True)["changed"])
+        self.error("owner_closed", "handoff", owner=owner["id"], expect=3, input=input_path)
+        self.error("owner_closed", "claim", owner=owner["id"], expect=3, resource=["src"])
         names = {p.name for p in Path(self.identity["project_dir"]).iterdir()}
         self.assertEqual(names, {"project.json", "knowledge"})
-
-    def test_continuing_handoff_keeps_claim_and_rejects_stale_updates(self):
-        self.initialize()
-        owner = self.claim()
-        first = self.input_file("First", "first.md")
-        second = self.input_file("Second", "second.md")
-        record = self.call("handoff", owner=owner["id"], expect=1, input=first)["contribution"]
-        self.assertTrue(record["active"])
-        self.assertEqual(len(self.call("status")["reservations"]), 1)
-        self.error("version_conflict", "handoff", owner=owner["id"], expect=1, input=second, release=True)
-        self.error("version_conflict", "release", owner=owner["id"], expect=1, reason="Stale")
-        self.assertEqual(self.call("status")["contributions"][owner["id"]], record)
 
     def test_blank_handoffs_cannot_erase_context_or_release_ownership(self):
         self.initialize()
         owner = self.claim()
+        self.call("handoff", owner=owner["id"], expect=1, input=self.input_file("Keep this handoff"))
         before = self.snapshot.read_bytes()
-        for content in ("", " \n\t"):
-            for release in (False, True):
-                self.error("invalid_input", "handoff", owner=owner["id"], expect=1,
+        for content, release in (("", False), (" \n\t", True)):
+            with self.subTest(content=content, release=release):
+                self.error("invalid_input", "handoff", owner=owner["id"], expect=2,
                            input=self.input_file(content), release=release)
                 self.assertEqual(self.snapshot.read_bytes(), before)
 
@@ -386,20 +370,10 @@ class KernelTest(unittest.TestCase):
             self.assertEqual(record["handoff"], record["id"])
             self.assertEqual(record["version"], 2)
 
-    def test_failed_snapshot_replace_keeps_claim_and_handoff_unchanged(self):
+    def test_ownership_requires_explicit_release_before_removal(self):
         self.initialize()
         owner = self.claim()
-        before = self.snapshot.read_bytes()
-        input_path = self.input_file("Finished")
-        with mock.patch.object(harness.os, "replace", side_effect=OSError("injected failure")):
-            self.error("write_failed", "handoff", owner=owner["id"], expect=1, input=input_path, release=True)
-        self.assertEqual(self.snapshot.read_bytes(), before)
-        self.assertEqual(len(self.call("status")["reservations"]), 1)
-        self.assertFalse(list(self.snapshot.parent.glob(".harness-*")))
-
-    def test_no_automatic_stale_release_and_explicit_reason_persists(self):
-        self.initialize()
-        owner = self.claim()
+        self.error("active_contribution", "drop", owner=owner["id"], expect=1)
         state = json.loads(self.snapshot.read_text())
         state["contributions"][owner["id"]]["updated_at"] = "2000-01-01T00:00:00+00:00"
         self.snapshot.write_text(json.dumps(state))
@@ -410,12 +384,6 @@ class KernelTest(unittest.TestCase):
         retry = self.call("release", owner=owner["id"], expect=1, reason="Retry")
         self.assertFalse(retry["changed"])
         self.assertEqual(retry["contribution"], released["contribution"])
-
-    def test_drop_requires_inactive_owner_and_is_idempotent(self):
-        self.initialize()
-        owner = self.claim()
-        self.error("active_contribution", "drop", owner=owner["id"], expect=1)
-        self.call("release", owner=owner["id"], expect=1, reason="Consolidated")
         self.error("version_conflict", "drop", owner=owner["id"], expect=1)
         self.assertTrue(self.call("drop", owner=owner["id"], expect=2)["changed"])
         self.assertFalse(self.call("drop", owner=owner["id"], expect=2)["changed"])
@@ -435,7 +403,7 @@ class KernelTest(unittest.TestCase):
     def test_knowledge_hash_and_content_are_from_one_read(self):
         self.initialize()
         text = "# Note\r\nCafé\r\n"
-        target = Path(self.identity["knowledge_dir"]) / "note.md"
+        target = self.knowledge / "note.md"
         target.write_bytes(text.encode("utf-8"))
         original = Path.read_bytes
         def replace_after_read(path):
@@ -465,16 +433,33 @@ class KernelTest(unittest.TestCase):
         self.assertFalse(self.call("delete", file="nested/note.md", expect=updated["sha256"])["changed"])
         self.assertTrue(self.call("read", file="nested/note.md")["missing"])
 
-    def test_knowledge_write_failure_preserves_old_bytes(self):
+    def test_failed_replacements_preserve_documents_and_ownership(self):
+        self.initialize()
+        owner = self.claim()
+        first = self.call("write", file="note.md", input=self.input_file("Original"), expect="missing")
+        before = self.snapshot.read_bytes()
+        changes = {
+            "handoff": dict(owner=owner["id"], expect=1, release=True),
+            "write": dict(file="note.md", expect=first["sha256"]),
+        }
+        for operation, data in changes.items():
+            with self.subTest(operation=operation), mock.patch.object(harness.os, "replace", side_effect=OSError("injected")):
+                self.error("write_failed", operation, input=self.input_file("New"), **data)
+            self.assertEqual(self.snapshot.read_bytes(), before)
+            self.assertEqual(self.call("read", file="note.md")["content"], "Original")
+            self.assertFalse(list(self.home.rglob(".harness-*")))
+
+    def test_post_replace_failure_reports_uncertain_durability(self):
         self.initialize()
         first = self.call("write", file="note.md", input=self.input_file("Original"), expect="missing")
-        with mock.patch.object(harness.os, "replace", side_effect=OSError("injected")):
-            self.error("write_failed", "write", file="note.md", input=self.input_file("New"), expect=first["sha256"])
-        self.assertEqual(self.call("read", file="note.md")["content"], "Original")
+        with mock.patch.object(harness, "sync_directory", side_effect=OSError("injected")):
+            self.error("write_uncertain", "write", file="note.md", input=self.input_file("New"), expect=first["sha256"])
+        self.assertEqual(self.call("read", file="note.md")["content"], "New")
+        self.assertFalse(self.call("write", file="note.md", input=self.input_file("New"), expect=first["sha256"])["changed"])
 
     def test_knowledge_escape_and_symlinks_are_rejected(self):
         self.initialize()
-        directory = Path(self.identity["knowledge_dir"])
+        directory = self.knowledge
         target = self.base / "outside.md"
         target.write_text("Keep")
         (directory / "link.md").symlink_to(target)
@@ -486,14 +471,12 @@ class KernelTest(unittest.TestCase):
                 self.error("unsafe_path", operation, file=name, input=self.input_file("Bad"), expect="0" * 64)
         self.assertEqual(target.read_text(), "Keep")
         self.assertEqual((directory / "inside.md").read_text(), "Inside")
-
-    def test_knowledge_directory_link_is_rejected(self):
-        self.initialize()
-        directory = Path(self.identity["knowledge_dir"])
-        directory.rmdir()
+        directory.rename(self.base / "original-knowledge")
         directory.symlink_to(self.base, target_is_directory=True)
-        self.error("unsafe_path", "read", file="note.md")
-        self.error("unsafe_path", "write", file="note.md", input=self.input_file("Bad"), expect="missing")
+        for operation in ("read", "write", "delete"):
+            with self.subTest(operation=operation, path="knowledge directory link"):
+                self.error("unsafe_path", operation, file="outside.md", input=self.input_file("Bad"), expect="missing")
+        self.assertEqual(target.read_text(), "Keep")
 
     def test_simultaneous_document_writes_use_cas(self):
         self.initialize()
@@ -502,19 +485,16 @@ class KernelTest(unittest.TestCase):
         results = self.concurrent_cli(commands)
         self.assertEqual(sum("error" not in r for r in results), 1)
         self.assertEqual([r["error"]["code"] for r in results if "error" in r], ["document_conflict"])
+        winner = next(r for r in results if "error" not in r)
+        self.assertEqual(self.call("read", file="note.md")["content"], winner["content"])
 
     def test_cli_stdin_and_error_shape(self):
         self.initialize()
-        completed = subprocess.run([sys.executable, str(HELPER), "--home", str(self.home), "write", "--project",
-                                    str(self.project), "--file", "stdin.md", "--expect", "missing", "--input", "-"],
-                                   input="# From stdin\n", capture_output=True, text=True)
-        self.assertEqual(completed.returncode, 0, completed.stderr)
-        self.assertEqual(json.loads(completed.stdout)["content"], "# From stdin\n")
-        completed = subprocess.run([sys.executable, str(HELPER), "--home", str(self.home), "read", "--project",
-                                    str(self.project), "--file", "../bad.md"], capture_output=True, text=True)
-        self.assertEqual(completed.returncode, 1)
-        self.assertEqual(json.loads(completed.stdout)["error"]["code"], "unsafe_path")
-        self.assertEqual(completed.stderr, "")
+        written = self.cli("write", "--project", str(self.project), "--file", "stdin.md",
+                           "--expect", "missing", "--input", "-", content="# From stdin\n")
+        self.assertEqual(written["content"], "# From stdin\n")
+        failure = self.cli("read", "--project", str(self.project), "--file", "../bad.md")
+        self.assertEqual(failure["error"]["code"], "unsafe_path")
 
 
 if __name__ == "__main__":

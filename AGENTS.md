@@ -24,7 +24,5 @@ Harness is a file-native project continuity and coordination layer for agents. I
 
 ## Verification
 
-- Run `python3 -m unittest discover -s tests -v`.
-- Validate every skill with the bundled skill validator.
-- Validate `.codex-plugin/plugin.json` with the plugin validator.
-- Run `npx skills add . --list` before publication.
+- Follow [development verification](docs/development.md), keeping checks proportional to the changed surface.
+- Keep tests in `tests/` and outside installed skills. Test mechanical guarantees and packaging; do not encode semantic judgments or exact skill wording as assertions.
