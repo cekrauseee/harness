@@ -16,7 +16,8 @@ Harness is a file-native project continuity and coordination layer for agents. I
 - Keep every published skill self-contained under `skills/<skill-name>/`.
 - Use Python standard library only for bundled scripts.
 - Make filesystem mutations atomic and idempotent.
-- Bump `DEFAULTS_VERSION` when managed Harness defaults change.
+- Keep the stored format explicit and current-only; do not add compatibility layers.
+- Edit `src/harness.py`; copies in skill script directories are generated.
 - Do not add default lifecycle hooks or automatic prompt-context injection.
 - Never store secrets, raw chat transcripts, or chain-of-thought in Harness state.
 - Never add Harness state to a target repository.

@@ -1,39 +1,25 @@
 # Architecture
 
-## One project, several workspaces
+## Agent responsibilities
 
-A project is a stable UUID and its knowledge and tasks. A workspace identifies a concrete directory. A task describes an outcome; a session identifies a participant and does not require a host conversation ID. These records live in one project snapshot under `projects/<uuid>/state.json` inside `${HARNESS_HOME:-~/.harness}`. No marker, database or operational state is added to the project.
+Knowledge lives in ordinary Markdown files. Agents decide what matters, search with existing file tools, read selected documents and consolidate their contents. Sources, scope, dates and uncertainty are prose, not a runtime schema. There is no lexical-ranking engine, classifier, context-budget system, duplicate detector or knowledge index to maintain.
 
-Registered ancestor paths support non-Git projects and subdirectories. Git common-directory identity links worktrees, while each tree keeps its workspace and checkpoints. Remote URL equality is never identity evidence. Explicit bindings and moves preserve identity where filesystem paths change; conflicting evidence requires reconciliation. Host project IDs are optional. Machine-local paths are not a cross-machine synchronization protocol.
+One current contribution represents a writer's purpose, workspace, reserved resources and latest handoff. The agent writes the handoff as Markdown. There are no separate sessions, checkpoint histories, acceptance graphs, execution journals or retry archives. Once useful information is consolidated, an explicitly authorized inactive contribution can be removed.
 
-## Persistence and concurrency
+The host owns execution tools, permissions and agent creation. A short host instruction supplies the lifecycle triggers; editing that instruction is ordinary authorized file work. No hooks, installer or background maintenance subsystem is required.
 
-The snapshot is canonical: project bindings, workspaces, tasks, participants, claims, knowledge, checkpoints, revision, event journal and idempotency receipts are saved together. There is no second authoritative catalog. Query cards and reports are derived views. A failed or unsupported snapshot produces an error, never a fresh empty project.
+## Mechanical guarantees
 
-Mutations take a short operating-system advisory lock on the Harness home, then read, validate and atomically replace a snapshot with filesystem synchronization. The operating system releases the lock when a process dies. The lock protects Harness files; cooperative claims protect project work. A timestamp is never grounds for breaking either protection. Serialization across the local home simplifies cross-project identity checks at the cost of brief contention among unrelated projects.
+The single helper in `src/harness.py` uses a shared operating-system lock and atomic replacement. A resource reservation checks the requested paths and records ownership in one transaction. A final handoff and its ownership release are written in the same project snapshot, preventing an unexplained gap between the two.
 
-A `request_id` identifies a semantic mutation. An exact retry returns its prior receipt instead of repeating the action; changed input under the same key fails. Memory receipts retain only record identity and revision, so retry metadata cannot preserve superseded knowledge content. Hydration reads the current canonical record. The receipt and data commit together. Expected revisions detect stale updates. The journal records state operations and checkpoint references, not tool transcripts; revision cursors prevent skipped update pages. A returned success means the operation completed its persistence path. Inspect failed or uncertain responses before changing a retry key.
+Each contribution has a version for compare-and-swap updates. Knowledge reads return observed Markdown bytes and their hash together. Writes/deletions check that hash under the lock. An identical intended write can be retried without retaining old responses; different stale writes fail and require reconciliation. The helper does not judge the text or establish completion. The agent must assess the result against the actual objective and evidence.
 
-This is deliberately a small file system, not a database service. Reading and rewriting a snapshot costs time proportional to its task journal. Checkpoints, task events and retry receipts support coordination and exact retries for new work. A knowledge update replaces that record's canonical content instead of retaining hidden copies of earlier payloads. The implementation targets local macOS/Linux filesystems with advisory locking and atomic replacement. Network filesystem locking semantics and automatic machine synchronization are not supported guarantees.
+Identity and coordination share a small `project.json`; knowledge files are independent. This avoids a second index or a multi-file delivery transaction. Git worktrees share identity through their physical common directory; regular folders use registered roots. Unknown identity changes require explicit binding. Reference-only projects can have no working roots.
 
-## Responsibility and delivery
+Reservations are cooperative and never expire based on age. The helper requires local POSIX locking and atomic filesystem replacement. It cannot guarantee the behavior of a writer that ignores the protocol or edits stored metadata directly.
 
-A task start/join acquires its resources in the same transaction as registration. Claims use canonical paths and include directory descendants. `.` claims a workspace. Overlaps are checked independently of recall ranking or output budgets. Distinct worktrees share context but do not claim each other's independent files; paths resolving to the same physical resource still overlap.
+## Why scripts remain
 
-Checkpoints explain results, evidence and next actions with session and workspace provenance. Active and blocked sessions retain claims. Delivery releases only that participant's claims; another participant may still be writing. Inactivity changes presence to uncertainty, not task completion or safe ownership release. Interrupted work remains discoverable through its last persisted checkpoint.
+The runtime helper prevents races and partial persistence that agent instructions alone do not prevent. It contains only those mechanical operations. The source-copy script exists because selective skills installation must work without the repository. The installation verification script exercises that actual distribution boundary in disposable homes. Neither development script is part of the agent's normal workflow.
 
-A consolidation report alone is a read. Acquire an exclusive `.` claim before a stable consolidation, then inspect the real files and checks. Claims cannot stop an editor or a nonparticipating agent. Even a stable cooperative report is not proof that a commit includes every contribution; the Git diff and actual artifact state remain evidence.
-
-Acceptance, commit, publication and follow-up resolution are explicit events backed by evidence. A resolution names the checkpoint follow-ups or released predecessors being reconciled; those operational records remain available for coordination. Delivery does not invent those events.
-
-## Knowledge and context
-
-Knowledge records carry title, summary, content, sources, scope, aliases, kind, status and dates. Facts, hypotheses, established decisions and historical context remain distinct. Stored text never becomes host instructions automatically. Knowledge may point to canonical project documentation without copying it.
-
-Recall ranks compact cards lexically, with aliases including a limited Portuguese/English vocabulary and record-specific translations. This is an aid, not semantic equivalence across languages. A relevant unanswered query warrants targeted reformulation or translation. Hydration returns selected content under a character budget. Responses distinguish no match, omitted/truncated content, stale state and errors. Coordination uses direct workspace/resource inspection and never relies on knowledge search.
-
-## Integration and maintenance
-
-The host loads a short explicitly installed instruction block. It routes substantive entry/resume, shared writes, significant outcomes and consolidation to the runtime. All skills have the same standalone runtime, so selective installation does not create hidden skill dependencies. The host controls tools, models and permissions; Harness launches no agents.
-
-There are no default hooks, prompt injections, model calls or background maintenance. Diagnostic maintenance runs only when requested and reports duplicates, stale information and integrity problems without mutating state. Agents consolidate knowledge through explicit record updates after checking sources. Removing operational history is an administrative filesystem change that requires specific authorization and stopped participating writers; it is not a runtime operation. Outside invocations, nothing runs.
+Each installed Harness skill gets a generated copy of the one helper. There is no shared package installation, paid API, daemon, model coupling or old-format compatibility layer.

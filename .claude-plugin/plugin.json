@@ -1,7 +1,7 @@
 {
   "name": "harness",
-  "version": "0.7.0",
-  "description": "Shared project continuity, knowledge and cooperative task coordination in local files.",
+  "version": "0.8.0",
+  "description": "Agent-led project knowledge with atomic resource reservations and current handoffs.",
   "author": {
     "name": "Henrique Krause"
   },
