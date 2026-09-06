@@ -1,4 +1,4 @@
 interface:
   display_name: "Harness Task"
-  short_description: "Coordinate shared scope and record outcomes"
-  default_prompt: "Use $harness-task to coordinate shared scope and record outcomes."
+  short_description: "Coordinate work and complete delivery cleanup"
+  default_prompt: "Use $harness-task to coordinate this work, consolidate useful knowledge and leave only necessary current handoffs."

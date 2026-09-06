@@ -8,16 +8,24 @@ python3 scripts/build_dist.py --check
 python3 -m unittest discover -s tests -v
 ```
 
-The unit suite checks identity, contention, current handoff persistence, observed-content writes and path boundaries in disposable directories. It must not touch actual user state. `HARNESS_TEST_HELPER=/absolute/copied/scripts/harness.py` runs the same suite against an independently copied helper.
+The local suite in `tests/test_kernel.py` checks the helper's mechanical guarantees in disposable directories. Related input variants use named subtests; independent concurrency and filesystem risks remain separate. It must not touch actual user state. `HARNESS_TEST_HELPER=/absolute/copied/scripts/harness.py` runs the same suite against an independently copied helper.
 
-Verify the actual skills CLI distribution separately:
+It covers project identity, resource contention, current handoff persistence, observed-content writes, failures before and after replacement, and filesystem boundaries. These tests do not evaluate what an agent should remember or how it interprets a skill. Instruction changes need review of scope, clarity and realistic usage; automated checks cannot establish that semantic behavior.
+
+For changes to delivery behavior, exercise a small set of real agent tasks in disposable projects: completed work, a genuine blocker and a read-only request. Include unrelated ownership and a superseded handoff where relevant. Inspect the resulting files, retained knowledge and contribution records, not just the agent's final message. These runs provide evidence for the evaluated scenarios; do not turn them into assertions about exact skill wording or a guarantee for every model and interruption.
+
+Keep validation proportional to the change. Run the local suite for helper or test changes and check generated copies when the helper changes. For skill edits, use the host's skill validators and review the actual instructions; for manifest edits, use its plugin validator. Before publication, validate all skills and the manifest, run `python3 scripts/build_dist.py --check`, and inspect discovery with `npx skills add . --list`.
+
+Verify actual skills CLI distribution separately when installation or packaging changes, or before publishing a changed distribution:
 
 ```bash
-python3 scripts/verify_install.py --workflows ../workflows
+python3 tests/verify_install.py
+# Include the independent sibling package when that distribution is in scope:
+python3 tests/verify_install.py --workflows ../workflows
 ```
 
-That script isolates child-process homes, checks copy/symlink installations and updates, removes the source package, and exercises installed capabilities. Workflows requires no runtime execution. The sibling checkout is only a development verification input, never an installed dependency.
+This opt-in check uses an isolated home for each published skill and installation mode. It selects one skill from the whole package, removes the source, checks the exact installed inventory and payload for Codex and Claude Code, and initializes a temporary project with each installed Harness helper. It verifies packaging without repeating the helper's ownership and document tests or testing the skills CLI's update/removal lifecycle. Workflows requires no runtime execution. The sibling checkout is only a development verification input, never an installed dependency.
 
-Validate every skill and plugin manifest with the host's available validators, and run `npx skills add . --list` before publication. These tools belong to the host rather than either plugin. No development server or browser is needed for the filesystem guarantees.
+The integration check is outside `unittest` discovery: ordinary local tests require neither Node nor network access. Installation uses Node and a pinned skills CLI; `--cli /path/to/bin/cli.mjs` selects an existing CLI. Tests stay in this repository and are not bundled into installed skills. No development server or browser is needed.
 
 There is no migration service or automatic archive. Deliberate changes to user knowledge or stored format are agent-led maintenance under explicit scope. Keep private state outside repositories and do not add implementation solely to preserve old contracts.
