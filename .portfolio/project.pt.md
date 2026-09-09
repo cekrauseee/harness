@@ -1,30 +1,46 @@
 ---
-description: "Continuidade baseada em arquivos para agentes que trabalham entre sessões e espaços de trabalho."
-metaDescription: "Harness oferece identidade compartilhada de projeto, recuperação seletiva, contexto de tarefas, conhecimento com fontes e manutenção segura em arquivos locais."
-summary: "Harness mantém o contexto útil de um projeto disponível entre sessões de agentes, sem colocar estado operacional no projeto nem carregar históricos completos de conversas."
+description: >-
+  um jeito de manter o contexto de um projeto entre conversas com agentes.
+metaDescription: >-
+  o harness guarda o conhecimento de um projeto em arquivos markdown locais
+  e ajuda agentes a retomar o trabalho, dividir tarefas e registrar o que ficou pendente.
+summary: >-
+  fiz o harness para que agentes possam retomar um projeto sem perder o
+  contexto entre conversas e pastas de trabalho. as skills orientam a leitura
+  e a atualização das notas, a divisão dos arquivos e o registro do que ficou
+  pendente. um pequeno programa em python confere reservas e mudanças nos documentos.
 highlights:
-  - "Identidade de projeto"
-  - "Recuperação seletiva"
-  - "Contexto compartilhado de tarefas"
-  - "Conhecimento com fontes"
-  - "Manutenção segura"
-  - "Git opcional"
+  - conhecimento do projeto em markdown
+  - contexto compartilhado entre conversas e worktrees
+  - reserva de arquivos para organizar o trabalho
+  - notas e registros de trabalho atualizados
 ---
 
-## Produto
+o harness dá aos agentes um lugar para guardar o que importa sobre um projeto:
+decisões, descobertas úteis e trabalho que ainda precisa de atenção.
 
-O trabalho com agentes costuma atravessar várias sessões, participantes e pastas. Harness oferece um registro canônico por projeto para identidade, conhecimento, responsabilidades, contribuições e checkpoints, armazenado fora do próprio projeto.
+fiz isso com arquivos markdown comuns, guardados fora do projeto. ao começar
+uma tarefa, o agente lê as notas relevantes e pode atualizá-las conforme o
+trabalho avança. funciona com repositórios, worktrees e pastas sem git.
 
-Projetos Git, pastas sem Git e worktrees são compatíveis. As worktrees compartilham o contexto do projeto, mas mantêm a procedência de cada espaço de trabalho, para que um agente encontre resultados anteriores sem presumir que outro checkout contenha os mesmos arquivos.
+## retomar de onde parou
 
-## O que construí
+as skills orientam os agentes a buscar contexto, registrar o que aprenderam
+e manter as notas úteis. as fontes e as dúvidas ficam junto da informação,
+para que o próximo agente consiga distinguir uma decisão confirmada de uma
+ideia que ainda está sendo explorada.
 
-Projetei cinco skills agênticas para identidade de projetos, contexto seletivo, responsabilidade compartilhada, escrita de conhecimento e manutenção. Os agentes usam Markdown comum e as ferramentas já disponíveis; cada skill instalável de forma independente inclui o mesmo pequeno auxiliar transacional.
+quando algo fica pela metade, o agente deixa um resumo para quem continuar.
+quando termina, incorpora o que vale guardar às notas e remove os registros
+de coordenação que já não servem.
 
-O modelo de tarefas registra responsabilidades e checkpoints dos agentes participantes. As reivindicações de escopo ajudam a detectar trabalhos sobrepostos, enquanto aceitação, commits e publicação continuam sendo decisões separadas, sustentadas por evidências próprias.
+## trabalhar nos mesmos arquivos
 
-## Decisões de engenharia
+fiz um pequeno programa em python para cuidar das operações nos arquivos.
+antes de editar, os agentes podem reservar o que vão usar e conferir se
+outro agente está trabalhando ali. o programa também verifica se uma nota
+mudou desde a leitura, antes de permitir que ela seja substituída.
 
-Os agentes pesquisam e leem os documentos Markdown relevantes e decidem o que manter ou reescrever. Fontes, escopo, incertezas e datas importantes ficam em texto legível, sem motor de ranking, classificador ou esquema obrigatório de metadados para o conhecimento.
-
-O auxiliar cuida da identidade do projeto, reservas atômicas, publicação do handoff atual e gravações conferidas contra o conteúdo observado. Seu sucesso confirma essas operações; investigar, julgar e verificar o resultado continua sendo trabalho do agente. Uma instrução curta no host conecta o fluxo sem hooks, daemon ou dependência de API externa.
+essas reservas ajudam a organizar os agentes que seguem o processo. não
+bloqueiam outros editores nem garantem que o trabalho esteja certo.
+ler, pensar e conferir o resultado continua sendo responsabilidade do agente.
