@@ -14,7 +14,7 @@ import unittest
 from unittest import mock
 import uuid
 
-HELPER = Path(os.environ.get("HARNESS_TEST_HELPER", Path(__file__).resolve().parents[1] / "src" / "harness.py"))
+HELPER = Path(__file__).resolve().parents[1] / "src" / "harness.py"
 SPEC = importlib.util.spec_from_file_location("kernel_under_test", HELPER)
 harness = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(harness)
@@ -329,7 +329,7 @@ class KernelTest(unittest.TestCase):
         first = self.input_file("Current progress")
         current = self.call("handoff", owner=owner["id"], expect=1, input=first)["contribution"]
         self.assertTrue(current["active"])
-        self.assertEqual(len(self.call("status")["reservations"]), 1)
+        self.assertTrue(self.call("status")["contributions"][owner["id"]]["active"])
         content = "# Done\nEvidence and next action.\n"
         input_path = self.input_file(content)
         self.error("version_conflict", "handoff", owner=owner["id"], expect=1, input=input_path, release=True)
@@ -339,8 +339,9 @@ class KernelTest(unittest.TestCase):
         record = released["contribution"]
         self.assertEqual(record["version"], 3)
         self.assertFalse(record["active"])
-        self.assertEqual(record["handoff"], content)
-        self.assertEqual(self.call("status")["reservations"], [])
+        self.assertEqual(self.call("status", owner=owner["id"])["contribution"]["handoff"], content)
+        self.assertNotIn("handoff", record)
+        self.assertFalse(self.call("status")["contributions"][owner["id"]]["active"])
         self.assertFalse(self.call("handoff", owner=owner["id"], expect=2, input=input_path, release=True)["changed"])
         self.error("owner_closed", "handoff", owner=owner["id"], expect=3, input=input_path)
         self.error("owner_closed", "claim", owner=owner["id"], expect=3, resource=["src"])
@@ -366,21 +367,23 @@ class KernelTest(unittest.TestCase):
                     for owner in (first, second)]
         results = self.concurrent_cli(commands)
         self.assertTrue(all("contribution" in r for r in results), results)
-        for record in self.call("status")["contributions"].values():
-            self.assertEqual(record["handoff"], record["id"])
+        for owner in (first, second):
+            record = self.call("status", owner=owner["id"])["contribution"]
+            self.assertEqual(record["handoff"], owner["id"])
             self.assertEqual(record["version"], 2)
 
-    def test_ownership_requires_explicit_release_before_removal(self):
+    def test_drop_requires_explicit_release_before_removal(self):
         self.initialize()
         owner = self.claim()
         self.error("active_contribution", "drop", owner=owner["id"], expect=1)
         state = json.loads(self.snapshot.read_text())
         state["contributions"][owner["id"]]["updated_at"] = "2000-01-01T00:00:00+00:00"
         self.snapshot.write_text(json.dumps(state))
-        self.assertEqual(len(self.call("status")["reservations"]), 1)
+        self.assertTrue(self.call("status")["contributions"][owner["id"]]["active"])
         self.error("resource_conflict", "claim", purpose="New writer", resource=["src"])
         released = self.call("release", owner=owner["id"], expect=1, reason="Verified the writer stopped")
-        self.assertEqual(released["contribution"]["release_reason"], "Verified the writer stopped")
+        self.assertEqual(self.call("status", owner=owner["id"])["contribution"]["release_reason"],
+                         "Verified the writer stopped")
         retry = self.call("release", owner=owner["id"], expect=1, reason="Retry")
         self.assertFalse(retry["changed"])
         self.assertEqual(retry["contribution"], released["contribution"])
@@ -425,6 +428,7 @@ class KernelTest(unittest.TestCase):
         second = self.input_file("Revised", "second.md")
         written = self.call("write", file="nested/note.md", input=first, expect="missing")
         self.assertTrue(written["changed"])
+        self.assertNotIn("content", written)
         self.assertFalse(self.call("write", file="nested/note.md", input=first, expect="missing")["changed"])
         self.error("document_conflict", "write", file="nested/note.md", input=second, expect="missing")
         updated = self.call("write", file="nested/note.md", input=second, expect=written["sha256"])
@@ -441,6 +445,7 @@ class KernelTest(unittest.TestCase):
         changes = {
             "handoff": dict(owner=owner["id"], expect=1, release=True),
             "write": dict(file="note.md", expect=first["sha256"]),
+            "finish": dict(owner=owner["id"], expect=1),
         }
         for operation, data in changes.items():
             with self.subTest(operation=operation), mock.patch.object(harness.os, "replace", side_effect=OSError("injected")):
@@ -486,13 +491,62 @@ class KernelTest(unittest.TestCase):
         self.assertEqual(sum("error" not in r for r in results), 1)
         self.assertEqual([r["error"]["code"] for r in results if "error" in r], ["document_conflict"])
         winner = next(r for r in results if "error" not in r)
-        self.assertEqual(self.call("read", file="note.md")["content"], winner["content"])
+        persisted = self.call("read", file="note.md")
+        self.assertEqual(persisted["sha256"], winner["sha256"])
+        self.assertIn(persisted["content"], ("First", "Second"))
+
+    def test_status_reads_only_selected_handoff_without_writing(self):
+        self.initialize()
+        first, second = self.claim("src"), self.claim("docs")
+        for owner, text in ((first, "Relevant progress"), (second, "Unrelated progress")):
+            result = self.call("handoff", owner=owner["id"], expect=1, input=self.input_file(text))
+            self.assertNotIn("handoff", result["contribution"])
+        before = self.snapshot.read_bytes()
+        summaries = self.call("status")["contributions"]
+        self.assertEqual(set(summaries), {first["id"], second["id"]})
+        self.assertTrue(all("handoff" not in record for record in summaries.values()))
+        selected = self.cli("status", "--project", str(self.project), "--owner", first["id"])
+        self.assertEqual(selected["contribution"]["handoff"], "Relevant progress")
+        self.assertNotIn("Unrelated progress", json.dumps(selected))
+        self.error("owner_unknown", "status", owner=str(uuid.uuid4()))
+        for invalid in ("", "not-an-id"):
+            with self.subTest(owner=invalid):
+                self.error("invalid_id", "status", owner=invalid)
+        self.assertEqual(self.snapshot.read_bytes(), before)
+
+    def test_finish_removes_only_observed_contribution_and_allows_retry(self):
+        self.initialize()
+        first, other = self.claim("src"), self.claim("docs")
+        updated = self.call("claim", owner=first["id"], expect=1, resource=["assets"])["contribution"]
+        before = self.snapshot.read_bytes()
+        self.error("version_conflict", "finish", owner=first["id"], expect=1)
+        self.assertEqual(self.snapshot.read_bytes(), before)
+        finished = self.cli("finish", "--project", str(self.project), "--owner", first["id"],
+                            "--expect", str(updated["version"]))
+        self.assertTrue(finished["changed"])
+        self.assertEqual(self.call("status")["contributions"], {other["id"]: other})
+        self.assertFalse(self.call("finish", owner=first["id"], expect=updated["version"])["changed"])
+        replacement = self.claim("src")
+        self.assertNotEqual(replacement["id"], first["id"])
+        released = self.call("release", owner=replacement["id"], expect=1, reason="Stopped")["contribution"]
+        self.assertTrue(self.call("finish", owner=replacement["id"], expect=released["version"])["changed"])
+        self.assertEqual(self.call("status")["contributions"], {other["id"]: other})
+
+    def test_uncertain_finish_can_be_reconciled_without_an_intermediate_record(self):
+        self.initialize()
+        owner = self.claim()
+        with mock.patch.object(harness, "sync_directory", side_effect=OSError("injected")):
+            self.error("write_uncertain", "finish", owner=owner["id"], expect=1)
+        self.assertEqual(self.call("status")["contributions"], {})
+        self.assertFalse(self.call("finish", owner=owner["id"], expect=1)["changed"])
 
     def test_cli_stdin_and_error_shape(self):
         self.initialize()
         written = self.cli("write", "--project", str(self.project), "--file", "stdin.md",
                            "--expect", "missing", "--input", "-", content="# From stdin\n")
-        self.assertEqual(written["content"], "# From stdin\n")
+        self.assertNotIn("content", written)
+        self.assertEqual(self.cli("read", "--project", str(self.project), "--file", "stdin.md")["content"],
+                         "# From stdin\n")
         failure = self.cli("read", "--project", str(self.project), "--file", "../bad.md")
         self.assertEqual(failure["error"]["code"], "unsafe_path")
 

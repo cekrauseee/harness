@@ -15,7 +15,7 @@ import tempfile
 import time
 import uuid
 
-VERSION = "0.8.0"
+VERSION = "0.9.0"
 FORMAT = 1
 LOCK_TIMEOUT = 10.0
 
@@ -427,6 +427,10 @@ def input_bytes(data):
     return content
 
 
+def contribution_summary(record):
+    return {key: value for key, value in record.items() if key not in {"handoff", "release_reason"}}
+
+
 def ownership(operation, home, state, current, data):
     records = state["contributions"]
     owner = data.get("owner")
@@ -449,7 +453,7 @@ def ownership(operation, home, state, current, data):
         if any(any(char in p for char in "*?[") for p in resources):
             fail("invalid_input", "Resources are literal paths; glob syntax is not supported.")
         if record and set(resources).issubset(record["resources"]):
-            return {**result(home, state, current), "contribution": record, "changed": False}
+            return {**result(home, state, current), "contribution": contribution_summary(record), "changed": False}
         if record:
             check_version(record, expected)
         elif not isinstance(data.get("purpose"), str) or not data["purpose"].strip():
@@ -482,11 +486,11 @@ def ownership(operation, home, state, current, data):
             fail("invalid_input", "Provide the contribution owner UUID.")
         expected = expected_version(data)
         if record is None:
-            if operation == "drop":
+            if operation in {"drop", "finish"}:
                 return {**result(home, state, current), "owner": owner, "changed": False}
             fail("owner_unknown", "Contribution owner does not exist.")
-        if operation == "drop":
-            if record["active"]:
+        if operation in {"drop", "finish"}:
+            if operation == "drop" and record["active"]:
                 fail("active_contribution", "Active ownership cannot be dropped; release it first.")
             check_version(record, expected)
             del records[owner]
@@ -498,7 +502,7 @@ def ownership(operation, home, state, current, data):
                 fail("invalid_input", "Provide a nonempty Markdown handoff.")
             active = not bool(data.get("release"))
             if record["handoff"] == content and record["active"] == active:
-                return {**result(home, state, current), "contribution": record, "changed": False}
+                return {**result(home, state, current), "contribution": contribution_summary(record), "changed": False}
             if not record["active"]:
                 fail("owner_closed", "Closed ownership cannot be changed or reopened.")
             check_version(record, expected)
@@ -508,13 +512,13 @@ def ownership(operation, home, state, current, data):
             if not isinstance(reason, str) or not reason.strip():
                 fail("invalid_input", "Provide a nonempty release reason.")
             if not record["active"]:
-                return {**result(home, state, current), "contribution": record, "changed": False}
+                return {**result(home, state, current), "contribution": contribution_summary(record), "changed": False}
             check_version(record, expected)
             record.update(active=False, release_reason=reason)
     record["version"] += 1
     record["updated_at"] = now()
     save(home, state)
-    return {**result(home, state, current), "contribution": record, "changed": True}
+    return {**result(home, state, current), "contribution": contribution_summary(record), "changed": True}
 
 
 def knowledge_path(home, state, name):
@@ -559,16 +563,16 @@ def document(operation, home, state, current, data):
         content = input_bytes(data)
         digest = hashlib.sha256(content).hexdigest()
         if digest == observed["sha256"]:
-            return {**base, **observed, "changed": False}
+            return {**base, "missing": False, "sha256": digest, "changed": False}
         if expected != observed["sha256"]:
             fail("document_conflict", "Knowledge changed; read it before retrying.", observed=observed, file=data["file"])
         make_directory(path.parent)
         atomic_write(path, content)
-        return {**base, "missing": False, "sha256": digest, "content": content.decode("utf-8"), "changed": True}
+        return {**base, "missing": False, "sha256": digest, "changed": True}
     if expected == "missing":
         fail("invalid_input", "Delete requires the observed SHA-256.")
     if observed["missing"]:
-        return {**base, **observed, "changed": False}
+        return {**base, "missing": True, "sha256": "missing", "changed": False}
     if expected != observed["sha256"]:
         fail("document_conflict", "Knowledge changed; read it before deleting.", observed=observed, file=data["file"])
     path.unlink()
@@ -576,7 +580,7 @@ def document(operation, home, state, current, data):
         sync_directory(path.parent)
     except OSError as exc:
         fail("write_uncertain", "File was removed but durability is uncertain; inspect it.", reason=str(exc))
-    return {**base, "missing": True, "sha256": "missing", "content": None, "changed": True}
+    return {**base, "missing": True, "sha256": "missing", "changed": True}
 
 
 def dispatch(operation, data, home):
@@ -586,12 +590,14 @@ def dispatch(operation, data, home):
     if operation == "resolve":
         return result(home, state, current)
     if operation == "status":
-        reservations = [{"owner": record["id"], "purpose": record["purpose"],
-                         "workspace": record["workspace"], "workspace_id": record["workspace_id"],
-                         "version": record["version"], "resource": resource}
-                        for record in state["contributions"].values() if record["active"]
-                        for resource in record["resources"]]
-        return {**result(home, state, current), "contributions": state["contributions"], "reservations": reservations}
+        if data.get("owner") is not None:
+            owner = canonical_id(data["owner"])
+            record = state["contributions"].get(owner)
+            if record is None:
+                fail("owner_unknown", "Contribution owner does not exist.")
+            return {**result(home, state, current), "contribution": record}
+        return {**result(home, state, current), "contributions": {
+            owner: contribution_summary(record) for owner, record in state["contributions"].items()}}
     if operation in {"read", "write", "delete"}:
         return document(operation, home, state, current, data)
     return ownership(operation, home, state, current, data)
@@ -599,7 +605,7 @@ def dispatch(operation, data, home):
 
 def execute(operation, data, home=None):
     """Execute one operation; return JSON-compatible data or raise Error."""
-    if operation not in {"init", "bind", "resolve", "status", "claim", "handoff", "release", "drop", "read", "write", "delete"}:
+    if operation not in {"init", "bind", "resolve", "status", "claim", "handoff", "release", "finish", "drop", "read", "write", "delete"}:
         fail("invalid_operation", "Unknown operation.", operation=operation)
     if not isinstance(data, dict):
         fail("invalid_input", "Operation arguments must be a dictionary.")
@@ -623,7 +629,7 @@ def main(argv=None):
     parser.add_argument("--version", action="version", version=VERSION)
     parser.add_argument("--home", help="External storage directory (default: HARNESS_HOME or ~/.harness)")
     commands = parser.add_subparsers(dest="operation", required=True)
-    for operation in ("resolve", "init", "bind", "status", "claim", "handoff", "release", "drop", "read", "write", "delete"):
+    for operation in ("resolve", "init", "bind", "status", "claim", "handoff", "release", "finish", "drop", "read", "write", "delete"):
         command = commands.add_parser(operation)
         if operation in {"init", "bind", "claim"}:
             command.add_argument("--project", required=True)
@@ -641,7 +647,9 @@ def main(argv=None):
             command.add_argument("--resource", action="append", required=True)
             command.add_argument("--owner")
             command.add_argument("--expect", type=int)
-        if operation in {"handoff", "release", "drop"}:
+        if operation == "status":
+            command.add_argument("--owner", help="Read one complete contribution, including its handoff")
+        if operation in {"handoff", "release", "finish", "drop"}:
             command.add_argument("--owner", required=True)
             command.add_argument("--expect", required=True, type=int)
         if operation == "handoff":

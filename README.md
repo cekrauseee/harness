@@ -1,66 +1,32 @@
 # Harness
 
-The agent owns investigation, judgment, writing and verification. A helper succeeding proves only its mechanical operation, not that the task is correct or complete.
+Harness keeps project knowledge and needed continuations in external local files. Agents retrieve information when the task needs it, curate useful knowledge and coordinate shared writes. A single Python helper provides atomic identity, ownership and protected Markdown updates.
 
-Harness gives agents shared project knowledge and current handoffs without depending on a conversation or model. Knowledge is ordinary Markdown. Agents search, interpret and maintain it using their existing tools.
+| Skill | Use |
+| --- | --- |
+| [harness-init](skills/harness-init/SKILL.md) | Set up storage, bind a project or update host integration |
+| [harness-recall](skills/harness-recall/SKILL.md) | Retrieve missing prior knowledge or a specific continuation |
+| [harness-remember](skills/harness-remember/SKILL.md) | Retain durable guidance or correct reusable knowledge |
+| [harness-task](skills/harness-task/SKILL.md) | Reserve shared writes and manage needed contributions |
 
-One small Python helper handles the operations that need a shared transaction: external project identity, overlapping resource reservations, current handoff publication, and document writes checked against the content the agent read. Harness does not classify knowledge, generate prose, run agents or maintain execution histories.
-
-## Install
+## Install and use
 
 ```bash
 npx skills add cekrauseee/harness --skill '*' -g -a codex -a claude-code -y
 ```
 
-Use `npx skills add . --list` to inspect a local checkout. Add `--copy` when independent copies are needed. Every skill contains the same helper generated from `src/harness.py`; installing one skill does not require the repository or other skills. The helper uses Python 3.10+ standard library on macOS or Linux. Workflows is a [separate instruction-only package](https://github.com/cekrauseee/workflows).
+Choose the skills and hosts you need. Every skill includes its own generated helper and works when installed alone. Python 3.10+ and Git are required; locking uses POSIX facilities on macOS and Linux. Select one installation route per host to avoid duplicate discovery. Package updates and host instruction changes require updating the actual installation separately from this source checkout.
 
-Install or update the short [host instruction](skills/harness-init/references/host-integration.md) through the host's normal file tools. It provides the triggers for recall, confirmed guidance, shared ownership and delivery cleanup. It can also route relevant tasks to an installed Workflows package. No hooks or configuration installer are included.
+Use [host integration](skills/harness-init/references/host-integration.md) to configure task-specific triggers. [Workflows](https://github.com/cekrauseee/workflows) is an independent, optional package for engineering procedures. Neither package requires loading the other for every task.
 
-## Start working
+## Design
 
-From an installed skill directory:
+Knowledge is ordinary Markdown under `${HARNESS_HOME:-~/.harness}/projects/<id>/knowledge/`. Agents search it with existing tools. `guidelines.md` can retain contextual user-confirmed guidance; rules needed for every task belong in applicable host or repository instructions.
 
-```bash
-python3 scripts/harness.py init --project /path/to/project
-python3 scripts/harness.py claim --project /path/to/project --purpose 'Revise introduction' --resource introduction.md
-```
+One `project.json` holds identity and current contributions. Git worktrees share identity through the physical common Git directory. A contribution reserves paths and may carry one handoff. Atomic operations protect against races and partial writes; agents decide relevance, authorization and completion.
 
-Keep the returned contribution ID and version. Before the final response, consolidate useful knowledge, then publish the current outcome and release the reservation together:
+Completed contributions can be removed atomically after the result and useful knowledge are settled. A genuine continuation retains a handoff. Reservations are cooperative and do not expire by age. There are no hooks, execution histories, model calls or background cleanup processes. State stays outside target repositories.
 
-```bash
-python3 scripts/harness.py handoff --project /path/to/project --owner <id> --expect <version> --input /path/to/handoff.md --release
-```
+See [helper contracts](docs/kernel-api.md) for operations and [development](docs/development.md) for proportional verification. The Codex and Claude manifests share a package version; instruction-only changes do not require changing the helper version. [Contributor guidance](AGENTS.md) defines repository conventions.
 
-Use `--input -` for stdin. Without `--release`, the writer retains its resources. A handoff replaces the current account; it does not append previous versions or imply user acceptance/publication. `status` shows current contributions and reservations.
-
-If the work is complete and no continuation needs that handoff, remove it using the version returned by the release:
-
-```bash
-python3 scripts/harness.py drop --project /path/to/project --owner <id> --expect <released-version>
-```
-
-Retire superseded records for the same work and verify the resulting state before delivery. The user never needs to announce session closure. Genuine pending work keeps one current handoff; unrelated records and other writers' reservations remain intact. [Harness Task](skills/harness-task/SKILL.md#before-every-delivery) defines the complete delivery procedure. This is agent behavior; an interrupted execution must reconcile unfinished cleanup on resumption.
-
-## Storage and skills
-
-State stays under `${HARNESS_HOME:-~/.harness}/projects/<id>/`:
-
-- `project.json` holds identity, registered roots and current contributions.
-- `knowledge/*.md` holds documents written and curated by agents.
-- `references/` may contain useful source documents or assets.
-
-Within knowledge, `guidelines.md` retains confirmed durable project guidance when there is any to keep. Agents read it when entering or resuming substantive work. [Harness Remember](skills/harness-remember/SKILL.md#durable-project-guidance) defines what belongs there and how to keep its source, scope and current wording clear.
-
-Git worktrees share project identity through their common Git directory and preserve workspace provenance. Ordinary folders use explicit path bindings. Reference-only projects can be selected by project ID. Remote URLs never join identities automatically.
-
-| Skill | Responsibility |
-| --- | --- |
-| `harness-init` | Locate, establish or explicitly rebind project storage. |
-| `harness-recall` | Recall confirmed guidelines and relevant documents and handoffs. |
-| `harness-remember` | Preserve durable project guidance and sourced Markdown knowledge. |
-| `harness-task` | Coordinate shared work and complete delivery cleanup. |
-| `harness-maintain` | Consolidate knowledge and retire obsolete records within scope. |
-
-Reservations coordinate participating agents; they cannot stop external editors. Silence never releases ownership. Knowledge-file hashes prevent overwriting an unobserved change. Sources, uncertainty and semantic decisions remain the agent's responsibility. Do not store secrets, transcripts or private reasoning.
-
-See [architecture](docs/architecture.md), [helper operations](docs/kernel-api.md), and [development](docs/development.md). [MIT](LICENSE), Henrique Krause.
+[MIT license](LICENSE), Henrique Krause.

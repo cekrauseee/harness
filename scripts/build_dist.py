@@ -5,6 +5,8 @@ from pathlib import Path
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / 'src'))
+from harness import atomic_write, make_directory
 
 
 def main():
@@ -16,24 +18,13 @@ def main():
     problems = []
     for folder in folders:
         target = folder / 'harness.py'
-        extras = [p for p in folder.rglob('*') if p.is_file() and p != target and '__pycache__' not in p.parts]
         if args.check:
-            if not target.exists() or target.read_bytes() != source or extras:
+            if not target.exists() or target.read_bytes() != source:
                 problems.append(str(folder.relative_to(ROOT)))
             continue
-        sys.path.insert(0, str(ROOT / 'src'))
-        from harness import atomic_write, make_directory
         make_directory(folder)
-        for extra in extras:
-            extra.unlink()
         if not target.exists() or target.read_bytes() != source:
             atomic_write(target, source)
-        for path in sorted(folder.rglob('*'), key=lambda p: len(p.parts), reverse=True):
-            if path.is_dir():
-                try:
-                    path.rmdir()
-                except OSError:
-                    pass
     if problems:
         print('Generated helper drift: ' + ', '.join(problems))
         return 1

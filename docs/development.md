@@ -1,31 +1,34 @@
 # Development
 
-`src/harness.py` is the one canonical runtime helper. It uses Python 3.10+ standard library and POSIX file locking. Skill script copies are generated; edit the source, then run:
+Edit `src/harness.py`; copies under skills are generated. Search and review the canonical source instead of repeating the same investigation across copies. Keep bundled code in the Python standard library and tests outside skills.
+
+| Changed surface | Verification |
+| --- | --- |
+| Prose or links | Review the affected meaning, scope and references |
+| Skill or manifest metadata | Validate affected files with available host validators and check inventory alignment |
+| Skill behavior | Assess realistic requests for the changed behavior and preserve authorization boundaries |
+| Helper behavior or test logic | Run tests for the affected contract; use the full suite for shared identity, ownership or persistence changes |
+| Helper distribution | Generate copies and check equality |
+| Package layout, discovery or installation | Check the affected installation boundary in disposable destinations |
+
+This table defines the repository-specific check scope. Editorial changes do not require runtime or installation tests. Host validators are optional tools, not repository dependencies. When unavailable, inspect the affected metadata and state the verification limit. Behavioral evaluation must assess actual outcomes, not match wording or impose a test framework for prose. Independent agent evaluations need authorization for delegation and any associated costs.
+
+For changes to shared helper mechanisms:
 
 ```bash
-python3 scripts/build_dist.py
-python3 scripts/build_dist.py --check
-python3 -m unittest discover -s tests -v
+python3 -B -m unittest discover -s tests -v
+python3 -B scripts/build_dist.py
+python3 -B scripts/build_dist.py --check
 ```
 
-The local suite in `tests/test_kernel.py` checks the helper's mechanical guarantees in disposable directories. Related input variants use named subtests; independent concurrency and filesystem risks remain separate. It must not touch actual user state. `HARNESS_TEST_HELPER=/absolute/copied/scripts/harness.py` runs the same suite against an independently copied helper.
+The suite uses disposable projects to check identity, concurrent ownership, safe persistence, scoped retrieval and completion. Generation only updates its helper copies and preserves other skill resources. Byte equality and an installation smoke check cover the copies; helper tests run against the canonical source, not each copy.
 
-It covers project identity, resource contention, current handoff persistence, observed-content writes, failures before and after replacement, and filesystem boundaries. These tests do not evaluate what an agent should remember or how it interprets a skill. Instruction changes need review of scope, clarity and realistic usage; automated checks cannot establish that semantic behavior.
-
-For changes to delivery behavior, exercise a small set of real agent tasks in disposable projects: completed work, a genuine blocker and a read-only request. Include unrelated ownership and a superseded handoff where relevant. Inspect the resulting files, retained knowledge and contribution records, not just the agent's final message. These runs provide evidence for the evaluated scenarios; do not turn them into assertions about exact skill wording or a guarantee for every model and interruption.
-
-Keep validation proportional to the change. Run the local suite for helper or test changes and check generated copies when the helper changes. For skill edits, use the host's skill validators and review the actual instructions; for manifest edits, use its plugin validator. Before publication, validate all skills and the manifest, run `python3 scripts/build_dist.py --check`, and inspect discovery with `npx skills add . --list`.
-
-Verify actual skills CLI distribution separately when installation or packaging changes, or before publishing a changed distribution:
+For distribution changes:
 
 ```bash
-python3 tests/verify_install.py
-# Include the independent sibling package when that distribution is in scope:
-python3 tests/verify_install.py --workflows ../workflows
+python3 -B tests/verify_install.py
 ```
 
-This opt-in check uses an isolated home for each published skill and installation mode. It selects one skill from the whole package, removes the source, checks the exact installed inventory and payload for Codex and Claude Code, and initializes a temporary project with each installed Harness helper. It verifies packaging without repeating the helper's ownership and document tests or testing the skills CLI's update/removal lifecycle. Workflows requires no runtime execution. The sibling checkout is only a development verification input, never an installed dependency.
+This separate check uses a pinned skills CLI and isolated homes to test each skill in copy and symlink modes for Codex and Claude Code. It removes the source, checks the selected inventory and payload, and runs the installed helper once. `--cli /path/to/bin/cli.mjs` uses an existing CLI. Ordinary local tests need neither Node nor network access.
 
-The integration check is outside `unittest` discovery: ordinary local tests require neither Node nor network access. Installation uses Node and a pinned skills CLI; `--cli /path/to/bin/cli.mjs` selects an existing CLI. Tests stay in this repository and are not bundled into installed skills. No development server or browser is needed.
-
-There is no migration service or automatic archive. Deliberate changes to user knowledge or stored format are agent-led maintenance under explicit scope. Keep private state outside repositories and do not add implementation solely to preserve old contracts.
+Before requested publication, validate the complete skill inventory and aligned manifests, inspect the final diff and verify discovery with `npx skills add . --list`. Installation checks are needed when distribution behavior changed. Keep repository URLs and MIT authorship intact. Commit, push, release, publication and user installation changes remain within their respective authorization; do not request it again when already granted.
