@@ -1,14 +1,14 @@
 {
-  "name": "harness",
-  "version": "0.9.0",
-  "description": "Task-scoped project knowledge, safe shared writes and necessary continuations.",
+  "name": "continuity",
+  "version": "0.10.0",
+  "description": "Shared project knowledge and cooperative work across multi-project environments.",
   "author": {
     "name": "Henrique Krause"
   },
   "skills": [
-    "./skills/harness-init",
-    "./skills/harness-recall",
-    "./skills/harness-task",
-    "./skills/harness-remember"
+    "./skills/continuity-init",
+    "./skills/continuity-recall",
+    "./skills/continuity-task",
+    "./skills/continuity-remember"
   ]
 }

@@ -1,7 +1,7 @@
 {
-  "name": "harness",
-  "version": "0.9.0",
-  "description": "Task-scoped project knowledge, safe shared writes and necessary continuations.",
+  "name": "continuity",
+  "version": "0.10.0",
+  "description": "Shared project knowledge and cooperative work across multi-project environments.",
   "author": {
     "name": "Henrique Krause",
     "url": "https://github.com/cekrauseee"
@@ -19,9 +19,9 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Harness",
-    "shortDescription": "Project knowledge and shared writes when needed.",
-    "longDescription": "Four independent skills for project setup, targeted recall, durable knowledge and safe contribution management. Local files and one atomic helper keep continuity proportional to the task.",
+    "displayName": "Continuity",
+    "shortDescription": "Knowledge and shared work across project environments.",
+    "longDescription": "Four independent skills for environment setup, targeted recall, durable knowledge and safe contribution management across project folders and repositories.",
     "developerName": "Henrique Krause",
     "category": "Productivity",
     "capabilities": [
@@ -29,9 +29,9 @@
     ],
     "websiteURL": "https://github.com/cekrauseee/harness",
     "defaultPrompt": [
-      "Find the prior project decision needed for this task.",
-      "Preserve this confirmed project guidance.",
-      "Reserve these files and complete this contribution."
+      "Create a shared environment for these projects.",
+      "Find the prior decision needed for this task.",
+      "Reserve files across these projects and complete the contribution."
     ]
   }
 }

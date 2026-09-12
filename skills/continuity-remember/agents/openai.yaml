@@ -1,0 +1,4 @@
+interface:
+  display_name: "Continuity Remember"
+  short_description: "Preserve durable guidance and useful knowledge"
+  default_prompt: "Use $continuity-remember to preserve this confirmed project guidance."

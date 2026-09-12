@@ -37,7 +37,7 @@ def check_install(skill, copy_mode, command, env):
                         ignore=shutil.ignore_patterns("__pycache__"))
         child = dict(env, HOME=str(home), CODEX_HOME=str(home / ".codex"),
                      CLAUDE_CONFIG_DIR=str(home / ".claude"), XDG_CONFIG_HOME=str(home / ".config"),
-                     HARNESS_HOME=str(root / "state"), PYTHONPATH="", CI="1")
+                     CONTINUITY_HOME=str(root / "state"), PYTHONPATH="", CI="1")
         install = command + ["add", str(source), "--skill", skill.name,
                              "-g", "-a", "codex", "claude-code", "-y"]
         if copy_mode:
@@ -55,12 +55,12 @@ def check_install(skill, copy_mode, command, env):
         if not copy_mode:
             assert claude.resolve() == canonical.resolve(), claude
 
-        helper = canonical / "scripts" / "harness.py"
+        helper = canonical / "scripts" / "continuity.py"
         if helper.is_file():
             # Payload equality covers every helper copy; one operation proves it runs alone.
             identity = json.loads(run([sys.executable, str(helper), "init", "--project", str(project)],
                                       project, child))
-            assert (root / "state" / "projects" / identity["project_id"] / "project.json").is_file()
+            assert (root / "state" / "environments" / identity["environment_id"] / "environment.json").is_file()
         assert not list(project.iterdir()), "Installation or initialization wrote into the project"
 
 

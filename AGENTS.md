@@ -1,8 +1,8 @@
-# Harness contributor guidance
+# Continuity contributor guidance
 
 ## Scope
 
-Harness is a file-native project continuity and coordination layer for agents. It is not an application, daemon, database, deployment tool, or infrastructure manager.
+Continuity is a file-native project continuity and coordination layer for agents. It is not an application, daemon, database, deployment tool, or infrastructure manager.
 
 ## Language
 
@@ -13,15 +13,15 @@ Harness is a file-native project continuity and coordination layer for agents. I
 
 ## Engineering conventions
 
-- Use English Conventional Commits for repository contributions. Execution conventions belong to Workflows, not the Harness runtime.
+- Use English Conventional Commits for repository contributions. Execution conventions belong to Workflows, not the Continuity runtime.
 - Keep every published skill self-contained under `skills/<skill-name>/`.
 - Use Python standard library only for bundled scripts.
 - Make filesystem mutations atomic and idempotent.
 - Keep the stored format explicit and current-only; do not add compatibility layers.
-- Edit `src/harness.py`; copies in skill script directories are generated.
+- Edit `src/continuity.py`; copies in skill script directories are generated.
 - Do not add default lifecycle hooks or automatic prompt-context injection.
-- Never store secrets, raw chat transcripts, or chain-of-thought in Harness state.
-- Never add Harness state to a target repository.
+- Never store secrets, raw chat transcripts, or chain-of-thought in Continuity state.
+- Never add Continuity state to a target repository.
 
 ## Verification
 

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Harness Task"
-  short_description: "Reserve writes and manage needed continuations"
-  default_prompt: "Use $harness-task to reserve these files and complete this contribution."

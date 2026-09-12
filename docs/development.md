@@ -1,6 +1,6 @@
 # Development
 
-Edit `src/harness.py`; copies under skills are generated. Search and review the canonical source instead of repeating the same investigation across copies. Keep bundled code in the Python standard library and tests outside skills.
+Edit `src/continuity.py`; copies under skills are generated. Search and review the canonical source instead of repeating the same investigation across copies. Keep bundled code in the Python standard library and tests outside skills.
 
 | Changed surface | Verification |
 | --- | --- |

@@ -1,8 +1,8 @@
 # Contribution recovery
 
-Use the installed skill's `scripts/harness.py` and the intended project selector. `status` returns contribution summaries; `status --owner <id>` returns one complete handoff. Match predecessor work by purpose, resources and remaining action. Check actual results and preserve unrelated records, including inactive work whose purpose is unclear.
+Use the installed skill's `scripts/continuity.py` and the intended environment or project selector. `status` returns contribution summaries; `status --owner <id>` returns one complete handoff. Match predecessor work by purpose, resources and remaining action. Check actual results and preserve unrelated records, including inactive work whose purpose is unclear.
 
-A released contribution cannot reopen. Claim your own resources to continue writing. After carrying useful context forward or completing the predecessor's remaining work, remove its inactive record with `drop --owner <id> --expect <version>`. An inactive-record cleanup needs no new contribution solely for that removal; its observed version protects it. Scope project-wide consolidation with a reservation for `.` before shared project-file edits.
+A released contribution cannot reopen. Claim your own resources to continue writing. After carrying useful context forward or completing the predecessor's remaining work, remove its inactive record with `drop --owner <id> --expect <version>`. An inactive-record cleanup needs no new contribution solely for that removal; its observed version protects it. For consolidation across projects, reserve each affected project path before shared file edits; `.` covers only the originating workspace.
 
 Use `finish` for your completed contribution after its outcome and any needed knowledge consolidation are settled. Reuse the existing task evidence. On interruption before completion, retain a current handoff. If you must release without writing one, `release --owner <id> --expect <version> --reason "..."` retains the existing handoff and records why ownership stopped.
 

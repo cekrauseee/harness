@@ -1,4 +1,0 @@
-interface:
-  display_name: "Harness Init"
-  short_description: "Set up storage or change project bindings"
-  default_prompt: "Use $harness-init to set up storage for this project."

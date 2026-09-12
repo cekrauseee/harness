@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Harness: external project identity, current ownership, and Markdown CAS."""
+"""Continuity: external environments, shared ownership, and Markdown CAS."""
 from __future__ import annotations
 
 import argparse
@@ -15,7 +15,7 @@ import tempfile
 import time
 import uuid
 
-VERSION = "0.9.0"
+VERSION = "0.10.0"
 FORMAT = 1
 LOCK_TIMEOUT = 10.0
 
@@ -92,7 +92,7 @@ def make_directory(path):
 
 def atomic_write(path, content):
     """A failed replace leaves the old bytes intact; post-replace failures are uncertain."""
-    descriptor, temporary = tempfile.mkstemp(prefix=".harness-", dir=path.parent)
+    descriptor, temporary = tempfile.mkstemp(prefix=".continuity-", dir=path.parent)
     replaced = False
     try:
         with os.fdopen(descriptor, "wb") as stream:
@@ -128,7 +128,7 @@ def locked(home):
                 break
             except BlockingIOError:
                 if time.monotonic() >= deadline:
-                    fail("lock_busy", "Another Harness transaction holds the lock; retry later.",
+                    fail("lock_busy", "Another Continuity transaction holds the lock; retry later.",
                          path=str(home / ".runtime.lock"))
                 time.sleep(0.02)
         try:
@@ -142,24 +142,24 @@ def absolute_string(value):
             and os.path.normpath(value) == value)
 
 
-def validate(state, project_id):
+def validate(state, environment_id):
     """Validate the small stored contract before trusting paths or coordination state."""
     if (not isinstance(state, dict) or type(state.get("format")) is not int
-            or state["format"] != FORMAT or state.get("id") != project_id
+            or state["format"] != FORMAT or state.get("id") != environment_id
             or not isinstance(state.get("name"), str)
             or not isinstance(state.get("roots"), list)
             or not isinstance(state.get("contributions"), dict)):
-        fail("invalid_state", "Project snapshot is not the current format.", project_id=project_id)
+        fail("invalid_state", "Environment snapshot is not the current format.", environment_id=environment_id)
     paths, workspaces = set(), set()
     for root in state["roots"]:
         if (not isinstance(root, dict) or not absolute_string(root.get("path"))
                 or not isinstance(root.get("git_common_dir"), str)
                 or (root["git_common_dir"] and not absolute_string(root["git_common_dir"]))
                 or root["path"] in paths):
-            fail("invalid_state", "Invalid or duplicate project root.", project_id=project_id)
+            fail("invalid_state", "Invalid or duplicate project root.", environment_id=environment_id)
         wid = canonical_id(root.get("workspace_id"))
         if wid in workspaces:
-            fail("invalid_state", "Duplicate workspace identity.", project_id=project_id)
+            fail("invalid_state", "Duplicate workspace identity.", environment_id=environment_id)
         paths.add(root["path"])
         workspaces.add(wid)
     for owner, record in state["contributions"].items():
@@ -176,14 +176,14 @@ def validate(state, project_id):
                 or not record["resources"]
                 or not all(absolute_string(p) for p in record["resources"])
                 or not isinstance(record.get("release_reason", ""), str)):
-            fail("invalid_state", "Invalid contribution record.", project_id=project_id, owner=owner)
+            fail("invalid_state", "Invalid contribution record.", environment_id=environment_id, owner=owner)
     return state
 
 
-def project_directory(home, project_id):
-    folder = home / "projects" / canonical_id(project_id)
-    if folder.is_symlink() or (home / "projects").is_symlink():
-        fail("unsafe_path", "Project storage must not be a symbolic link.", path=str(folder))
+def environment_directory(home, environment_id):
+    folder = home / "environments" / canonical_id(environment_id)
+    if folder.is_symlink() or (home / "environments").is_symlink():
+        fail("unsafe_path", "Environment storage must not be a symbolic link.", path=str(folder))
     return folder
 
 
@@ -191,39 +191,39 @@ def unique_object(pairs):
     result = {}
     for key, value in pairs:
         if key in result:
-            fail("invalid_state", "Project snapshot contains a duplicate JSON key.", key=key)
+            fail("invalid_state", "Environment snapshot contains a duplicate JSON key.", key=key)
         result[key] = value
     return result
 
 
-def load_project(home, project_id):
-    path = project_directory(home, project_id) / "project.json"
+def load_environment(home, environment_id):
+    path = environment_directory(home, environment_id) / "environment.json"
     if path.is_symlink():
-        fail("unsafe_path", "Project snapshot must not be a symbolic link.", path=str(path))
+        fail("unsafe_path", "Environment snapshot must not be a symbolic link.", path=str(path))
     try:
         state = json.loads(path.read_bytes(), object_pairs_hook=unique_object,
                            parse_constant=lambda value: fail(
-                               "invalid_state", "Project snapshot contains an invalid JSON constant.", value=value))
+                               "invalid_state", "Environment snapshot contains an invalid JSON constant.", value=value))
     except FileNotFoundError:
-        fail("project_unknown", "Project snapshot does not exist.", path=str(path))
+        fail("environment_unknown", "Environment snapshot does not exist.", path=str(path))
     except (ValueError, UnicodeError) as exc:
-        fail("invalid_state", "Project snapshot cannot be decoded.", path=str(path), reason=str(exc))
-    return validate(state, project_id)
+        fail("invalid_state", "Environment snapshot cannot be decoded.", path=str(path), reason=str(exc))
+    return validate(state, environment_id)
 
 
 def scan(home):
-    directory = home / "projects"
+    directory = home / "environments"
     if not directory.exists():
         return []
     if directory.is_symlink():
-        fail("unsafe_path", "Project storage must not be a symbolic link.", path=str(directory))
+        fail("unsafe_path", "Environment storage must not be a symbolic link.", path=str(directory))
     result = []
     for folder in sorted(directory.iterdir()):
         if folder.name.startswith("."):
             continue
         if not folder.is_dir():
-            fail("invalid_state", "Unexpected file in the projects directory.", path=str(folder))
-        result.append(load_project(home, canonical_id(folder.name)))
+            fail("invalid_state", "Unexpected file in the environments directory.", path=str(folder))
+        result.append(load_environment(home, canonical_id(folder.name)))
     return result
 
 
@@ -256,32 +256,32 @@ def probe(value, home):
         fail("git_unavailable", "Git common-directory identity is unavailable.")
     common = str((root / common).resolve()) if common else ""
     if overlaps(root, home):
-        fail("unsafe_path", "Harness storage and project roots must be outside one another.",
+        fail("unsafe_path", "Continuity storage and project roots must be outside one another.",
              project=str(root), home=str(home))
     return path, {"path": str(root), "git_common_dir": common}
 
 
-def workspace(project_id, root, roots=()):
+def workspace(environment_id, root, roots=()):
     # A moved workspace keeps its ID; reuse of its old path must get a distinct ID.
     occupied = {r["workspace_id"] for r in roots if r["path"] != root["path"]}
     seed, suffix = root["path"], 0
-    identifier = str(uuid.uuid5(uuid.UUID(project_id), seed))
+    identifier = str(uuid.uuid5(uuid.UUID(environment_id), seed))
     while identifier in occupied:
         suffix += 1
-        identifier = str(uuid.uuid5(uuid.UUID(project_id), seed + "\0" + str(suffix)))
+        identifier = str(uuid.uuid5(uuid.UUID(environment_id), seed + "\0" + str(suffix)))
     return {**root, "workspace_id": identifier}
 
 
-def collision(states, project_id, root, replacing=None):
+def collision(states, environment_id, root, replacing=None):
     for state in states:
         for existing in state["roots"]:
-            if state["id"] == project_id and existing["path"] == replacing:
+            if state["id"] == environment_id and existing["path"] == replacing:
                 continue
-            if state["id"] != project_id and (
+            if state["id"] != environment_id and (
                     overlaps(Path(root["path"]), Path(existing["path"]))
                     or (root["git_common_dir"] and root["git_common_dir"] == existing["git_common_dir"])):
-                fail("root_conflict", "Root overlaps another project's registered identity.",
-                     project_id=state["id"], root=existing)
+                fail("root_conflict", "Root overlaps another environment's registered identity.",
+                     environment_id=state["id"], root=existing)
 
 
 def select_path(states, path, current):
@@ -291,7 +291,7 @@ def select_path(states, path, current):
         state, root = max(candidates, key=lambda pair: len(Path(pair[1]["path"]).parts))
         if root["git_common_dir"] != current["git_common_dir"]:
             fail("topology_changed", "Registered root topology changed; use explicit bind --replace.",
-                 registered=root, current=current, project_id=state["id"])
+                 registered=root, current=current, environment_id=state["id"])
         collision(states, state["id"], current)
         if not current["git_common_dir"] or root["path"] == current["path"]:
             return state, root
@@ -299,42 +299,42 @@ def select_path(states, path, current):
     matches = [state for state in states if current["git_common_dir"] and any(
         root["git_common_dir"] == current["git_common_dir"] for root in state["roots"])]
     if len(matches) > 1:
-        fail("root_conflict", "Git identity belongs to multiple projects.")
+        fail("root_conflict", "Git identity belongs to multiple environments.")
     if matches:
         state = matches[0]
         collision(states, state["id"], current)
         return state, workspace(state["id"], current, state["roots"])
-    fail("project_unknown", "Project is not registered; use init or explicit bind.", path=str(path))
+    fail("environment_unknown", "Project is not bound to an environment; use init or explicit bind.", path=str(path))
 
 
 def select(home, data):
-    if bool(data.get("project")) == bool(data.get("project_id")):
-        fail("invalid_input", "Select exactly one of project or project_id.")
-    if data.get("project_id"):
-        return load_project(home, data["project_id"]), None
+    if bool(data.get("project")) == bool(data.get("environment_id")):
+        fail("invalid_input", "Select exactly one of project or environment_id.")
+    if data.get("environment_id"):
+        return load_environment(home, data["environment_id"]), None
     path, current = probe(data["project"], home)
     return select_path(scan(home), path, current)
 
 
 def result(home, state, current):
-    folder = project_directory(home, state["id"])
-    return {"project_id": state["id"], "project_dir": str(folder),
+    folder = environment_directory(home, state["id"])
+    return {"environment_id": state["id"], "environment_dir": str(folder),
             "knowledge_dir": str(folder / "knowledge"), "workspace": current}
 
 
 def save(home, state, new=False):
     validate(state, state["id"])
     content = (json.dumps(state, ensure_ascii=False, sort_keys=True, indent=2) + "\n").encode()
-    folder = project_directory(home, state["id"])
+    folder = environment_directory(home, state["id"])
     if not new:
-        atomic_write(folder / "project.json", content)
+        atomic_write(folder / "environment.json", content)
         return
     # Publish a complete directory, so concurrent readers never observe a partial project.
     make_directory(folder.parent)
-    temporary = Path(tempfile.mkdtemp(prefix=".project-", dir=folder.parent))
+    temporary = Path(tempfile.mkdtemp(prefix=".environment-", dir=folder.parent))
     try:
         (temporary / "knowledge").mkdir()
-        atomic_write(temporary / "project.json", content)
+        atomic_write(temporary / "environment.json", content)
         os.rename(temporary, folder)
         try:
             sync_directory(folder.parent)
@@ -347,14 +347,23 @@ def save(home, state, new=False):
             temporary.rmdir()
 
 
+def project_paths(value):
+    paths = value if isinstance(value, list) else [value]
+    if not paths:
+        fail("invalid_input", "Provide at least one project directory.")
+    return paths
+
+
 def initialize(home, data, binding=False):
-    path, current = probe(data.get("project"), home)
+    paths = [data.get("project")] if binding else project_paths(data.get("project"))
+    requested = [probe(path, home) for path in paths]
+    path, current = requested[0]
     states = scan(home)
     if binding:
-        project_id = canonical_id(data.get("project_id"))
-        state = next((s for s in states if s["id"] == project_id), None)
+        environment_id = canonical_id(data.get("environment_id"))
+        state = next((s for s in states if s["id"] == environment_id), None)
         if state is None:
-            fail("project_unknown", "Target project is not registered.", project_id=project_id)
+            fail("environment_unknown", "Target environment is not registered.", environment_id=environment_id)
         replacing = str(Path(data["replace"]).expanduser().resolve()) if data.get("replace") else None
         old = next((r for r in state["roots"] if r["path"] == replacing), None)
         exact = next((r for r in state["roots"] if r["path"] == current["path"]), None)
@@ -373,32 +382,47 @@ def initialize(home, data, binding=False):
             if old:
                 fail("root_conflict", "Replacement destination is already registered.")
             return result(home, state, exact)
-        collision(states, project_id, current, replacing)
-        root = workspace(project_id, current, state["roots"])
+        collision(states, environment_id, current, replacing)
+        root = workspace(environment_id, current, state["roots"])
         if old:
             root["workspace_id"] = old["workspace_id"]
             state["roots"].remove(old)
         state["roots"].append(root)
         save(home, state)
         return result(home, state, root)
-    if data.get("project_id"):
-        fail("invalid_input", "Use bind to associate an existing project ID.")
-    try:
-        state, root = select_path(states, path, current)
-    except Error as exc:
-        if exc.code != "project_unknown":
-            raise
-        project_id = str(uuid.uuid4())
-        collision(states, project_id, current)
-        root = workspace(project_id, current)
-        state = {"format": FORMAT, "id": project_id, "name": data.get("name") or path.name,
-                 "roots": [root], "contributions": {}}
-        save(home, state, new=True)
-        return result(home, state, root)
-    if root not in state["roots"]:
-        state["roots"].append(root)
-        save(home, state)
-    return result(home, state, root)
+    if data.get("environment_id"):
+        fail("invalid_input", "Use bind to associate a project with an existing environment ID.")
+    selected, environments = [], {}
+    for path, current in requested:
+        try:
+            state, root = select_path(states, path, current)
+        except Error as exc:
+            if exc.code != "environment_unknown":
+                raise
+            selected.append(current)
+        else:
+            environments[state["id"]] = state
+            selected.append(root)
+    if len(environments) > 1:
+        fail("environment_conflict", "Projects already belong to different environments; no bindings changed.",
+             environment_ids=sorted(environments))
+    new = not environments
+    state = next(iter(environments.values())) if environments else {
+        "format": FORMAT, "id": str(uuid.uuid4()), "name": data.get("name") or requested[0][0].name,
+        "roots": [], "contributions": {}}
+    added, primary = False, None
+    for current in selected:
+        collision(states, state["id"], current)
+        root = next((r for r in state["roots"] if r["path"] == current["path"]), None)
+        if root is None:
+            root = workspace(state["id"], current, state["roots"])
+            state["roots"].append(root)
+            added = True
+        if primary is None:
+            primary = root
+    if added:
+        save(home, state, new=new)
+    return result(home, state, primary)
 
 
 def expected_version(data):
@@ -459,14 +483,14 @@ def ownership(operation, home, state, current, data):
         elif not isinstance(data.get("purpose"), str) or not data["purpose"].strip():
             fail("invalid_input", "A new owner requires a nonempty purpose.")
         conflicts = []
-        for project in scan(home):
-            for other in project["contributions"].values():
-                if not other["active"] or (project["id"] == state["id"] and other["id"] == owner):
+        for environment in scan(home):
+            for other in environment["contributions"].values():
+                if not other["active"] or (environment["id"] == state["id"] and other["id"] == owner):
                     continue
                 for requested in resources:
                     for reserved in other["resources"]:
                         if resource_overlap(Path(requested), Path(reserved).resolve()):
-                            conflicts.append({"project_id": project["id"], "owner": other["id"], "purpose": other["purpose"],
+                            conflicts.append({"environment_id": environment["id"], "owner": other["id"], "purpose": other["purpose"],
                                               "workspace": other["workspace"], "resource": reserved,
                                               "requested": requested})
         if conflicts:
@@ -525,7 +549,7 @@ def knowledge_path(home, state, name):
     if (not isinstance(name, str) or not name or Path(name).is_absolute()
             or ".." in Path(name).parts or Path(name).suffix != ".md"):
         fail("unsafe_path", "Use a relative .md filename inside knowledge, without '..'.")
-    directory = project_directory(home, state["id"]) / "knowledge"
+    directory = environment_directory(home, state["id"]) / "knowledge"
     target = directory / name
     # Reject links even when they presently point inside knowledge: CAS addresses one name.
     for path in [directory, *target.relative_to(directory).parents]:
@@ -588,6 +612,8 @@ def dispatch(operation, data, home):
         return initialize(home, data, operation == "bind")
     state, current = select(home, data)
     if operation == "resolve":
+        if current is None:
+            return {**result(home, state, current), "name": state["name"], "workspaces": state["roots"]}
         return result(home, state, current)
     if operation == "status":
         if data.get("owner") is not None:
@@ -610,37 +636,43 @@ def execute(operation, data, home=None):
     if not isinstance(data, dict):
         fail("invalid_input", "Operation arguments must be a dictionary.")
     try:
-        home = Path(home or os.environ.get("HARNESS_HOME", "~/.harness")).expanduser().resolve()
+        home = Path(home or os.environ.get("CONTINUITY_HOME", "~/.continuity")).expanduser().resolve()
         if operation in {"resolve", "status", "read"}:
             return dispatch(operation, data, home)
         # Reject unsafe project/home relationships before creating even the lock file.
-        if data.get("project"):
+        if operation == "init":
+            for path in project_paths(data.get("project")):
+                probe(path, home)
+        elif data.get("project"):
             probe(data["project"], home)
         with locked(home):
             return dispatch(operation, data, home)
     except Error:
         raise
     except (OSError, ValueError, TypeError) as exc:
-        fail("io_error", "Harness could not complete the operation.", reason=str(exc))
+        fail("io_error", "Continuity could not complete the operation.", reason=str(exc))
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--version", action="version", version=VERSION)
-    parser.add_argument("--home", help="External storage directory (default: HARNESS_HOME or ~/.harness)")
+    parser.add_argument("--home", help="External storage directory (default: CONTINUITY_HOME or ~/.continuity)")
     commands = parser.add_subparsers(dest="operation", required=True)
     for operation in ("resolve", "init", "bind", "status", "claim", "handoff", "release", "finish", "drop", "read", "write", "delete"):
         command = commands.add_parser(operation)
-        if operation in {"init", "bind", "claim"}:
+        if operation == "init":
+            command.add_argument("--project", required=True, action="append",
+                                 help="Project directory; repeat to share one environment")
+        elif operation in {"bind", "claim"}:
             command.add_argument("--project", required=True)
         else:
             selector = command.add_mutually_exclusive_group(required=True)
             selector.add_argument("--project")
-            selector.add_argument("--project-id")
+            selector.add_argument("--environment-id")
         if operation == "init":
             command.add_argument("--name")
         if operation == "bind":
-            command.add_argument("--project-id", required=True)
+            command.add_argument("--environment-id", required=True)
             command.add_argument("--replace")
         if operation == "claim":
             command.add_argument("--purpose")
