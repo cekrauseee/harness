@@ -14,10 +14,10 @@ import unittest
 from unittest import mock
 import uuid
 
-HELPER = Path(__file__).resolve().parents[1] / "src" / "harness.py"
+HELPER = Path(__file__).resolve().parents[1] / "src" / "continuity.py"
 SPEC = importlib.util.spec_from_file_location("kernel_under_test", HELPER)
-harness = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(harness)
+continuity = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(continuity)
 
 
 class KernelTest(unittest.TestCase):
@@ -30,13 +30,13 @@ class KernelTest(unittest.TestCase):
         self.project.mkdir(parents=True)
 
     def call(self, operation, **data):
-        if "project_id" not in data and "project" not in data:
+        if "environment_id" not in data and "project" not in data:
             data["project"] = str(self.project)
-        return harness.execute(operation, data, self.home)
+        return continuity.execute(operation, data, self.home)
 
     def initialize(self):
         self.identity = self.call("init")
-        self.snapshot = Path(self.identity["project_dir"]) / "project.json"
+        self.snapshot = Path(self.identity["environment_dir"]) / "environment.json"
         self.knowledge = Path(self.identity["knowledge_dir"])
         return self.identity
 
@@ -49,7 +49,7 @@ class KernelTest(unittest.TestCase):
         return str(path)
 
     def error(self, code, operation, **data):
-        with self.assertRaises(harness.Error) as caught:
+        with self.assertRaises(continuity.Error) as caught:
             self.call(operation, **data)
         self.assertEqual(caught.exception.code, code, str(caught.exception))
         return caught.exception
@@ -85,7 +85,7 @@ class KernelTest(unittest.TestCase):
 
     def test_unknown_reads_do_not_initialize(self):
         for operation in ("resolve", "status", "read"):
-            self.error("project_unknown", operation, file="fact.md")
+            self.error("environment_unknown", operation, file="fact.md")
         self.assertFalse(self.home.exists())
         self.assertEqual(list(self.project.iterdir()), [])
 
@@ -104,13 +104,74 @@ class KernelTest(unittest.TestCase):
         commands = [["init", "--project", str(self.project)]] * 2
         results = self.concurrent_cli(commands)
         self.assertEqual(results[0], results[1])
-        folders = [p for p in (self.home / "projects").iterdir() if not p.name.startswith(".")]
+        folders = [p for p in (self.home / "environments").iterdir() if not p.name.startswith(".")]
         self.assertEqual(len(folders), 1)
+
+    def test_multi_repository_environment_shares_knowledge_and_ownership(self):
+        self.repository()
+        other = self.base / "other-repository"
+        other.mkdir()
+        self.git(other, "init", "-q")
+        identity = self.cli("init", "--project", str(self.project), "--project", str(other),
+                            "--name", "shared-tools")
+        self.assertEqual(self.call("resolve", project=str(other))["environment_id"], identity["environment_id"])
+        environment = self.call("resolve", environment_id=identity["environment_id"])
+        self.assertEqual(environment["name"], "shared-tools")
+        self.assertEqual({w["path"] for w in environment["workspaces"]}, {str(self.project), str(other)})
+        self.call("write", file="shared.md", input=self.input_file("Shared decision"), expect="missing")
+        self.assertEqual(self.call("read", project=str(other), file="shared.md")["content"], "Shared decision")
+        first = self.claim("src")
+        second = self.claim("docs", project=str(other))
+        self.call("claim", owner=first["id"], expect=1, resource=[str(other / "src")])
+        self.error("resource_conflict", "claim", project=str(other), purpose="Overlapping work",
+                   resource=["src/file.py"])
+        self.assertEqual(set(self.call("status", project=str(other))["contributions"]),
+                         {first["id"], second["id"]})
+        checkout = self.base / "checkout"
+        self.git(self.project, "worktree", "add", "-qb", "shared-worktree", str(checkout))
+        self.assertEqual(self.call("resolve", project=str(checkout))["environment_id"], identity["environment_id"])
+        self.call("init", project=[str(checkout), str(other)])
+        self.assertEqual(len(self.call("resolve", environment_id=identity["environment_id"])["workspaces"]), 3)
+
+    def test_environment_binding_and_group_initialization_preserve_existing_state(self):
+        identity = self.initialize()
+        owner = self.claim()
+        other, notes = self.base / "other", self.base / "notes"
+        other.mkdir()
+        notes.mkdir()
+        self.call("bind", project=str(other), environment_id=identity["environment_id"])
+        grouped = self.call("init", project=[str(self.project), str(other), str(notes)])
+        self.assertEqual(grouped, identity)
+        before = self.snapshot.read_bytes()
+        self.assertEqual(self.call("init", project=[str(self.project), str(other), str(notes), str(notes)]), grouped)
+        self.assertEqual(self.snapshot.read_bytes(), before)
+        self.assertEqual(self.call("resolve", project=str(notes))["environment_id"], identity["environment_id"])
+        self.assertEqual(self.call("status", project=str(notes))["contributions"], {owner["id"]: owner})
+
+    def test_group_initialization_does_not_merge_existing_environments(self):
+        first = self.initialize()
+        self.claim()
+        other, unbound = self.base / "other", self.base / "unbound"
+        other.mkdir()
+        unbound.mkdir()
+        second = self.call("init", project=str(other))
+        snapshots = [Path(identity["environment_dir"]) / "environment.json" for identity in (first, second)]
+        before = [path.read_bytes() for path in snapshots]
+        self.error("environment_conflict", "init", project=[str(self.project), str(unbound), str(other)])
+        self.assertEqual([path.read_bytes() for path in snapshots], before)
+        self.error("environment_unknown", "resolve", project=str(unbound))
+
+    def test_invalid_group_member_does_not_create_partial_environment(self):
+        for projects, code in (([], "invalid_input"),
+                               ([str(self.project), str(self.base / "missing")], "project_missing")):
+            with self.subTest(projects=projects):
+                self.error(code, "init", project=projects)
+                self.assertFalse(self.home.exists())
 
     def test_storage_cannot_be_inside_project_or_project_inside_storage(self):
         nested_home = self.project / "state"
-        with self.assertRaises(harness.Error) as caught:
-            harness.execute("init", {"project": str(self.project)}, nested_home)
+        with self.assertRaises(continuity.Error) as caught:
+            continuity.execute("init", {"project": str(self.project)}, nested_home)
         self.assertEqual(caught.exception.code, "unsafe_path")
         self.assertFalse(nested_home.exists())
         self.home.mkdir()
@@ -126,7 +187,7 @@ class KernelTest(unittest.TestCase):
         self.git(self.project, "worktree", "add", "-qb", "test-worktree", str(worktree))
         before = self.snapshot.read_bytes()
         resolved = self.call("resolve", project=str(worktree))
-        self.assertEqual(resolved["project_id"], first["project_id"])
+        self.assertEqual(resolved["environment_id"], first["environment_id"])
         self.assertNotEqual(resolved["workspace"]["workspace_id"], first["workspace"]["workspace_id"])
         self.assertEqual(self.snapshot.read_bytes(), before)
         self.assertEqual(self.call("init", project=str(worktree)), resolved)
@@ -134,7 +195,7 @@ class KernelTest(unittest.TestCase):
         clone = self.base / "clone"
         self.git(self.base, "clone", "-q", str(self.project), str(clone))
         cloned = self.call("init", project=str(clone))
-        self.assertNotEqual(cloned["project_id"], first["project_id"])
+        self.assertNotEqual(cloned["environment_id"], first["environment_id"])
 
     def test_worktree_claim_registers_stable_workspace(self):
         self.repository()
@@ -146,7 +207,7 @@ class KernelTest(unittest.TestCase):
         self.assertEqual(record["workspace_id"], resolved["workspace"]["workspace_id"])
         state = json.loads(self.snapshot.read_text())
         self.assertEqual(len(state["roots"]), 2)
-        self.assertEqual(self.call("resolve", project_id=first["project_id"])["workspace"], None)
+        self.assertEqual(self.call("resolve", environment_id=first["environment_id"])["workspace"], None)
 
     def test_cross_project_ancestor_collision(self):
         self.initialize()
@@ -154,21 +215,21 @@ class KernelTest(unittest.TestCase):
         other = self.base / "other"
         other.mkdir()
         identity = self.call("init", project=str(other))
-        self.error("root_conflict", "bind", project=str(self.project), project_id=identity["project_id"])
-        self.error("root_conflict", "bind", project=str(self.project.parent), project_id=identity["project_id"])
+        self.error("root_conflict", "bind", project=str(self.project), environment_id=identity["environment_id"])
+        self.error("root_conflict", "bind", project=str(self.project.parent), environment_id=identity["environment_id"])
 
     def test_topology_changes_require_explicit_rebind(self):
         first = self.initialize()
         self.repository()
         self.error("topology_changed", "resolve")
         self.error("topology_changed", "init")
-        self.error("topology_changed", "bind", project_id=first["project_id"], project=str(self.project))
-        rebound = self.call("bind", project_id=first["project_id"], project=str(self.project), replace=str(self.project))
+        self.error("topology_changed", "bind", environment_id=first["environment_id"], project=str(self.project))
+        rebound = self.call("bind", environment_id=first["environment_id"], project=str(self.project), replace=str(self.project))
         self.assertEqual(rebound["workspace"]["workspace_id"], first["workspace"]["workspace_id"])
         self.assertTrue(rebound["workspace"]["git_common_dir"])
         self.assertEqual(self.call("resolve"), rebound)
         self.claim()
-        self.assertEqual(self.call("bind", project_id=first["project_id"], project=str(self.project),
+        self.assertEqual(self.call("bind", environment_id=first["environment_id"], project=str(self.project),
                                    replace=str(self.project)), rebound)
 
     def test_move_rebind_preserves_workspace_and_blocks_active_owners(self):
@@ -177,32 +238,32 @@ class KernelTest(unittest.TestCase):
         moved = self.project.with_name("moved")
         old = str(self.project)
         self.project.rename(moved)
-        self.error("project_unknown", "resolve", project=str(moved))
-        self.error("active_contribution", "bind", project=str(moved), project_id=first["project_id"], replace=old)
-        self.call("release", project_id=first["project_id"], owner=owner["id"], expect=1, reason="Writer stopped")
-        rebound = self.call("bind", project=str(moved), project_id=first["project_id"], replace=old)
+        self.error("environment_unknown", "resolve", project=str(moved))
+        self.error("active_contribution", "bind", project=str(moved), environment_id=first["environment_id"], replace=old)
+        self.call("release", environment_id=first["environment_id"], owner=owner["id"], expect=1, reason="Writer stopped")
+        rebound = self.call("bind", project=str(moved), environment_id=first["environment_id"], replace=old)
         self.assertEqual(rebound["workspace"]["workspace_id"], first["workspace"]["workspace_id"])
-        self.assertEqual(self.call("bind", project=str(moved), project_id=first["project_id"], replace=old), rebound)
+        self.assertEqual(self.call("bind", project=str(moved), environment_id=first["environment_id"], replace=old), rebound)
         self.assertEqual(self.call("resolve", project=str(moved)), rebound)
         self.assertFalse(Path(old).exists())
         self.project.mkdir()
-        recreated = self.call("bind", project=str(self.project), project_id=first["project_id"])
+        recreated = self.call("bind", project=str(self.project), environment_id=first["environment_id"])
         self.assertNotEqual(recreated["workspace"]["workspace_id"], rebound["workspace"]["workspace_id"])
         self.assertEqual(self.call("resolve"), recreated)
         self.assertEqual(self.call("resolve", project=str(moved)), rebound)
 
     def test_reference_only_project_read_and_status(self):
-        project_id = str(uuid.uuid4())
-        folder = self.home / "projects" / project_id
+        environment_id = str(uuid.uuid4())
+        folder = self.home / "environments" / environment_id
         (folder / "knowledge").mkdir(parents=True)
-        state = {"format": 1, "id": project_id, "name": "Reference", "roots": [], "contributions": {}}
-        (folder / "project.json").write_text(json.dumps(state))
+        state = {"format": 1, "id": environment_id, "name": "Reference", "roots": [], "contributions": {}}
+        (folder / "environment.json").write_text(json.dumps(state))
         (folder / "knowledge" / "notes.md").write_text("# Reference\n")
-        self.assertIsNone(self.call("resolve", project_id=project_id)["workspace"])
-        self.assertEqual(self.call("status", project_id=project_id)["contributions"], {})
-        self.assertEqual(self.call("read", project_id=project_id, file="notes.md")["content"], "# Reference\n")
-        self.error("invalid_input", "claim", project_id=project_id, purpose="Read", resource=["notes.md"])
-        self.assertFalse((self.home / "projects" / project_id / ".runtime.lock").exists())
+        self.assertIsNone(self.call("resolve", environment_id=environment_id)["workspace"])
+        self.assertEqual(self.call("status", environment_id=environment_id)["contributions"], {})
+        self.assertEqual(self.call("read", environment_id=environment_id, file="notes.md")["content"], "# Reference\n")
+        self.error("invalid_input", "claim", environment_id=environment_id, purpose="Read", resource=["notes.md"])
+        self.assertFalse((self.home / "environments" / environment_id / ".runtime.lock").exists())
 
     def test_invalid_state_is_rejected_without_resetting_ownership(self):
         self.initialize()
@@ -223,7 +284,7 @@ class KernelTest(unittest.TestCase):
                 self.error("invalid_state", "init")
                 self.assertEqual(self.snapshot.read_text(), content)
         self.snapshot.unlink()
-        self.error("project_unknown", "init")
+        self.error("environment_unknown", "init")
 
     def test_simultaneous_overlapping_claims_have_one_owner(self):
         self.initialize()
@@ -288,7 +349,7 @@ class KernelTest(unittest.TestCase):
         for resource in (str(shared / "file.py"), "alias/file.py"):
             conflict = self.error("resource_conflict", "claim", project=str(other),
                                   purpose="Other project", resource=[resource])
-            self.assertEqual(conflict.details["conflicts"][0]["project_id"], first["project_id"])
+            self.assertEqual(conflict.details["conflicts"][0]["environment_id"], first["environment_id"])
             self.assertEqual(conflict.details["conflicts"][0]["owner"], owner["id"])
         self.assertEqual(self.call("status", project=str(other))["contributions"], {})
         self.assertEqual(len(self.call("status")["contributions"]), 1)
@@ -345,8 +406,8 @@ class KernelTest(unittest.TestCase):
         self.assertFalse(self.call("handoff", owner=owner["id"], expect=2, input=input_path, release=True)["changed"])
         self.error("owner_closed", "handoff", owner=owner["id"], expect=3, input=input_path)
         self.error("owner_closed", "claim", owner=owner["id"], expect=3, resource=["src"])
-        names = {p.name for p in Path(self.identity["project_dir"]).iterdir()}
-        self.assertEqual(names, {"project.json", "knowledge"})
+        names = {p.name for p in Path(self.identity["environment_dir"]).iterdir()}
+        self.assertEqual(names, {"environment.json", "knowledge"})
 
     def test_blank_handoffs_cannot_erase_context_or_release_ownership(self):
         self.initialize()
@@ -396,7 +457,7 @@ class KernelTest(unittest.TestCase):
         self.initialize()
         lock = self.home / ".runtime.lock"
         inode = lock.stat().st_ino
-        with lock.open("a+b") as stream, mock.patch.object(harness, "LOCK_TIMEOUT", 0.03):
+        with lock.open("a+b") as stream, mock.patch.object(continuity, "LOCK_TIMEOUT", 0.03):
             fcntl.flock(stream.fileno(), fcntl.LOCK_EX)
             self.error("lock_busy", "claim", purpose="Other", resource=["src"])
             fcntl.flock(stream.fileno(), fcntl.LOCK_UN)
@@ -448,16 +509,16 @@ class KernelTest(unittest.TestCase):
             "finish": dict(owner=owner["id"], expect=1),
         }
         for operation, data in changes.items():
-            with self.subTest(operation=operation), mock.patch.object(harness.os, "replace", side_effect=OSError("injected")):
+            with self.subTest(operation=operation), mock.patch.object(continuity.os, "replace", side_effect=OSError("injected")):
                 self.error("write_failed", operation, input=self.input_file("New"), **data)
             self.assertEqual(self.snapshot.read_bytes(), before)
             self.assertEqual(self.call("read", file="note.md")["content"], "Original")
-            self.assertFalse(list(self.home.rglob(".harness-*")))
+            self.assertFalse(list(self.home.rglob(".continuity-*")))
 
     def test_post_replace_failure_reports_uncertain_durability(self):
         self.initialize()
         first = self.call("write", file="note.md", input=self.input_file("Original"), expect="missing")
-        with mock.patch.object(harness, "sync_directory", side_effect=OSError("injected")):
+        with mock.patch.object(continuity, "sync_directory", side_effect=OSError("injected")):
             self.error("write_uncertain", "write", file="note.md", input=self.input_file("New"), expect=first["sha256"])
         self.assertEqual(self.call("read", file="note.md")["content"], "New")
         self.assertFalse(self.call("write", file="note.md", input=self.input_file("New"), expect=first["sha256"])["changed"])
@@ -471,7 +532,7 @@ class KernelTest(unittest.TestCase):
         (directory / "outside").symlink_to(self.base, target_is_directory=True)
         (directory / "inside.md").write_text("Inside")
         (directory / "inside-link.md").symlink_to(directory / "inside.md")
-        for name in ("../project.json", "../outside.md", "project.json", str(target), "link.md", "outside/outside.md", "inside-link.md"):
+        for name in ("../environment.json", "../outside.md", "environment.json", str(target), "link.md", "outside/outside.md", "inside-link.md"):
             for operation in ("read", "write", "delete"):
                 self.error("unsafe_path", operation, file=name, input=self.input_file("Bad"), expect="0" * 64)
         self.assertEqual(target.read_text(), "Keep")
@@ -535,7 +596,7 @@ class KernelTest(unittest.TestCase):
     def test_uncertain_finish_can_be_reconciled_without_an_intermediate_record(self):
         self.initialize()
         owner = self.claim()
-        with mock.patch.object(harness, "sync_directory", side_effect=OSError("injected")):
+        with mock.patch.object(continuity, "sync_directory", side_effect=OSError("injected")):
             self.error("write_uncertain", "finish", owner=owner["id"], expect=1)
         self.assertEqual(self.call("status")["contributions"], {})
         self.assertFalse(self.call("finish", owner=owner["id"], expect=1)["changed"])

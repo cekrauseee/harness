@@ -1,0 +1,4 @@
+interface:
+  display_name: "Continuity Init"
+  short_description: "Set up environments and bind their projects"
+  default_prompt: "Use $continuity-init to create a shared environment for these projects."

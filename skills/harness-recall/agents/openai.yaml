@@ -1,4 +1,0 @@
-interface:
-  display_name: "Harness Recall"
-  short_description: "Retrieve prior knowledge needed for this task"
-  default_prompt: "Use $harness-recall to find the prior decision needed for this task."

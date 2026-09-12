@@ -1,0 +1,4 @@
+interface:
+  display_name: "Continuity Recall"
+  short_description: "Retrieve needed knowledge from the environment"
+  default_prompt: "Use $continuity-recall to find the prior decision needed for this task."

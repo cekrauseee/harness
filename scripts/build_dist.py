@@ -6,18 +6,18 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'src'))
-from harness import atomic_write, make_directory
+from continuity import atomic_write, make_directory
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--check', action='store_true')
     args = parser.parse_args()
-    source = (ROOT / 'src/harness.py').read_bytes()
+    source = (ROOT / 'src/continuity.py').read_bytes()
     folders = [p.parent / 'scripts' for p in sorted((ROOT / 'skills').glob('*/SKILL.md'))]
     problems = []
     for folder in folders:
-        target = folder / 'harness.py'
+        target = folder / 'continuity.py'
         if args.check:
             if not target.exists() or target.read_bytes() != source:
                 problems.append(str(folder.relative_to(ROOT)))
@@ -28,7 +28,7 @@ def main():
     if problems:
         print('Generated helper drift: ' + ', '.join(problems))
         return 1
-    print(f'{len(folders)} standalone helper copies match src/harness.py.')
+    print(f'{len(folders)} standalone helper copies match src/continuity.py.')
     return 0
 
 

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Continuity Task"
+  short_description: "Reserve writes and manage needed continuations"
+  default_prompt: "Use $continuity-task to reserve these files and complete this contribution."

@@ -1,46 +1,65 @@
 ---
 description: >-
-  um jeito de manter o contexto de um projeto entre conversas com agentes.
+  conhecimento compartilhado para agentes trabalhando em vários projetos.
 metaDescription: >-
-  o harness guarda o conhecimento de um projeto em arquivos markdown locais
-  e ajuda agentes a retomar o trabalho, dividir tarefas e registrar o que ficou pendente.
+  o continuity reúne projetos em ambientes compartilhados e mantém conhecimento,
+  pendências e coordenação de arquivos em armazenamento local.
 summary: >-
-  fiz o harness para que agentes possam retomar um projeto sem perder o
-  contexto entre conversas e pastas de trabalho. as skills orientam a leitura
-  e a atualização das notas, a divisão dos arquivos e o registro do que ficou
-  pendente. um pequeno programa em python confere reservas e mudanças nos documentos.
+  fiz o continuity para manter decisões úteis e trabalho pendente disponíveis
+  entre tarefas com agentes. os ambientes reúnem repositórios e pastas relacionados.
+  quatro skills independentes orientam contexto, conhecimento e coordenação,
+  com um pequeno programa em python protegendo as escritas compartilhadas.
 highlights:
-  - conhecimento do projeto em markdown
-  - contexto compartilhado entre conversas e worktrees
-  - reserva de arquivos para organizar o trabalho
-  - notas e registros de trabalho atualizados
+  - ambientes compartilhados por vários projetos
+  - conhecimento em arquivos markdown locais
+  - contexto buscado quando a tarefa precisa
+  - reserva de arquivos e resumos para continuar o trabalho
 ---
 
-o harness dá aos agentes um lugar para guardar o que importa sobre um projeto:
-decisões, descobertas úteis e trabalho que ainda precisa de atenção.
+o continuity, antes chamado harness, dá aos agentes um lugar para guardar
+decisões, descobertas úteis e trabalho que ainda precisa de atenção. queria
+que esse conhecimento acompanhasse o trabalho, para que outra conversa ou
+outro agente pudesse retomá-lo.
 
-fiz isso com arquivos markdown comuns, guardados fora do projeto. ao começar
-uma tarefa, o agente lê as notas relevantes e pode atualizá-las conforme o
-trabalho avança. funciona com repositórios, worktrees e pastas sem git.
+fiz isso com arquivos markdown comuns, fora dos repositórios. quatro skills
+independentes cuidam da configuração dos ambientes, da busca de contexto, das
+notas úteis e da coordenação das escritas. o modelo, as ferramentas e o ambiente
+de execução continuam sendo responsabilidade do aplicativo que usa as skills.
 
-## retomar de onde parou
+## projetos relacionados, um ambiente
 
-as skills orientam os agentes a buscar contexto, registrar o que aprenderam
-e manter as notas úteis. as fontes e as dúvidas ficam junto da informação,
-para que o próximo agente consiga distinguir uma decisão confirmada de uma
-ideia que ainda está sendo explorada.
+um ambiente, chamado environment, reúne repositórios ou pastas que compartilham
+conhecimento e trabalho. continuity e workflows podem formar um ambiente;
+um portfólio e suas notas podem formar outro. cada pasta de trabalho mantém
+sua identidade, inclusive nos worktrees, enquanto as notas e contribuições
+ficam no ambiente compartilhado.
 
-quando algo fica pela metade, o agente deixa um resumo para quem continuar.
-quando termina, incorpora o que vale guardar às notas e remove os registros
-de coordenação que já não servem.
+esse vínculo é explícito. projetos que já pertencem a ambientes diferentes
+não são unidos silenciosamente. uma contribuição pode reservar arquivos em
+vários repositórios e continuar identificando onde começou.
 
-## trabalhar nos mesmos arquivos
+## buscar o contexto necessário
 
-fiz um pequeno programa em python para cuidar das operações nos arquivos.
-antes de editar, os agentes podem reservar o que vão usar e conferir se
-outro agente está trabalhando ali. o programa também verifica se uma nota
-mudou desde a leitura, antes de permitir que ela seja substituída.
+o agente começa com o pedido e as informações que já tem. busca conhecimento
+salvo quando uma decisão anterior ou um fato que falta importa para a tarefa.
+compartilhar um ambiente não significa carregar as notas de todos os projetos.
 
-essas reservas ajudam a organizar os agentes que seguem o processo. não
-bloqueiam outros editores nem garantem que o trabalho esteja certo.
-ler, pensar e conferir o resultado continua sendo responsabilidade do agente.
+as notas preservam o escopo, as fontes e as dúvidas. uma decisão confirmada
+continua distinta de uma ideia em discussão. o que já está bem documentado
+no próprio projeto pode continuar lá.
+
+## manter o trabalho em andamento
+
+quando alguém precisa continuar uma tarefa, o agente deixa um resumo curto.
+quando ela termina, incorpora o que vale guardar às notas e remove a contribuição.
+mantive o foco no estado atual, sem um arquivo histórico de toda a atividade.
+
+um pequeno programa em python confere reservas de arquivos que se sobrepõem
+e protege notas contra substituições depois de uma mudança não observada.
+ele também encerra uma contribuição concluída e libera suas reservas em uma
+única operação atômica.
+
+essas garantias ajudam os agentes que seguem o mesmo processo. não bloqueiam
+outros editores nem avaliam a qualidade da implementação. o workflows pode
+orientar a execução e a delegação; o continuity mantém o conhecimento e o
+estado de coordenação disponíveis quando forem necessários.

@@ -14,13 +14,13 @@ class DistributionTest(unittest.TestCase):
             root = Path(temporary)
             for folder in ("src", "scripts", "skills/example/scripts/assets"):
                 (root / folder).mkdir(parents=True)
-            for file in ("src/harness.py", "scripts/build_dist.py"):
+            for file in ("src/continuity.py", "scripts/build_dist.py"):
                 shutil.copyfile(source / file, root / file)
             skill = root / "skills/example"
             (skill / "SKILL.md").write_text("---\nname: example\n---\n")
             authored = skill / "scripts/custom.py"
             authored.write_text("print('keep this source')\n")
-            generated = skill / "scripts/harness.py"
+            generated = skill / "scripts/continuity.py"
 
             def run(*args):
                 return subprocess.run([sys.executable, "-B", str(root / "scripts/build_dist.py"), *args],
@@ -30,7 +30,7 @@ class DistributionTest(unittest.TestCase):
             self.assertFalse(generated.exists())
             result = run()
             self.assertEqual(result.returncode, 0, result.stderr)
-            self.assertEqual(generated.read_bytes(), (root / "src/harness.py").read_bytes())
+            self.assertEqual(generated.read_bytes(), (root / "src/continuity.py").read_bytes())
             modified = generated.stat().st_mtime_ns
             self.assertEqual(run().returncode, 0)
             self.assertEqual(generated.stat().st_mtime_ns, modified)
