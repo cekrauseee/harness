@@ -1,7 +1,7 @@
 {
   "name": "harness",
-  "version": "0.8.1",
-  "description": "Agent-led project knowledge with atomic resource reservations and current handoffs.",
+  "version": "0.9.0",
+  "description": "Task-scoped project knowledge, safe shared writes and necessary continuations.",
   "author": {
     "name": "Henrique Krause",
     "url": "https://github.com/cekrauseee"
@@ -20,8 +20,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Harness",
-    "shortDescription": "Shared project context, tasks and continuity.",
-    "longDescription": "Harness keeps project knowledge as Markdown and uses one small helper for external identity, atomic reservations, current handoffs and protected document writes. Agents own search, curation and judgment.",
+    "shortDescription": "Project knowledge and shared writes when needed.",
+    "longDescription": "Four independent skills for project setup, targeted recall, durable knowledge and safe contribution management. Local files and one atomic helper keep continuity proportional to the task.",
     "developerName": "Henrique Krause",
     "category": "Productivity",
     "capabilities": [
@@ -29,9 +29,9 @@
     ],
     "websiteURL": "https://github.com/cekrauseee/harness",
     "defaultPrompt": [
-      "Continue this project from relevant knowledge and checkpoints.",
-      "Record the scope and outcome of this shared task.",
-      "Check Harness integrity and consolidate project knowledge."
+      "Find the prior project decision needed for this task.",
+      "Preserve this confirmed project guidance.",
+      "Reserve these files and complete this contribution."
     ]
   }
 }

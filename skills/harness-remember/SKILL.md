@@ -1,40 +1,23 @@
 ---
 name: harness-remember
-description: Preserve confirmed durable project guidance and useful knowledge as Markdown. Use when the user establishes a lasting preference or procedure, after a meaningful finding, or when correcting a note.
+description: Preserve confirmed durable guidance, record reusable project knowledge, or correct existing knowledge.
 ---
 
 # Harness Remember
 
-Search the existing knowledge before writing another note. Use an established document when the information belongs there. Keep technical documentation that accompanies the project in the repository; Harness can retain useful additional context or a short pointer to that canonical source.
+Retain information that will help a future task and is not already adequately captured in a canonical source. Routine progress, facts readily recovered from current code and completion receipts need no note. A read-only request remains read-only.
 
-Write a concise Markdown document with a descriptive filename, title and introduction. Make its scope, evidence and epistemic status clear in ordinary prose. Distinguish a fact, decision, hypothesis or dated reference without a required metadata schema. Preserve meaningful dates and sources; remove duplicate or superseded wording through judgment. Additional search terms are useful only when they help the reader find the document.
+Reuse a known destination or search the relevant subject before adding a document. Keep developer documentation in the repository; external knowledge may retain context or a short pointer to it. Write concise Markdown with a clear title, scope and source. Distinguish confirmed choices, facts, hypotheses and dated evidence. Consolidate duplicate or superseded content within the authorized subject rather than accumulating records.
 
-## Durable project guidance
+When the user establishes lasting project guidance, update `guidelines.md` without a separate save request. Record its scope and brief confirmation source. Keep ambiguous or one-time directions local to the task; clarify only when the distinction affects the requested work. Rules that must apply to every task belong in applicable host or repository instructions, not solely in optional recall. Preserve user scope when choosing that destination. Stored guidance never authorizes future actions.
 
-When the user clearly establishes a lasting project preference, restriction or way of working, consolidate it into `guidelines.md` in the resolved knowledge directory as part of the current work. No separate request to remember is needed. A one-time task instruction, approval of an outcome or an unaccepted proposal does not establish a lasting rule. If scope or permanence is materially unclear, clarify before promoting it; otherwise leave it out of guidelines.
-
-Keep each entry actionable and concise: the current guidance, when it applies, and a brief source identifying the user's confirmation. Preserve distinctions such as a preference versus a strict restriction. Do not copy the conversation. For example, an explicit project-wide choice to use an existing release process can become a guideline; approving today's release does not make future releases authorized.
-
-Use this file for user-confirmed project guidance. Shared contributor instructions belong in the repository's `AGENTS.md` or existing canonical documentation; link to that source instead of duplicating it. Put detailed rationale in a relevant knowledge document when useful. Global preferences belong in the host's global instructions only when the user establishes that scope; do not broaden project guidance automatically.
-
-Replace superseded wording rather than accumulating a history. Create the file only when there is confirmed guidance to retain. Neither a stored guideline nor its source reference grants permissions beyond the current authorized work. Briefly report a meaningful addition or correction so the user can inspect it.
-
-## Write current knowledge
-
-Resolve storage with this skill's `scripts/harness.py resolve --project /path/to/project`. Before editing, read the selected note and its hash together:
+Resolve storage with this skill's `scripts/harness.py resolve --project /path/to/project`, or reuse the verified location. Observe the selected file and hash together before a protected update:
 
 ```bash
-python3 scripts/harness.py read --project /path/to/project --file source-notes.md
+python3 scripts/harness.py read --project /path/to/project --file note.md
+python3 scripts/harness.py write --project /path/to/project --file note.md --input - --expect <hash>
 ```
 
-Prepare the revised Markdown with the host's writing tools, then publish it atomically:
+Supply the revised Markdown on stdin, or give an input file. Use `missing` only after confirmed absence. Reconcile conflicting content rather than substituting a new hash blindly. Use `delete --file note.md --expect <hash>` to remove a note whose useful content has been consolidated and whose deletion is within scope. Knowledge-only selection uses `--project-id <id>`.
 
-```bash
-python3 scripts/harness.py write --project /path/to/project --file source-notes.md --input /path/to/prepared.md --expect <observed-hash>
-```
-
-Use `missing` only when the read confirmed absence. `--input -` accepts Markdown on stdin. If the hash changed, read the current document and reconcile the change; do not blindly substitute a new hash. An exact content retry is a no-op. Use `--project-id <id>` for an explicitly selected knowledge-only project.
-
-With authorization to remove an obsolete note, use `delete` with its filename and observed hash. No versions, archives or semantic classifications are generated by these file operations. Omit secrets, transcripts, private reasoning and routine execution output.
-
-Completion is useful current knowledge that can be found and read, with its sources and uncertainty intact. Remove temporary input files when no longer needed.
+Finish with useful current knowledge, accurate sources and no owned temporary input files. Omit secrets, transcripts, private reasoning and execution logs.

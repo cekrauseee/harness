@@ -9,6 +9,7 @@ Harness is a file-native project continuity and coordination layer for agents. I
 - Write all repository-facing documentation, commit messages, branch names, and pull request content in English.
 - Use simple, objective, coherent, and concise language.
 - Keep one canonical source of truth and link to it instead of duplicating it.
+- Include only guidance and mechanisms that serve a current requirement. Keep operational guidance independent of model names. Reuse context and verification, and expand them only for a relevant gap.
 
 ## Engineering conventions
 
