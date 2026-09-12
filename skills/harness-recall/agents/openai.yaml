@@ -1,4 +1,4 @@
 interface:
   display_name: "Harness Recall"
-  short_description: "Recall project guidelines and relevant knowledge"
-  default_prompt: "Use $harness-recall to recover confirmed project guidelines, relevant knowledge and current handoffs."
+  short_description: "Retrieve prior knowledge needed for this task"
+  default_prompt: "Use $harness-recall to find the prior decision needed for this task."

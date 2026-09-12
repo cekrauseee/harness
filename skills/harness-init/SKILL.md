@@ -1,22 +1,16 @@
 ---
 name: harness-init
-description: Locate or establish external Harness storage for a project, including non-Git folders and linked worktrees. Use for first setup or an explicit project binding change.
+description: Set up Harness project storage or change an existing project binding or host integration.
 ---
 
 # Harness Init
 
-Keep project knowledge outside its working files. Commands are relative to this installed skill directory; use its absolute script path from elsewhere.
+Use this skill for setup or a binding change. Routine knowledge lookup can resolve storage directly without running setup. Commands below use this skill's `scripts/harness.py`; use its absolute path from another directory.
 
-```bash
-python3 scripts/harness.py resolve --project /path/to/project
-```
+Resolve the intended project with `resolve --project /path/to/project`. If storage is needed for the authorized work and the project is unregistered, use `init --project /path/to/project`. Keep Harness state outside project files. Git worktrees share identity through the physical common Git directory; similar remote URLs do not establish identity.
 
-The result gives the project ID, knowledge directory and current workspace. Initialize an intended unregistered project with `init --project /path/to/project`. Git worktrees share identity through their physical common Git directory; ordinary folders use registered paths. Remote URL similarity is not identity evidence.
+For an identified additional folder, use `bind --project /new/path --project-id <id>`. Add `--replace /old/path` only for an intended replacement. This preserves identity and moves no files. Never infer a project ID; explicitly selected knowledge-only projects use `--project-id <id>`.
 
-Use `resolve --project-id <id>` for an explicitly selected knowledge-only project. Project names and roots are in `project.json` under `${HARNESS_HOME:-~/.harness}/projects/`. Do not guess an ID or merge similar projects.
+Read [host-integration.md](references/host-integration.md) only when installing or changing the host instruction. Setup or binding is complete when the intended identity resolves; host integration is complete when the edited instruction and installed paths are correct. One operation does not require repeating the others.
 
-For an explicitly identified additional folder, use `bind --project /new/path --project-id <id>`. Add `--replace /old/path` only when replacing that binding is intended. The helper preserves identity, checks conflicts and refuses to replace a root with active contributions; it does not move files. Inspect the operation's `--help` if needed.
-
-Read [host-integration.md](references/host-integration.md) when installing or updating the short host instruction. The agent edits that instruction through its existing file tools within the user's authorization. There is no installer, hook or background process.
-
-Setup is complete when the intended identity resolves and the selected host reads the continuity instruction. No Harness files belong inside the project working tree.
+If stored metadata is malformed, inspect the reported problem within the requested repair scope. Preserve existing knowledge and ownership; do not reset an unreadable project to empty state. Use operation `--help` for syntax.

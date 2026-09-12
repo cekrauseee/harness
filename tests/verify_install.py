@@ -26,14 +26,14 @@ def files(directory):
             if path.is_file() and "__pycache__" not in path.parts}
 
 
-def check_install(package, skill, copy_mode, command, env):
+def check_install(skill, copy_mode, command, env):
     with tempfile.TemporaryDirectory(prefix="skills-install-check-") as temporary:
         root = Path(temporary).resolve()
         source, home, project = root / "source", root / "home", root / "project"
         home.mkdir()
         project.mkdir()
         # Select from the whole package so a broken --skill filter cannot pass.
-        shutil.copytree(package / "skills", source / "skills",
+        shutil.copytree(ROOT / "skills", source / "skills",
                         ignore=shutil.ignore_patterns("__pycache__"))
         child = dict(env, HOME=str(home), CODEX_HOME=str(home / ".codex"),
                      CLAUDE_CONFIG_DIR=str(home / ".claude"), XDG_CONFIG_HOME=str(home / ".config"),
@@ -66,7 +66,6 @@ def check_install(package, skill, copy_mode, command, env):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--workflows", type=Path, help="Optional Workflows checkout to verify too")
     parser.add_argument("--cli", type=Path, help="Existing skills bin/cli.mjs")
     args = parser.parse_args()
     env = dict(os.environ, DISABLE_TELEMETRY="1", NO_COLOR="1")
@@ -74,18 +73,16 @@ def main():
                               ROOT, env).strip().splitlines()[-1]).resolve()
     command = [shutil.which("node") or "node", str(cli)]
     print("skills CLI " + run(command + ["--version"], ROOT, env).strip(), flush=True)
-    packages = [ROOT] + ([args.workflows.resolve()] if args.workflows else [])
+    skills = sorted(path.parent for path in (ROOT / "skills").glob("*/SKILL.md"))
+    if not skills:
+        raise RuntimeError(f"No skills found in {ROOT}")
     count = 0
-    for package in packages:
-        skills = sorted(path.parent for path in (package / "skills").glob("*/SKILL.md"))
-        if not skills:
-            raise RuntimeError(f"No skills found in {package}")
-        for skill in skills:
-            for copy_mode in (False, True):
-                check_install(package, skill, copy_mode, command, env)
-                count += 1
-                mode = "copy" if copy_mode else "symlink"
-                print(f"{package.name}/{skill.name}: {mode} passed", flush=True)
+    for skill in skills:
+        for copy_mode in (False, True):
+            check_install(skill, copy_mode, command, env)
+            count += 1
+            mode = "copy" if copy_mode else "symlink"
+            print(f"{skill.name}: {mode} passed", flush=True)
     print(f"{count} isolated selective installations passed.")
     return 0
 

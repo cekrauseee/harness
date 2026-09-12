@@ -58,7 +58,7 @@ event journals, receipts, session records, or checkpoint histories.
 
 ## Commands
 
-Run `python3 /path/to/scripts/harness.py --version` to report `0.8.0`.
+Run `python3 /path/to/scripts/harness.py --version` to report the current helper version.
 Commands print one JSON object. Helper errors print
 `{"error":{"code":"...","message":"...","details":{}}}` and exit 1;
 argument syntax errors exit 2. Success exits 0.
@@ -71,11 +71,12 @@ Except where a path is specifically required, select exactly one of
 | `resolve` | Project selector | Read identity and the selected workspace. Never initializes. |
 | `init` | `--project PATH [--name NAME]` | Create identity or register a worktree under the existing Git identity. |
 | `bind` | `--project PATH --project-id UUID [--replace OLD_ROOT]` | Explicitly associate a root, or replace an old binding while preserving its workspace ID. Does not move files. |
-| `status` | Project selector | Return every current contribution and active reservation with provenance. |
+| `status` | Project selector, optional `--owner UUID` | List contribution summaries, or read one complete contribution and handoff. |
 | `claim` | `--project PATH --purpose TEXT --resource PATH ...` | Create a separate owner UUID and version 1; reserve all requested resources atomically. |
 | `claim` | `--project PATH --owner UUID --expect VERSION --resource PATH ...` | Extend an active owner, preserving its purpose and workspace. |
 | `handoff` | Project selector, `--owner UUID --expect VERSION --input FILE [--release]` | Replace current Markdown handoff, optionally releasing ownership in the same snapshot replacement. |
 | `release` | Project selector, `--owner UUID --expect VERSION --reason TEXT` | Explicitly relinquish ownership and preserve the reason. |
+| `finish` | Project selector, `--owner UUID --expect VERSION` | Atomically remove a completed contribution and its reservations after consolidation. |
 | `drop` | Project selector, `--owner UUID --expect VERSION` | Remove an inactive contribution after the agent consolidates useful knowledge. |
 | `read` | Project selector, `--file NAME` | Read Markdown and its SHA-256 from the same bytes. |
 | `write` | Project selector, `--file NAME --input FILE --expect HASH_OR_missing` | Replace opaque Markdown only if the observed version still matches. |
@@ -115,14 +116,19 @@ Every successful result includes `project_id`, `project_dir`, `knowledge_dir`, a
 `workspace`. The workspace is `{path, git_common_dir, workspace_id}` for path
 selection and `null` for ID selection.
 
-- `status` adds the `contributions` dictionary and `reservations` list. Each
-  reservation contains `owner`, `purpose`, `workspace`, `workspace_id`, `version`,
-  and `resource`.
-- `claim`, `handoff`, and `release` add `contribution` and `changed`.
-- `drop` adds `owner` and `changed`.
-- `read`, `write`, and `delete` add `file`, `missing`, `sha256`, and `content`.
+- `status` adds a `contributions` dictionary of summaries. Each includes its ID,
+  purpose, workspace, resources, active flag, version and update time. Active
+  contributions reserve their listed resources; reservations are not repeated in
+  a second collection. Handoff text and release reasons are omitted.
+- `status --owner UUID` adds one full `contribution`, including its handoff and any
+  release reason. An unknown owner is an error. Status operations do not write.
+- `claim`, `handoff`, and `release` add a contribution summary and `changed`.
+- `finish` and `drop` add `owner` and `changed`.
+- `read` adds `file`, `missing`, `sha256` and `content` from the same bytes.
   Missing files use `missing: true`, `sha256: "missing"`, and `content: null`.
-  Writes and deletes also add `changed`.
+- `write` and `delete` add `file`, `missing`, `sha256` and `changed`, without
+  echoing the document. A content conflict includes the current observed content
+  and hash so the agent can reconcile the edit.
 
 Mutations serialize with POSIX `flock` on `HOME/.runtime.lock`, waiting up to ten
 seconds before `lock_busy`. The lock is never unlinked or broken by age. Snapshot
@@ -136,6 +142,13 @@ serialize without overwriting one another. There is no automatic expiry: an agen
 must establish independent evidence before releasing another writer's ownership.
 The helper cannot establish that evidence or authorize the release.
 
+`finish` removes the observed contribution in one snapshot replacement, whether
+active or inactive. Use it for the writer's completed work after verification
+and knowledge consolidation. It creates no intermediate handoff or receipt.
+`drop` still rejects active ownership and is the operation for scoped cleanup of
+inactive predecessors. Owner handles are cooperative, not authentication.
+Use `handoff --release` when continuation is needed instead of finishing.
+
 Retries are based on current state, without retained operation history:
 
 - Repeating a claim extension whose resources are already held is a no-op.
@@ -143,7 +156,7 @@ Retries are based on current state, without retained operation history:
   expected version predates that result. Different stale updates fail.
 - Closed owners cannot reopen or acquire more resources. Releasing an already
   closed owner is a no-op and preserves its existing reason and handoff.
-- Dropping an absent owner and deleting an absent knowledge file are no-ops.
+- Finishing or dropping an absent owner and deleting an absent knowledge file are no-ops.
 - Writing bytes already present is a no-op, even with the earlier expected hash.
 - Repeating a completed root replacement is a no-op when its old path is absent
   from the bindings and the destination already has the intended topology.
@@ -153,7 +166,7 @@ inspect `status` and reconcile the current contribution; blindly creating anothe
 claim cannot replay or recover a historical response. Similarly, no-op retries do
 not prove which process produced the matching current state.
 
-## Python entry point and tests
+## Python entry point
 
 `execute(operation, data, home=None) -> dict` uses the same operation and argument
 names as the CLI, with hyphens changed to underscores. Repeated resources use
@@ -161,13 +174,4 @@ names as the CLI, with hyphens changed to underscores. Repeated resources use
 `Error(code, message, details)` for helper errors. It does not accept an alternate
 JSON command language.
 
-Run the kernel tests with:
-
-```sh
-python3 -m unittest discover -s tests -p test_kernel.py -v
-```
-
-Set `HARNESS_TEST_HELPER` to an absolute copied `scripts/harness.py` path to run the
-same temporary-directory tests against a bundled or installed helper. Tests cover
-separate-process contention, stale CAS, retry behavior, failed replacement,
-worktrees, clones, root moves, Markdown integrity, and path escapes.
+Verification is defined in [development](development.md).

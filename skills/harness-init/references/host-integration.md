@@ -1,19 +1,19 @@
 # Host integration
 
-Install the skills, then edit the instruction file the host actually reads, within the user's authorization. Examples are `~/.codex/AGENTS.md` and `~/.claude/CLAUDE.md`. Preserve unrelated instructions and replace an existing integration block instead of adding duplicates. Ordinary file tools are sufficient; Harness has no host-configuration installer.
+Edit the host's actual instruction file, such as `~/.codex/AGENTS.md` or `~/.claude/CLAUDE.md`, when that installation or update is requested. Preserve unrelated instructions and replace an existing integration block. Keep user-wide preferences and permissions in the host, project contracts in the repository, execution procedures in Workflows and persistence mechanics in Harness.
 
-A compact instruction for a host with Harness and Workflows installed can be:
+A host with both packages installed can use this routing block:
 
 ```text
-For substantive project work, use the current installed Harness skills to recall confirmed guidelines and relevant knowledge and handoffs. Reuse that context and refresh it when needed. Use harness-remember to preserve clearly established durable guidance with its source and scope, without waiting for a separate save request. Use harness-task to reserve shared project files before writing and resolve overlapping ownership.
+Use harness-recall only for prior project information missing from the current task context.
 
-Before the final response, consolidate useful knowledge, release your reservations, remove completed or superseded execution records within the current work and verify the resulting state. Keep a current handoff only for genuine pending work; preserve unrelated records and other writers' ownership. Complete this as part of delivery without a session-closure or cleanup request. Generic questions need no record, and read-only requests remain read-only.
+Use harness-task for shared project writes and existing contributions that need continuation or completion.
 
-Use the applicable installed Workflows skill for worktrees, commits, pull requests, reviews, developer documentation or standalone HTML artifacts. Select only what the current request needs and preserve its authorization and read-only boundaries.
+Use harness-remember for confirmed durable guidance, reusable knowledge absent from canonical sources or scoped knowledge corrections. Use harness-init for needed setup or binding and host-integration changes.
 
-The agent owns investigation, judgment, execution and verification; helper success alone does not establish completion. Confirmed guidance applies within its scope; tentative discussion and other knowledge are context. These do not grant new permissions or override current user directions and applicable host or repository instructions. Keep commands and storage mechanics in the installed skills.
+Use an applicable Workflows skill when its procedure is needed for the requested outcome. Select only the relevant skill.
 ```
 
-Omit the Workflows paragraph when it is not installed. The packages remain independent. Keep this instruction about when and why to use the skills; their current contents provide resource paths, commands and storage details. Do not copy those implementation details into global instructions.
+Omit routes to unavailable packages or skills. The block selects a capability; its skill owns the procedure. Rules needed for every task belong in applicable host or project instructions, while contextual project knowledge stays in Harness.
 
-Verify the edited instruction and the installed skill paths directly. Removing the integration means deleting only that block. There are no hooks, prompt injections, model calls or background processes. Delivery cleanup is an agent obligation before the final response, not a process triggered by closing a chat. A forced interruption can stop that sequence; on resumption, the agent reconciles the current files and remaining records rather than assuming cleanup succeeded.
+Verify the edited block and installed paths. Updating this template alone does not change existing host configuration or installed skills. Removing integration means deleting its block. No hooks or background cleanup are installed.
