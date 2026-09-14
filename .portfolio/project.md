@@ -3,63 +3,44 @@ slug: harness
 name: cekrause/continuity
 repositoryUrl: https://github.com/cekrauseee/harness
 description: >-
-  shared project knowledge for agents working across repositories.
+  Persistent knowledge and coordination across agents, tasks, and repositories.
 metaDescription: >-
-  continuity groups projects in shared environments, keeping useful knowledge,
-  pending work, and file coordination in local files.
+  Continuity keeps relevant decisions, useful findings, and unfinished work
+  available between agent tasks. Knowledge lives in local Markdown files outside
+  the repositories.
 summary: >-
-  i built continuity to keep useful decisions and unfinished work available
-  between agent tasks. environments bring related repositories and folders
-  together. four independent skills guide context retrieval, knowledge,
-  and coordination, with a small python helper protecting shared writes.
+  Continuity keeps relevant decisions, useful findings, and unfinished work
+  available between agent tasks. I built it so that context could remain
+  available when work moves to a new conversation or another agent. Four
+  independent skills guide environment setup, context retrieval, knowledge
+  maintenance, and coordination of shared changes.
 highlights:
-  - "shared environments for several projects"
-  - "knowledge in local markdown files"
-  - "context retrieved when the task needs it"
-  - "file reservations and useful handoffs"
+  - knowledge in local Markdown files outside repositories
+  - four independent skills
+  - retrieving context when the task needs it
+  - file reservations and atomic coordination
 ---
 
-continuity, previously called harness, gives agents a place to keep decisions,
-useful findings, and work that still needs attention. i wanted that knowledge
-to belong to the work, so another conversation or agent could pick it up.
+Continuity keeps relevant decisions, useful findings, and unfinished work available between agent tasks. I built it so that context could remain available when work moves to a new conversation or another agent.
 
-i built it around ordinary markdown files outside the repositories. four
-independent skills handle environment setup, finding needed context, maintaining
-useful knowledge, and coordinating shared writes. the host still provides the
-model, tools, and execution environment.
+Four independent skills guide environment setup, context retrieval, knowledge maintenance, and coordination of shared changes.
 
-## related projects, one environment
+## Sharing knowledge across projects
 
-an environment groups repositories or folders that share knowledge and work.
-continuity and workflows can belong to one environment; a portfolio and its
-notes can belong to another. each workspace keeps its identity, including git
-worktrees, while the environment holds the shared notes and contributions.
+Knowledge lives in local Markdown files outside the repositories. Related projects can belong to the same environment and share notes and contributions, while each working directory retains its own identity.
 
-i made the grouping explicit. projects already in different environments are
-not silently combined. work spanning several repositories can reserve the
-relevant paths while retaining where the contribution started.
+Environment membership is explicit. A contribution can span files in several repositories while retaining a record of the project where it started. Git worktrees share their repository’s environment but remain distinct workspaces.
 
-## only the context a task needs
+## Retrieving context when the task needs it
 
-an agent starts with the request and the information already available. it
-looks up stored knowledge when a previous decision or missing fact matters.
-sharing an environment doesn't mean loading every project's notes.
+The skills instruct agents to begin with the request and the information already available. Stored knowledge is consulted when an earlier decision or a missing fact could affect how the task is approached.
 
-notes keep their scope, sources, and uncertainty. a confirmed decision stays
-distinct from an idea being explored. information already captured well in the
-project's own documentation can stay there.
+Notes preserve their scope, sources, and uncertainty. Confirmed decisions remain distinct from hypotheses, and information already documented adequately in a project can stay at its original source.
 
-## keep the work moving
+## Coordinating changes and unfinished work
 
-pending work gets a concise handoff when someone needs to continue it. completed
-contributions are removed after useful knowledge has been consolidated. i kept
-this focused on the current work, without an archive of agent activity.
+A Python helper checks for overlapping file reservations and protects knowledge updates from overwriting content that has changed since it was last read.
 
-a small python helper checks overlapping file reservations and protects notes
-from being overwritten after an unseen change. it can close a completed
-contribution and release its reservations in one atomic operation.
+When a task needs to be resumed later, its contribution record holds a summary of the current state and next steps. Once the work is complete, relevant knowledge is consolidated, and the contribution and its reservations are removed in a single atomic operation.
 
-these guarantees apply to agents cooperating through the same process. they
-don't block other editors or judge the quality of an implementation. workflows
-can guide execution and delegation; continuity keeps the shared knowledge and
-coordination state available when needed.
+Reservations coordinate agents that follow the same procedure. They do not prevent edits made through other tools, an important limitation of this approach.

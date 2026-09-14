@@ -1,65 +1,45 @@
 ---
 description: >-
-  conhecimento compartilhado para agentes trabalhando em vários projetos.
+  Conhecimento persistente e coordenação de trabalho entre agentes, tarefas e
+  repositórios.
 metaDescription: >-
-  o continuity reúne projetos em ambientes compartilhados e mantém conhecimento,
-  pendências e coordenação de arquivos em armazenamento local.
+  O Continuity mantém decisões relevantes, descobertas úteis e trabalho pendente
+  disponíveis entre tarefas com agentes. O conhecimento fica em arquivos
+  Markdown locais, fora dos repositórios.
 summary: >-
-  fiz o continuity para manter decisões úteis e trabalho pendente disponíveis
-  entre tarefas com agentes. os ambientes reúnem repositórios e pastas relacionados.
-  quatro skills independentes orientam contexto, conhecimento e coordenação,
-  com um pequeno programa em python protegendo as escritas compartilhadas.
+  O Continuity mantém decisões relevantes, descobertas úteis e trabalho pendente
+  disponíveis entre tarefas com agentes. Desenvolvi o projeto para permitir que
+  esse contexto acompanhe o trabalho quando ele passa para outra conversa ou
+  outro executor. Quatro skills independentes orientam a configuração dos
+  ambientes, a recuperação de contexto, a manutenção do conhecimento e a
+  coordenação de alterações compartilhadas.
 highlights:
-  - ambientes compartilhados por vários projetos
-  - conhecimento em arquivos markdown locais
-  - contexto buscado quando a tarefa precisa
-  - reserva de arquivos e resumos para continuar o trabalho
+  - conhecimento compartilhado entre projetos
+  - arquivos Markdown locais, fora dos repositórios
+  - recuperação orientada pela tarefa
+  - coordenação de alterações compartilhadas
 ---
 
-o continuity, antes chamado harness, dá aos agentes um lugar para guardar
-decisões, descobertas úteis e trabalho que ainda precisa de atenção. queria
-que esse conhecimento acompanhasse o trabalho, para que outra conversa ou
-outro agente pudesse retomá-lo.
+O Continuity mantém decisões relevantes, descobertas úteis e trabalho pendente disponíveis entre tarefas com agentes. Desenvolvi o projeto para permitir que esse contexto acompanhe o trabalho quando ele passa para outra conversa ou outro executor.
 
-fiz isso com arquivos markdown comuns, fora dos repositórios. quatro skills
-independentes cuidam da configuração dos ambientes, da busca de contexto, das
-notas úteis e da coordenação das escritas. o modelo, as ferramentas e o ambiente
-de execução continuam sendo responsabilidade do aplicativo que usa as skills.
+Quatro skills independentes orientam a configuração dos ambientes, a recuperação de contexto, a manutenção do conhecimento e a coordenação de alterações compartilhadas.
 
-## projetos relacionados, um ambiente
+## Conhecimento compartilhado entre projetos
 
-um ambiente, chamado environment, reúne repositórios ou pastas que compartilham
-conhecimento e trabalho. continuity e workflows podem formar um ambiente;
-um portfólio e suas notas podem formar outro. cada pasta de trabalho mantém
-sua identidade, inclusive nos worktrees, enquanto as notas e contribuições
-ficam no ambiente compartilhado.
+O conhecimento fica em arquivos Markdown locais, fora dos repositórios. Projetos relacionados podem pertencer a um mesmo ambiente e compartilhar notas e contribuições, preservando a identidade de cada pasta de trabalho.
 
-esse vínculo é explícito. projetos que já pertencem a ambientes diferentes
-não são unidos silenciosamente. uma contribuição pode reservar arquivos em
-vários repositórios e continuar identificando onde começou.
+Essa associação é explícita. Uma contribuição pode envolver arquivos de vários repositórios e continuar identificada pelo projeto em que começou. Worktrees compartilham o ambiente do repositório, mas mantêm identidades distintas como espaços de trabalho.
 
-## buscar o contexto necessário
+## Recuperação orientada pela tarefa
 
-o agente começa com o pedido e as informações que já tem. busca conhecimento
-salvo quando uma decisão anterior ou um fato que falta importa para a tarefa.
-compartilhar um ambiente não significa carregar as notas de todos os projetos.
+As skills orientam o agente a começar pelo pedido e pelas informações já disponíveis. O conhecimento salvo é consultado quando uma decisão anterior ou um fato ausente pode mudar a condução da tarefa.
 
-as notas preservam o escopo, as fontes e as dúvidas. uma decisão confirmada
-continua distinta de uma ideia em discussão. o que já está bem documentado
-no próprio projeto pode continuar lá.
+As notas preservam escopo, fontes e incertezas. Uma decisão confirmada permanece distinta de uma hipótese, e informações já documentadas adequadamente no projeto podem continuar em sua fonte original.
 
-## manter o trabalho em andamento
+## Coordenação de alterações e continuidade
 
-quando alguém precisa continuar uma tarefa, o agente deixa um resumo curto.
-quando ela termina, incorpora o que vale guardar às notas e remove a contribuição.
-mantive o foco no estado atual, sem um arquivo histórico de toda a atividade.
+Um utilitário em Python verifica reservas de arquivos que se sobrepõem e protege atualizações de conhecimento contra a substituição de uma versão que mudou desde a última leitura.
 
-um pequeno programa em python confere reservas de arquivos que se sobrepõem
-e protege notas contra substituições depois de uma mudança não observada.
-ele também encerra uma contribuição concluída e libera suas reservas em uma
-única operação atômica.
+Quando uma tarefa precisa continuar depois, a contribuição guarda um resumo do estado atual e dos próximos passos. Na conclusão, o conhecimento relevante é consolidado e a contribuição é removida junto de suas reservas, em uma operação atômica.
 
-essas garantias ajudam os agentes que seguem o mesmo processo. não bloqueiam
-outros editores nem avaliam a qualidade da implementação. o workflows pode
-orientar a execução e a delegação; o continuity mantém o conhecimento e o
-estado de coordenação disponíveis quando forem necessários.
+As reservas coordenam agentes que seguem o mesmo procedimento. Elas não impedem alterações feitas por outros editores, uma limitação importante dessa forma de coordenação.
