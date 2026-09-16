@@ -1,5 +1,6 @@
 ---
 slug: harness
+portfolioIndex: 1
 name: cekrause/continuity
 repositoryUrl: https://github.com/cekrauseee/harness
 description: >-
