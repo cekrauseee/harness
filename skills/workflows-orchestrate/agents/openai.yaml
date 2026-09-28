@@ -1,0 +1,4 @@
+interface:
+  display_name: "Workflows Orchestrate"
+  short_description: "Configure and coordinate an authorized team."
+  default_prompt: "Use $workflows-orchestrate to coordinate the authorized team for this plan."

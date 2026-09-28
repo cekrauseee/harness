@@ -1,0 +1,4 @@
+interface:
+  display_name: "Environment Context"
+  short_description: "Find missing context and resume scoped work."
+  default_prompt: "Use $environment-context to find the prior decision needed for this task."

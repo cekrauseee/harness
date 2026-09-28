@@ -1,0 +1,4 @@
+interface:
+  display_name: "Workflows Document"
+  short_description: "Create and consolidate developer documentation."
+  default_prompt: "Use $workflows-document to simplify and consolidate this documentation."
