@@ -1,34 +1,39 @@
 #!/usr/bin/env python3
-"""Copy the single helper into independently installable skills; --check checks drift."""
+"""Generate only the helper/reference copies a self-contained skill actually uses."""
 import argparse
 from pathlib import Path
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'src'))
-from continuity import atomic_write, make_directory
+from harness import atomic_write, make_directory
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--check', action='store_true')
     args = parser.parse_args()
-    source = (ROOT / 'src/continuity.py').read_bytes()
-    folders = [p.parent / 'scripts' for p in sorted((ROOT / 'skills').glob('*/SKILL.md'))]
+    copies = []
+    for entry in sorted((ROOT / 'skills').glob('*/SKILL.md')):
+        text = entry.read_text()
+        if 'scripts/harness.py' in text:
+            copies.append((ROOT / 'src/harness.py', entry.parent / 'scripts/harness.py'))
+        if 'references/file-context.md' in text:
+            copies.append((ROOT / 'docs/file-context.md', entry.parent / 'references/file-context.md'))
     problems = []
-    for folder in folders:
-        target = folder / 'continuity.py'
-        if args.check:
-            if not target.exists() or target.read_bytes() != source:
-                problems.append(str(folder.relative_to(ROOT)))
+    for source, target in copies:
+        content = source.read_bytes()
+        if target.exists() and target.read_bytes() == content:
             continue
-        make_directory(folder)
-        if not target.exists() or target.read_bytes() != source:
-            atomic_write(target, source)
+        if args.check:
+            problems.append(str(target.relative_to(ROOT)))
+        else:
+            make_directory(target.parent)
+            atomic_write(target, content)
     if problems:
-        print('Generated helper drift: ' + ', '.join(problems))
+        print('Generated content drift: ' + ', '.join(problems))
         return 1
-    print(f'{len(folders)} standalone helper copies match src/continuity.py.')
+    print(f'{len(copies)} standalone helper/reference copies match canonical sources.')
     return 0
 
 

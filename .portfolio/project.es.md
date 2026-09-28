@@ -1,45 +1,29 @@
 ---
 description: >-
-  Conocimiento persistente y coordinación del trabajo entre agentes, tareas y
-  repositorios.
+  Contexto externo por proyecto y procesos de ingeniería específicos para agentes.
 metaDescription: >-
-  Continuity mantiene disponibles entre tareas las decisiones relevantes, los
-  hallazgos útiles y el trabajo pendiente. El conocimiento se guarda en
-  archivos Markdown locales, fuera de los repositorios.
+  Harness conserva conocimiento útil y contexto de continuación en archivos Markdown locales, fuera del repositorio. Quince skills independientes apoyan la planificación, implementación, revisión y operaciones Git.
 summary: >-
-  Continuity mantiene disponibles entre tareas las decisiones relevantes, los
-  hallazgos útiles y el trabajo pendiente. Lo creé para que el contexto pudiera
-  conservarse cuando el trabajo pasa a una conversación nueva o a otro agente.
-  Cuatro skills independientes guían la configuración de entornos, la
-  recuperación del contexto, el mantenimiento del conocimiento y la
-  coordinación de cambios compartidos.
+  Harness proporciona a cada proyecto un entorno externo compartido por sus worktrees de Git. Quince skills independientes cubren contexto, planificación modular, handoffs, coordinación de agentes y procesos de ingeniería. Los agentes consultan solo el material necesario para la tarea.
 highlights:
-  - conocimiento en archivos Markdown locales, fuera de los repositorios
-  - cuatro skills independientes
-  - recuperación del contexto cuando la tarea lo requiere
-  - reservas de archivos y coordinación atómica
+  - un entorno por proyecto y sus worktrees
+  - quince skills independientes
+  - contexto en archivos consultado cuando hace falta
+  - actualizaciones atómicas de Markdown sin reservas de archivos
 ---
 
-Continuity mantiene disponibles entre tareas las decisiones relevantes, los hallazgos útiles y el trabajo pendiente. Lo creé para que el contexto pudiera conservarse cuando el trabajo pasa a una conversación nueva o a otro agente.
+Harness proporciona a cada proyecto un entorno externo compartido por sus worktrees de Git. Quince skills independientes cubren contexto, planificación modular, handoffs, coordinación de agentes y procesos de ingeniería. Los agentes consultan solo el material necesario para la tarea.
 
-Cuatro skills independientes guían la configuración de entornos, la recuperación del contexto, el mantenimiento del conocimiento y la coordinación de cambios compartidos.
+## Contexto del proyecto fuera del repositorio
 
-## Compartir conocimiento entre proyectos
+Cada repositorio o monorepo tiene un entorno. El conocimiento útil se guarda en archivos Markdown organizados por tema. Los planes temporales, la configuración del equipo y el contexto de continuación existen solo cuando son necesarios; los pequeños cambios individuales no requieren un registro de trabajo.
 
-El conocimiento se guarda en archivos Markdown locales, fuera de los repositorios. Los proyectos relacionados pueden pertenecer al mismo entorno y compartir notas y contribuciones, manteniendo la identidad propia de cada directorio de trabajo.
+## Procesos específicos y contexto delimitado
 
-La pertenencia al entorno es explícita. Una contribución puede abarcar archivos de varios repositorios sin perder el registro del proyecto en el que comenzó. Los worktrees de Git comparten el entorno de su repositorio, pero siguen siendo espacios de trabajo distintos.
+Los planes macro son modulares independientemente del número de agentes. Los frentes de implementación y revisión pueden referenciar los mismos entregables y mantener separados sus contextos de ejecución. Los handoffs transfieren responsabilidad mediante referencias a archivos canónicos, sin copiar conversaciones.
 
-## Recuperar el contexto cuando la tarea lo requiere
+## Worktrees y persistencia segura
 
-Las skills indican a los agentes que comiencen por la solicitud y la información ya disponible. El conocimiento guardado se consulta cuando una decisión anterior o un dato que falta podría influir en la forma de abordar la tarea.
+Las nuevas worktrees se ubican dentro del entorno del proyecto. Los agentes que colaboran en un frente pueden alternar la escritura; los frentes independientes usan checkouts separados. El helper de Python protege las actualizaciones de Markdown frente a cambios realizados desde la última lectura.
 
-Las notas conservan su alcance, sus fuentes y sus incertidumbres. Las decisiones confirmadas se mantienen diferenciadas de las hipótesis, y la información que ya está documentada adecuadamente en un proyecto puede permanecer en su fuente original.
-
-## Coordinar cambios y trabajo pendiente
-
-Un helper de Python comprueba si hay reservas de archivos que se solapan y protege las actualizaciones de conocimiento para evitar que sobrescriban contenido que cambió desde la última lectura.
-
-Cuando una tarea debe retomarse más adelante, su registro de contribución guarda un resumen del estado actual y de los siguientes pasos. Una vez completado el trabajo, se consolida el conocimiento relevante y la contribución, junto con sus reservas, se elimina en una única operación atómica.
-
-Las reservas coordinan a los agentes que siguen el mismo procedimiento. No impiden las modificaciones realizadas con otras herramientas, una limitación importante de este enfoque.
+Al completar un trabajo, se consolida el conocimiento útil y se elimina el contexto temporal. El material necesario para otro frente o un handoff pendiente permanece disponible. Retirar una worktree es una decisión separada.

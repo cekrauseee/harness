@@ -1,0 +1,4 @@
+interface:
+  display_name: "Workflows Plan"
+  short_description: "Plan changes as independent deliverables."
+  default_prompt: "Use $workflows-plan to create a modular plan for this change."

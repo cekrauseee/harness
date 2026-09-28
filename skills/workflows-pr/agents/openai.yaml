@@ -1,0 +1,4 @@
+interface:
+  display_name: "Workflows PR"
+  short_description: "Describe and publish requested pull requests."
+  default_prompt: "Use $workflows-pr to draft a pull request describing the implemented change."

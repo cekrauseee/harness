@@ -1,7 +1,7 @@
 {
-  "name": "continuity",
-  "version": "0.10.0",
-  "description": "Shared project knowledge and cooperative work across multi-project environments.",
+  "name": "harness",
+  "version": "1.0.0",
+  "description": "File-native project environments and focused engineering workflows for agents.",
   "author": {
     "name": "Henrique Krause",
     "url": "https://github.com/cekrauseee"
@@ -11,17 +11,17 @@
   "license": "MIT",
   "keywords": [
     "agents",
-    "continuity",
-    "memory",
-    "tasks",
-    "projects",
+    "harness",
+    "workflows",
+    "context",
+    "git",
     "skills"
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Continuity",
-    "shortDescription": "Knowledge and shared work across project environments.",
-    "longDescription": "Four independent skills for environment setup, targeted recall, durable knowledge and safe contribution management across project folders and repositories.",
+    "displayName": "Harness",
+    "shortDescription": "Project context and focused agent workflows.",
+    "longDescription": "Fifteen self-contained skills for project environments, modular planning, handoffs, agent coordination, implementation, reviews, documentation and Git. Persistent context stays outside the repository; new worktrees stay inside the project environment.",
     "developerName": "Henrique Krause",
     "category": "Productivity",
     "capabilities": [
@@ -29,9 +29,9 @@
     ],
     "websiteURL": "https://github.com/cekrauseee/harness",
     "defaultPrompt": [
-      "Create a shared environment for these projects.",
-      "Find the prior decision needed for this task.",
-      "Reserve files across these projects and complete the contribution."
+      "Plan this change in independent modules.",
+      "Transfer this work to another agent.",
+      "Prepare a pull request from the implemented change."
     ]
   }
 }
