@@ -1,0 +1,4 @@
+interface:
+  display_name: "Environment Setup"
+  short_description: "One external context environment per project."
+  default_prompt: "Use $environment-setup to set up this project's external environment."

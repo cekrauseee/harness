@@ -1,47 +1,33 @@
 ---
 slug: harness
 portfolioIndex: 1
-name: cekrause/continuity
+name: cekrause/harness
 repositoryUrl: https://github.com/cekrauseee/harness
 description: >-
-  Persistent knowledge and coordination across agents, tasks, and repositories.
+  External project context and focused engineering workflows for agents.
 metaDescription: >-
-  Continuity keeps relevant decisions, useful findings, and unfinished work
-  available between agent tasks. Knowledge lives in local Markdown files outside
-  the repositories.
+  Harness keeps useful knowledge and continuation context in local Markdown files outside the repository. Fifteen independent skills support planning, implementation, review and Git workflows.
 summary: >-
-  Continuity keeps relevant decisions, useful findings, and unfinished work
-  available between agent tasks. I built it so that context could remain
-  available when work moves to a new conversation or another agent. Four
-  independent skills guide environment setup, context retrieval, knowledge
-  maintenance, and coordination of shared changes.
+  Harness gives each project an external environment shared by its Git worktrees. Fifteen independent skills cover context, modular planning, handoffs, agent coordination and engineering workflows. Agents load only the material their task needs.
 highlights:
-  - knowledge in local Markdown files outside repositories
-  - four independent skills
-  - retrieving context when the task needs it
-  - file reservations and atomic coordination
+  - one environment per project and its worktrees
+  - fifteen independent skills
+  - file-based context retrieved only when needed
+  - atomic Markdown updates without file reservations
 ---
 
-Continuity keeps relevant decisions, useful findings, and unfinished work available between agent tasks. I built it so that context could remain available when work moves to a new conversation or another agent.
+Harness gives each project an external environment shared by its Git worktrees. Fifteen independent skills cover context, modular planning, handoffs, agent coordination and engineering workflows. Agents load only the material their task needs.
 
-Four independent skills guide environment setup, context retrieval, knowledge maintenance, and coordination of shared changes.
+## Project context outside the repository
 
-## Sharing knowledge across projects
+Each repository or monorepo has one environment. Useful knowledge lives in Markdown files organized by subject. Temporary plans, team configuration and continuation context exist only when needed; small solo changes require no work record.
 
-Knowledge lives in local Markdown files outside the repositories. Related projects can belong to the same environment and share notes and contributions, while each working directory retains its own identity.
+## Focused workflows and scoped context
 
-Environment membership is explicit. A contribution can span files in several repositories while retaining a record of the project where it started. Git worktrees share their repository’s environment but remain distinct workspaces.
+Macro plans are modular regardless of the number of agents. Implementation and review fronts can reference the same deliverables while keeping their execution context separate. Handoffs transfer responsibility through canonical file references rather than copied conversations.
 
-## Retrieving context when the task needs it
+## Worktrees and safe persistence
 
-The skills instruct agents to begin with the request and the information already available. Stored knowledge is consulted when an earlier decision or a missing fact could affect how the task is approached.
+New worktrees live inside the project environment. Cooperating agents can alternate writes in one front; independent writing fronts use separate checkouts. The Python helper protects Markdown updates against overwriting an intervening change.
 
-Notes preserve their scope, sources, and uncertainty. Confirmed decisions remain distinct from hypotheses, and information already documented adequately in a project can stay at its original source.
-
-## Coordinating changes and unfinished work
-
-A Python helper checks for overlapping file reservations and protects knowledge updates from overwriting content that has changed since it was last read.
-
-When a task needs to be resumed later, its contribution record holds a summary of the current state and next steps. Once the work is complete, relevant knowledge is consolidated, and the contribution and its reservations are removed in a single atomic operation.
-
-Reservations coordinate agents that follow the same procedure. They do not prevent edits made through other tools, an important limitation of this approach.
+After a work item is complete, useful knowledge is consolidated and temporary context is removed. Material still needed by another front or pending handoff remains available. Worktree retirement is a separate decision.

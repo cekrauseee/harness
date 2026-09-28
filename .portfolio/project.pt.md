@@ -1,45 +1,29 @@
 ---
 description: >-
-  Conhecimento persistente e coordenação de trabalho entre agentes, tarefas e
-  repositórios.
+  Contexto externo por projeto e processos de engenharia específicos para agentes.
 metaDescription: >-
-  O Continuity mantém decisões relevantes, descobertas úteis e trabalho pendente
-  disponíveis entre tarefas com agentes. O conhecimento fica em arquivos
-  Markdown locais, fora dos repositórios.
+  O Harness mantém conhecimento útil e contexto de continuação em arquivos Markdown locais, fora do repositório. Quinze skills independentes apoiam planejamento, implementação, revisão e operações Git.
 summary: >-
-  O Continuity mantém decisões relevantes, descobertas úteis e trabalho pendente
-  disponíveis entre tarefas com agentes. Desenvolvi o projeto para permitir que
-  esse contexto acompanhe o trabalho quando ele passa para outra conversa ou
-  outro executor. Quatro skills independentes orientam a configuração dos
-  ambientes, a recuperação de contexto, a manutenção do conhecimento e a
-  coordenação de alterações compartilhadas.
+  O Harness oferece a cada projeto um ambiente externo compartilhado por suas worktrees Git. Quinze skills independentes cobrem contexto, planejamento modular, handoffs, coordenação de agentes e processos de engenharia. Os agentes leem apenas o material necessário à tarefa.
 highlights:
-  - conhecimento compartilhado entre projetos
-  - arquivos Markdown locais, fora dos repositórios
-  - recuperação orientada pela tarefa
-  - coordenação de alterações compartilhadas
+  - um ambiente por projeto e suas worktrees
+  - quinze skills independentes
+  - contexto em arquivos consultado quando necessário
+  - atualizações atômicas de Markdown sem reservas de arquivos
 ---
 
-O Continuity mantém decisões relevantes, descobertas úteis e trabalho pendente disponíveis entre tarefas com agentes. Desenvolvi o projeto para permitir que esse contexto acompanhe o trabalho quando ele passa para outra conversa ou outro executor.
+O Harness oferece a cada projeto um ambiente externo compartilhado por suas worktrees Git. Quinze skills independentes cobrem contexto, planejamento modular, handoffs, coordenação de agentes e processos de engenharia. Os agentes leem apenas o material necessário à tarefa.
 
-Quatro skills independentes orientam a configuração dos ambientes, a recuperação de contexto, a manutenção do conhecimento e a coordenação de alterações compartilhadas.
+## Contexto do projeto fora do repositório
 
-## Conhecimento compartilhado entre projetos
+Cada repositório ou monorepo tem um ambiente. O conhecimento útil fica em arquivos Markdown organizados por assunto. Planos temporários, configuração de equipe e contexto de continuação existem apenas quando necessários; pequenas correções solo dispensam registro de trabalho.
 
-O conhecimento fica em arquivos Markdown locais, fora dos repositórios. Projetos relacionados podem pertencer a um mesmo ambiente e compartilhar notas e contribuições, preservando a identidade de cada pasta de trabalho.
+## Processos específicos e contexto delimitado
 
-Essa associação é explícita. Uma contribuição pode envolver arquivos de vários repositórios e continuar identificada pelo projeto em que começou. Worktrees compartilham o ambiente do repositório, mas mantêm identidades distintas como espaços de trabalho.
+Planos macro são modulares independentemente da quantidade de agentes. Frentes de implementação e revisão podem referenciar os mesmos entregáveis, mantendo separados seus contextos de execução. Handoffs transferem responsabilidade por referências aos arquivos canônicos, sem copiar conversas.
 
-## Recuperação orientada pela tarefa
+## Worktrees e persistência segura
 
-As skills orientam o agente a começar pelo pedido e pelas informações já disponíveis. O conhecimento salvo é consultado quando uma decisão anterior ou um fato ausente pode mudar a condução da tarefa.
+Novas worktrees ficam dentro do ambiente do projeto. Agentes que colaboram em uma frente podem alternar a escrita; frentes independentes usam checkouts separados. O utilitário Python protege atualizações de Markdown contra a substituição de mudanças feitas depois da leitura.
 
-As notas preservam escopo, fontes e incertezas. Uma decisão confirmada permanece distinta de uma hipótese, e informações já documentadas adequadamente no projeto podem continuar em sua fonte original.
-
-## Coordenação de alterações e continuidade
-
-Um utilitário em Python verifica reservas de arquivos que se sobrepõem e protege atualizações de conhecimento contra a substituição de uma versão que mudou desde a última leitura.
-
-Quando uma tarefa precisa continuar depois, a contribuição guarda um resumo do estado atual e dos próximos passos. Na conclusão, o conhecimento relevante é consolidado e a contribuição é removida junto de suas reservas, em uma operação atômica.
-
-As reservas coordenam agentes que seguem o mesmo procedimento. Elas não impedem alterações feitas por outros editores, uma limitação importante dessa forma de coordenação.
+Ao concluir um trabalho, o conhecimento útil é consolidado e o contexto temporário é removido. Material ainda necessário a outra frente ou a um handoff pendente permanece disponível. A retirada de uma worktree é uma decisão separada.

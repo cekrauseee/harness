@@ -1,0 +1,4 @@
+interface:
+  display_name: "Workflows Implement"
+  short_description: "Implement changes and directed corrections."
+  default_prompt: "Use $workflows-implement to implement this change and verify its behavior."
