@@ -1,0 +1,4 @@
+interface:
+  display_name: "Workflows Deliberate"
+  short_description: "Develop analyses and decisions with agent peers."
+  default_prompt: "Use $workflows-deliberate to think through this question with another agent as an equal peer."
