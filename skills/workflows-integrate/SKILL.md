@@ -1,6 +1,6 @@
 ---
 name: workflows-integrate
-description: Merge or rebase authorized Git work and resolve conflicts while preserving the intended changes.
+description: Merge, rebase or resolve Git conflicts within authorized integration work, preserving both lines of intent.
 ---
 
 # Integrate

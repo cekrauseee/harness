@@ -1,6 +1,6 @@
 ---
 name: workflows-document
-description: Create, update, audit, simplify or consolidate project documentation for its intended readers.
+description: Write, revise or audit project documentation, including focused edits and consolidation for its intended readers.
 ---
 
 # Document
@@ -13,4 +13,4 @@ For cleanup, synthesis or consolidation, remove duplication and obsolete materia
 
 Project architecture, APIs, development guidance and durable technical explanations belong in the repository. Agent assignments, numbered execution stages, attempts, status and handoffs belong in the external environment. Translate useful learning into product terms; do not copy internal plans into public or developer documentation. A real architectural module may be named as such; a temporary planning label is not a product concept.
 
-Use concise English by default, honoring explicit audience and project requirements. Do not invent commands, behavior or evidence. Check affected references and applicable documentation validation proportionately, reusing valid results. Deliver the revised canonical material or requested audit findings and material gaps. Documentation work does not imply commit or publication.
+Use concise English by default, honoring explicit audience and project requirements. Do not invent commands, behavior or evidence. Check affected references and applicable documentation validation proportionately, reusing valid results. Deliver the revised canonical material or requested audit findings and material gaps, then continue any broader authorized task. Documentation work does not imply commit or publication.
