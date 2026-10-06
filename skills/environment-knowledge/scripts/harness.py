@@ -15,7 +15,7 @@ import sys
 import tempfile
 import time
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 FORMAT = "harness-project-v1"
 LOCK_TIMEOUT = 10.0
 
@@ -276,11 +276,14 @@ def initialize(home, data):
             try:
                 atomic_write(temporary / "environment.json", encoded({"format": FORMAT, "project": project}))
                 atomic_write(temporary / "README.md", (
-                    f"# {root.name}\n\nProject: `{root}`\n\n## Map\n\n"
+                    f"# {root.name}\n\nLocal project: `{root}`\n\n"
+                    "Consult this map when project context is unknown; follow only relevant links.\n"
+                    "Add descriptive links as useful subjects or ongoing work appear.\n\n## Map\n\n"
                     "- `knowledge/`: durable internal knowledge by subject.\n"
                     "- `work/`: plans and continuation context, only while needed.\n"
                     "- `worktrees/`: Git checkouts; exclude these from knowledge searches.\n\n"
-                    "## Project-specific guidance\n\nAdd confirmed local guidance when needed.\n"
+                    "## Project-specific guidance\n\n"
+                    "Keep one canonical source per decision; link to maintained sources instead of copying them.\n"
                 ).encode())
                 os.rename(temporary, folder)
                 sync_directory(folder.parent)

@@ -7,7 +7,7 @@ Harness keeps project context in external files and provides focused engineering
 | Environment | Purpose |
 | --- | --- |
 | [environment-setup](skills/environment-setup/SKILL.md) | Bind one project and all its worktrees to an external environment |
-| [environment-context](skills/environment-context/SKILL.md) | Retrieve missing knowledge or scoped continuation context |
+| [environment-context](skills/environment-context/SKILL.md) | Discover applicable constraints, retrieve missing knowledge or resume scoped work |
 | [environment-knowledge](skills/environment-knowledge/SKILL.md) | Preserve and correct confirmed durable internal knowledge |
 | [environment-close-work](skills/environment-close-work/SKILL.md) | Consolidate useful knowledge and remove completed work context |
 
@@ -25,7 +25,9 @@ Harness keeps project context in external files and provides focused engineering
 | [workflows-commit](skills/workflows-commit/SKILL.md) | Prepare cohesive Conventional Commits |
 | [workflows-pr](skills/workflows-pr/SKILL.md) | Describe and publish the requested macro change for review |
 
-These are independent process entry points, not a mandatory pipeline. A small solo correction can use implementation alone. A large plan can be handed to another orchestrator; implementation and review fronts can then share module specifications while using separate execution context. Integration is used only when the work requires it. Applying review findings is a mode of implementation, not an additional process.
+Select a skill by the responsibility of the requested outcome or a distinct necessary operation, without requiring the user to name it. Read its current instructions or reuse them when already available. Suboperations fully covered by the active skill do not require separate workflows: creating a worktree can cover its branch setup, and finishing a plan within authorized implementation returns to implementation. A planning-only request still stops at the plan.
+
+These are independent process entry points, not a mandatory pipeline. A small solo correction can use implementation alone. A large plan can be handed to another orchestrator; implementation and review fronts can then share module specifications while using separate execution context. Integration is used only when the work requires it. Applying review findings is a mode of implementation, not an additional process. Workflows respect the user's testing, QA and delegation policies and project requirements; they do not prescribe tests for every edit or audit every delivery again.
 
 ## Project environments
 
@@ -45,11 +47,15 @@ environment/
     handoffs/<recipient-scope>.md
 ```
 
-Create only the files needed for the current work. Macro plans are always modular; modules describe deliverables independently of agent trees and PR boundaries. Executors start from their own front/module, not the whole environment. Temporary team configuration records logical roles and native host IDs when agents actually start. Messages carry pointers and instructions; files retain the context needed to continue.
+Create only the files needed for the current work. When project context is unknown, locate the existing environment and inspect its short map, then follow relevant references. With a supplied continuation entry, start there. Reuse sufficient current context; discovery is neither a repository survey nor a reason to initialize empty storage.
+
+Preserve decisions, useful investigation and continuation when losing the conversation would cause meaningful loss, without requiring a separate save request. Reading knowledge does not require a work record. Macro plans describe modular deliverables independently of agent trees and PR boundaries; a single table may suffice. Team/front files exist only when shared coordination or continuation needs them. Short teams can use native messages and results alone. Messages carry pointers and instructions; files retain useful context, not authority to perform new actions.
 
 All new worktrees belong under the environment's `worktrees/` directory. Cooperating agents can alternate writes in one front; independent writing fronts use separate checkouts. Retiring a checkout is separate from closing a work item.
 
-When the whole work is complete, consolidate useful durable knowledge and remove its temporary material without an archive or receipt. Preserve anything still needed by active fronts, pending handoffs or other ongoing work. See the [file context contract](docs/file-context.md) for the canonical responsibilities and destinations.
+When the whole work is complete, consolidate useful durable knowledge and preserve retained deliverables before removing temporary material without an archive or receipt. Inspect all file types, including HTML outputs, and update consumer references to durable destinations outside the closing subtree. Preserve anything still needed by active fronts, pending handoffs or other ongoing work. See the [file context contract](docs/file-context.md) for the canonical responsibilities and destinations.
+
+Storage is currently local. The [remote storage boundary](docs/remote-storage.md) specifies requirements for a separate future file service; this release does not synchronize environments or expose an MCP service.
 
 ## Product documentation and internal context
 
@@ -60,7 +66,7 @@ Code and developer documentation must make sense without the agents' execution p
 For standalone skills in supported hosts:
 
 ```bash
-npx skills add cekrauseee/harness --skill '*' -g -a codex claude-code -y
+pnpx skills add cekrauseee/harness --skill '*' -g -a codex claude-code -y
 ```
 
 Use `.` for a local checkout. Each skill is self-contained. Native Codex and Claude plugin manifests are also included; choose one discovery route per host to avoid duplicates. See [installation](docs/install.md) for plugin setup and deliberate replacement of existing installations.
