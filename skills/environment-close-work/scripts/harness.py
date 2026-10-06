@@ -15,7 +15,7 @@ import sys
 import tempfile
 import time
 
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 FORMAT = "harness-project-v1"
 LOCK_TIMEOUT = 10.0
 

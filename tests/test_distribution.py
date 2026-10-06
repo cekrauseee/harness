@@ -59,7 +59,7 @@ class DistributionTest(unittest.TestCase):
                        and any(isinstance(t, ast.Name) and t.id == 'VERSION' for t in n.targets))
         self.assertEqual(version, codex['version'].split('+')[0])
         self.assertEqual({Path(p).name for p in claude['skills']}, names)
-        self.assertEqual(len(names), 15)
+        self.assertEqual(len(names), 16)
         self.assertEqual(codex['skills'], './skills/')
         self.assertTrue(all(n.startswith(('environment-', 'workflows-')) for n in names))
 

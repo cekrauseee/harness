@@ -1,6 +1,6 @@
 {
   "name": "harness",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "File-native project environments and focused engineering workflows for agents.",
   "author": {
     "name": "Henrique Krause"
@@ -12,6 +12,7 @@
     "./skills/environment-setup",
     "./skills/workflows-branch",
     "./skills/workflows-commit",
+    "./skills/workflows-deliberate",
     "./skills/workflows-document",
     "./skills/workflows-handoff",
     "./skills/workflows-implement",

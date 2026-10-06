@@ -16,6 +16,7 @@ Harness keeps project context in external files and provides focused engineering
 | [workflows-plan](skills/workflows-plan/SKILL.md) | Produce a modular macro plan |
 | [workflows-handoff](skills/workflows-handoff/SKILL.md) | Prepare or assume a transfer to another agent or chat |
 | [workflows-orchestrate](skills/workflows-orchestrate/SKILL.md) | Configure and coordinate authorized agent work |
+| [workflows-deliberate](skills/workflows-deliberate/SKILL.md) | Develop analyses, decisions and proposals through authorized peer deliberation |
 | [workflows-implement](skills/workflows-implement/SKILL.md) | Implement changes and directed corrections |
 | [workflows-review](skills/workflows-review/SKILL.md) | Review an identified version for concrete defects |
 | [workflows-document](skills/workflows-document/SKILL.md) | Create, update, simplify and consolidate project documentation |
