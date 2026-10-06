@@ -1,6 +1,6 @@
 ---
 name: workflows-pr
-description: Draft, create or update a pull request describing the final macro change and expected behavior.
+description: Draft pull-request text or create and update an authorized PR describing the final change and expected behavior.
 ---
 
 # Pull request

@@ -5,10 +5,16 @@ Choose one discovery route per host. Installing both the native plugin and stand
 ## Standalone skills
 
 ```bash
-npx skills add cekrauseee/harness --skill '*' -g -a codex claude-code -y
+pnpx skills add cekrauseee/harness --skill '*' -g -a codex claude-code -y
 ```
 
-Select only the desired host or skills when appropriate. Use `.` to install a local checkout. Each skill contains its own needed helper and references; it does not require its siblings or access to this repository after installation.
+Select only the desired host or skills when appropriate. Use `.` to install the current local checkout, including unpublished changes, rather than fetching the remote release. For Codex only:
+
+```bash
+pnpx skills add . --skill '*' -g -a codex -y
+```
+
+The CLI requires Node.js on `PATH`. `npx skills` is an alternative to `pnpx skills`. Each skill contains its own needed helper and references; it does not require its siblings or access to this repository after installation. This route installs the standalone skills; it does not register a native plugin or an MCP server.
 
 ## Native plugins
 
@@ -27,3 +33,5 @@ Bind the intended project with `environment-setup` and verify resolution from it
 ## Host behavior
 
 Installing Harness does not rewrite AGENTS.md or CLAUDE.md. When an instruction update is requested, use the short behavioral responsibilities in [host integration](../skills/environment-setup/references/host-integration.md) while preserving unrelated rules. Do not introduce hooks, broad context injection or a required sequence of skills.
+
+Discovery metadata enables automatic selection; a global instruction can require selection by responsibility without making the user name skills. Neither installation nor that instruction guarantees every model invocation. Verify the installed inventory separately from observed selection and application. A successful CLI install alone does not establish behavioral reliability.

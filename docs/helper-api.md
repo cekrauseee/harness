@@ -39,6 +39,6 @@ python3 src/harness.py inspect-work --project /path/to/project --work access-con
 python3 src/harness.py close-work --project /path/to/project --work access-control --expect <tree-hash>
 ```
 
-`inspect-work` returns filenames and a digest of that one work tree. `close-work` checks that digest, atomically detaches `work/<name>/` and deletes it. It never removes knowledge, another work directory or Git worktrees. The caller must establish completion, consolidate useful knowledge and preserve active consumers before invoking it; Markdown is not interpreted as an agent state machine.
+`inspect-work` returns filenames and a digest of that one work tree, including non-Markdown files. `close-work` checks that digest, atomically detaches `work/<name>/` and deletes all its contents. It never removes knowledge, another work directory or Git worktrees. The caller must establish completion, consolidate useful knowledge, preserve active consumers and relocate retained deliverables outside the subtree with verified contents and updated references before invoking it. Obtain a fresh digest after those changes. Markdown is not interpreted as an agent state machine, and the helper does not determine artifact retention.
 
 A process interruption during removal may leave `work/.closing-<name>/`. Retrying the same close finishes removal. If the work name was reused while that directory remains, the helper refuses to delete either. Successful completion leaves no archive or receipt. Other filesystem failures are reported as `io_error`; inspect the named work before retrying.

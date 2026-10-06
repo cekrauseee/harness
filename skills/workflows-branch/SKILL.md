@@ -1,6 +1,6 @@
 ---
 name: workflows-branch
-description: Prepare or create a Git branch whose name describes the intended change.
+description: Propose, create or select a Git branch for an intended change; worktree creation can cover its own branch operation.
 ---
 
 # Branch
@@ -11,4 +11,4 @@ Use `<type>/<main-title>` in English, with a concise lowercase hyphenated title:
 
 Create or select the branch within the authorized operation, preserving existing staged and unstaged work. Verify the resulting branch and base from the operation result or a targeted Git check. A branch can exist in the current checkout without another worktree. Opening a worktree may create its branch in the same operation; do not require duplicate user requests or separate rituals.
 
-Return the branch name, relevant base and any collision or limitation. Branch work does not imply a work directory, agent creation, commit, push or PR.
+Return the branch name, relevant base and any collision or limitation, then resume the authorized work that needed the branch. Branch work does not imply a work directory, agent creation, commit, push or PR.
