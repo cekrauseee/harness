@@ -314,27 +314,27 @@ class RuntimeTest(unittest.TestCase):
         self.error('unsafe_path', self.call, 'inspect-work', work='one')
         self.error('invalid_input', self.call, 'inspect-work', work='../one')
 
-    def test_interrupted_close_is_recoverable(self):
+    def test_close_moves_work_to_trash_without_overwriting(self):
         folder = self.env()
         self.write('work/one/README.md', 'complete')
+        (folder / 'work/one/output.html').write_text('<p>kept</p>')
         snapshot = self.call('inspect-work', work='one')
-        with patch.object(harness.shutil, 'rmtree', side_effect=OSError('simulated')):
-            self.error('io_error', self.call, 'close-work', work='one', expect=snapshot['sha256'])
+        first = self.call('close-work', work='one', expect=snapshot['sha256'])
+        trashed = Path(first['trash'])
+        self.assertEqual(trashed.parent, folder / 'trash')
+        self.assertTrue(trashed.name.startswith('one-'))
+        self.assertEqual((trashed / 'output.html').read_text(), '<p>kept</p>')
         self.assertFalse((folder / 'work/one').exists())
-        self.assertTrue((folder / 'work/.closing-one').exists())
-        self.assertTrue(self.call('close-work', work='one', expect=snapshot['sha256'])['changed'])
-        self.assertEqual(list((folder / 'work').iterdir()), [])
-
-    def test_interrupted_close_does_not_remove_reused_name(self):
-        folder = self.env()
-        self.write('work/one/README.md', 'complete')
-        snapshot = self.call('inspect-work', work='one')
-        with patch.object(harness.shutil, 'rmtree', side_effect=OSError('simulated')):
-            self.error('io_error', self.call, 'close-work', work='one', expect=snapshot['sha256'])
         self.write('work/one/README.md', 'new work')
-        self.error('close_pending', self.call, 'close-work', work='one', expect=snapshot['sha256'])
-        self.assertEqual((folder / 'work/one/README.md').read_text(), 'new work')
-        self.assertTrue((folder / 'work/.closing-one').exists())
+        snapshot = self.call('inspect-work', work='one')
+        with patch.object(harness.time, 'strftime', return_value=trashed.name[len('one-'):]):
+            second = self.call('close-work', work='one', expect=snapshot['sha256'])
+        self.assertNotEqual(second['trash'], first['trash'])
+        self.assertEqual((Path(second['trash']) / 'README.md').read_text(), 'new work')
+        self.assertEqual((trashed / 'README.md').read_text(), 'complete')
+        self.assertEqual(sorted(p.name for p in (folder / 'trash').iterdir()), sorted([trashed.name, Path(second['trash']).name]))
+        self.error('unsafe_path', self.call, 'read', file='trash/one/README.md')
+        self.assertEqual(self.call('resolve')['trash'], str(folder / 'trash'))
 
     def test_cli_json_input_stdin_and_errors(self):
         command = [sys.executable, '-B', str(ROOT / 'src/harness.py'), '--home', str(self.home)]

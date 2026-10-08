@@ -1,4 +1,0 @@
-interface:
-  display_name: "Workflows Review"
-  short_description: "Review identified code changes for defects."
-  default_prompt: "Use $workflows-review to review this version for actionable defects."

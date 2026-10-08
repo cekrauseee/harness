@@ -1,4 +1,0 @@
-interface:
-  display_name: "Workflows Integrate"
-  short_description: "Integrate Git changes without losing intent."
-  default_prompt: "Use $workflows-integrate to integrate these Git changes while preserving both sides."

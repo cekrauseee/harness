@@ -1,4 +1,0 @@
-interface:
-  display_name: "Workflows Handoff"
-  short_description: "Transfer or assume scoped agent work."
-  default_prompt: "Use $workflows-handoff to transfer this work to another agent."

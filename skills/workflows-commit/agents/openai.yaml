@@ -1,4 +1,0 @@
-interface:
-  display_name: "Workflows Commit"
-  short_description: "Prepare cohesive Conventional Commits."
-  default_prompt: "Use $workflows-commit to create a cohesive commit from these changes."

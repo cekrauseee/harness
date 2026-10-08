@@ -4,7 +4,7 @@ Use the file for the current responsibility directly. Read this contract only wh
 
 ## Location and boundaries
 
-One external environment belongs to one project. A repository or monorepo and all its worktrees share that environment. Its README is a short map and a place for project-specific guidance. Link to subjects and ongoing work with enough applicability information to discover unknown constraints, without copying their contents. A fundamental rule can live in the map itself; link to that canonical rule from other files. `knowledge/<subject>.md` holds confirmed durable internal knowledge. Under the current local storage contract, all new Git checkouts go under `worktrees/<name>/`; exclude them from knowledge searches.
+One external environment belongs to one project. A repository or monorepo and all its worktrees share that environment. Its README is a short map and a place for project-specific guidance. Link to subjects and ongoing work with enough applicability information to discover unknown constraints, without copying their contents. A fundamental rule can live in the map itself; link to that canonical rule from other files. `knowledge/<subject>.md` holds confirmed durable internal knowledge. Checkouts Harness creates default to `worktrees/<name>/`; checkouts the host manages are accepted where they are, and every checkout of the repository resolves to the same environment. `trash/` holds closed work until the user purges it. Exclude `worktrees/` and `trash/` from knowledge searches.
 
 For substantive work without known project context, locate the existing environment and consult its map, then follow only relevant references. With a supplied continuation entry, start there. Sufficient current context can be reused across turns. Isolated questions and mechanical edits do not require discovery; a missing binding does not justify initialization merely to look for context.
 
@@ -34,7 +34,7 @@ A front is a cooperating group or solo executor with its own responsibility. Cre
 
 This is the executor's entry point. Follow module and dependency references only as needed. Check relevant workspace reality when resuming; a file cannot prove that a checkout or remote state has remained unchanged.
 
-One front is responsible for writes to a workspace. A pair can share it and coordinate alternation without a claim for every file or action. Independent writing fronts use separate worktrees. Multiple fronts can reference the same modules; front topology does not redefine deliverables. In a pair, agree who maintains shared context or coordinate updates before overwriting it.
+One front is responsible for writes to a workspace. A pair can share it and coordinate alternation without a claim for every file or action. Independent writing fronts use separate worktrees, recorded by path in their context. Multiple fronts can reference the same modules; front topology does not redefine deliverables. In a pair, agree who maintains shared context or coordinate updates before overwriting it.
 
 Review uses identified versions. Persist actionable findings in the review front's `findings.md` when the assignment needs that artifact. Identify the version and comparison base, impact and source location; preserve unresolved findings needed by the next round. Do not mirror findings in the plan or module. Record current continuation in the front, without duplicating the findings.
 
@@ -54,13 +54,13 @@ If the existing files already carry the necessary context, pointers and the assi
 
 Files are canonical for relevant persistent context; messages carry pointers, instructions and authorization. Update at meaningful changes of direction, responsibility, continuation or result, not after every action. Maintain map links when adding, moving or removing useful context. Prefer project-relative source references, paired with a revision when validity depends on it; identify local execution paths as local. Do not transcribe conversations or preserve secrets and reasoning traces.
 
-Consolidate useful durable knowledge and remove temporary material after the whole work is complete. Preserve files still consumed by an active front, pending handoff or other ongoing work. Finishing one module or leaving a chat does not close the work. Do not create an archive, receipt or obligatory final summary. Worktree and branch lifecycles remain separate.
+Consolidate useful durable knowledge and close temporary material after the whole work is complete. Preserve files still consumed by an active front, pending handoff or other ongoing work. Finishing one module or leaving a chat does not close the work. Do not create an archive, receipt or obligatory final summary. Worktree and branch lifecycles remain separate.
 
-Before closure, inspect every file type in the work subtree. Retained deliverables need a durable destination outside that subtree and updated consumer references before removal. Choose the destination according to the artifact and project; no universal output directory or registry is required. Confirm preserved contents and references. Derived views identify their maintained source where one exists; original artifacts must not be assumed regenerable. If retention is unresolved, leave the work open. The helper removes the whole selected subtree, including HTML and other non-Markdown files.
+Before closure, inspect every file type in the work subtree. Retained deliverables need a durable destination outside that subtree and updated consumer references before removal. Choose the destination according to the artifact and project; no universal output directory or registry is required. Confirm preserved contents and references. Derived views identify their maintained source where one exists; original artifacts must not be assumed regenerable. If retention is unresolved, leave the work open. The helper moves the whole selected subtree, including HTML and other non-Markdown files, to `trash/<work>-<timestamp>/` in one atomic rename; the user purges the trash.
 
 ## Helper access
 
-The skill's bundled `scripts/harness.py` resolves a missing environment location and performs atomic Markdown updates. Use its absolute path from another directory. Setup is only needed if no environment exists and the task needs persistent context.
+The skill's bundled `scripts/harness.py` resolves a missing environment location and performs atomic Markdown updates. Use its absolute path from another directory. Setup is only needed if no environment exists and the task needs persistent context. The `environment` skill carries the full read and save procedure.
 
 ```bash
 python3 scripts/harness.py resolve --project /path/to/project

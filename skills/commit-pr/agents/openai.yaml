@@ -1,0 +1,4 @@
+interface:
+  display_name: "Commit & PR"
+  short_description: "Conventional Commits and prose pull requests."
+  default_prompt: "Use $commit-pr to commit this change and draft its pull request."

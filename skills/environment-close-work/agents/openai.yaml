@@ -1,4 +1,0 @@
-interface:
-  display_name: "Environment Close Work"
-  short_description: "Preserve deliverables and close completed context."
-  default_prompt: "Use $environment-close-work to preserve needed outputs and close this completed work."

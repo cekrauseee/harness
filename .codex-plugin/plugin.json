@@ -1,6 +1,6 @@
 {
   "name": "harness",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "description": "File-native project environments and focused engineering workflows for agents.",
   "author": {
     "name": "Henrique Krause",
@@ -21,7 +21,7 @@
   "interface": {
     "displayName": "Harness",
     "shortDescription": "Project context and focused agent workflows.",
-    "longDescription": "Sixteen self-contained skills for project environments, modular planning, handoffs, agent coordination, peer deliberation, implementation, reviews, documentation and Git. Persistent context stays outside the repository; new worktrees stay inside the project environment.",
+    "longDescription": "Ten self-contained skills for project environments, modular planning, handoffs, agent coordination, peer deliberation, implementation, reviews, worktrees, commits and pull requests. Persistent context stays outside the repository; closed work moves to the environment trash.",
     "developerName": "Henrique Krause",
     "category": "Productivity",
     "capabilities": [

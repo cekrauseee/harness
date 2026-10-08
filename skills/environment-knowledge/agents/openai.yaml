@@ -1,4 +1,0 @@
-interface:
-  display_name: "Environment Knowledge"
-  short_description: "Maintain confirmed internal project knowledge."
-  default_prompt: "Use $environment-knowledge to preserve this confirmed project decision."

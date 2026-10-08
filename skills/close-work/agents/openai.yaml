@@ -1,0 +1,6 @@
+interface:
+  display_name: "Close Work"
+  short_description: "Preserve outputs and close completed work context."
+  default_prompt: "Use $close-work to preserve needed outputs and close this completed work."
+policy:
+  allow_implicit_invocation: false

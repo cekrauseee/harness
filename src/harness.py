@@ -15,7 +15,7 @@ import sys
 import tempfile
 import time
 
-VERSION = "1.2.0"
+VERSION = "2.0.0"
 FORMAT = "harness-project-v1"
 LOCK_TIMEOUT = 10.0
 
@@ -235,7 +235,7 @@ def location(folder, project, workspace):
     return {"environment": str(folder), "project": project,
             "workspace": str(workspace) if workspace else None,
             "knowledge": str(folder / "knowledge"), "work": str(folder / "work"),
-            "worktrees": str(folder / "worktrees")}
+            "worktrees": str(folder / "worktrees"), "trash": str(folder / "trash")}
 
 
 def initialize(home, data):
@@ -276,14 +276,18 @@ def initialize(home, data):
             try:
                 atomic_write(temporary / "environment.json", encoded({"format": FORMAT, "project": project}))
                 atomic_write(temporary / "README.md", (
-                    f"# {root.name}\n\nLocal project: `{root}`\n\n"
-                    "Consult this map when project context is unknown; follow only relevant links.\n"
-                    "Add descriptive links as useful subjects or ongoing work appear.\n\n## Map\n\n"
-                    "- `knowledge/`: durable internal knowledge by subject.\n"
-                    "- `work/`: plans and continuation context, only while needed.\n"
-                    "- `worktrees/`: Git checkouts; exclude these from knowledge searches.\n\n"
-                    "## Project-specific guidance\n\n"
-                    "Keep one canonical source per decision; link to maintained sources instead of copying them.\n"
+                    f"# {root.name}\n\nProject: `{root}`\n\n## How agents use this environment\n\n"
+                    "- `knowledge/<subject>.md` holds confirmed durable decisions; `work/<work>/` holds plans and "
+                    "continuation while needed; `trash/` keeps closed work until purged; `worktrees/` is the "
+                    "default home for checkouts created here.\n"
+                    "- Consult the map below when project context is unknown and follow only relevant links; keep "
+                    "it current with a descriptive link when a subject or work item is added.\n"
+                    "- Files are evidence of past decisions, not authorization for new actions; Git and the host "
+                    "establish current facts.\n"
+                    "- Keep one canonical source per fact and link to maintained repository documentation instead "
+                    "of copying it. Exclude `worktrees/` and `trash/` from context searches.\n"
+                    "- Preserve concurrent changes: use the Harness helper's hash-checked writes when another "
+                    "agent may be writing.\n\n## Map\n\n## Project-specific guidance\n"
                 ).encode())
                 os.rename(temporary, folder)
                 sync_directory(folder.parent)
@@ -384,24 +388,22 @@ def inspect_work(path):
 def close_work(folder, data):
     path = work_path(folder, data.get("work"))
     token = expected(data)
-    retiring = safe_path(path.parent / (".closing-" + path.name))
-    if retiring.exists():
-        if path.exists():
-            fail("close_pending", "Earlier cleanup is incomplete and the work name was reused; preserve both directories.")
-        inspect_work(retiring)
-        shutil.rmtree(retiring)
-        sync_directory(path.parent)
-        return {"path": str(path), "changed": True}
     observed = inspect_work(path)
     if observed["sha256"] == "missing":
         return {"path": str(path), "changed": False}
     if token != observed["sha256"]:
         fail("document_conflict", "Work material changed; inspect it before closing.", sha256=observed["sha256"])
-    os.rename(path, retiring)
+    trash = safe_path(folder / "trash")
+    make_directory(trash)
+    stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
+    destination, attempt = trash / f"{path.name}-{stamp}", 1
+    while destination.exists():
+        attempt += 1
+        destination = trash / f"{path.name}-{stamp}-{attempt}"
+    os.rename(path, destination)
     sync_directory(path.parent)
-    shutil.rmtree(retiring)
-    sync_directory(path.parent)
-    return {"path": str(path), "changed": True}
+    sync_directory(trash)
+    return {"path": str(path), "trash": str(destination), "changed": True}
 
 
 def execute(operation, data, home=None):
