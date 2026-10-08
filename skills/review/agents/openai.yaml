@@ -1,0 +1,4 @@
+interface:
+  display_name: "Review"
+  short_description: "Review an identified change for defects."
+  default_prompt: "Use $review to review this version for actionable defects."

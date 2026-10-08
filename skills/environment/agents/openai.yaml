@@ -1,0 +1,4 @@
+interface:
+  display_name: "Environment"
+  short_description: "Read or save the project's Harness context."
+  default_prompt: "Use $environment to find the project context relevant to this task."

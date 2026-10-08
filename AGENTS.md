@@ -18,7 +18,7 @@ Harness provides file-native project context and focused engineering workflows. 
 - Make helper mutations atomic and idempotent; detect concurrent changes instead of overwriting them.
 - Keep storage explicit and current-only. Do not add compatibility layers or automatic migration.
 - Edit `src/harness.py` and `docs/file-context.md`; their copies in skills are generated.
-- Keep one external environment per project, shared by its Git worktrees. New worktrees belong inside that environment.
+- Keep one external environment per project, shared by its Git worktrees. Worktrees Harness creates default to that environment; host-managed worktrees are accepted where they are.
 - Do not add lifecycle hooks, automatic context injection, agent claims or mandatory work records.
 - Never store secrets, chat transcripts or chain-of-thought in context files, or add environment state to a target repository.
 - Use Conventional Commits and semantic branches such as `feat/access-control`. PRs describe the macro behavior in normal prose.

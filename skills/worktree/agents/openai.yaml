@@ -1,0 +1,4 @@
+interface:
+  display_name: "Worktree"
+  short_description: "Create or reuse an isolated checkout and branch."
+  default_prompt: "Use $worktree to prepare an isolated checkout for this work."

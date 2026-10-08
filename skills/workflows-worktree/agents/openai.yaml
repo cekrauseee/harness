@@ -1,4 +1,0 @@
-interface:
-  display_name: "Workflows Worktree"
-  short_description: "Manage local worktrees and their branch setup."
-  default_prompt: "Use $workflows-worktree to prepare an isolated checkout inside the environment."

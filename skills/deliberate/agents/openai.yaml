@@ -1,0 +1,4 @@
+interface:
+  display_name: "Deliberate"
+  short_description: "Develop decisions with agent peers as equals."
+  default_prompt: "Use $deliberate to think through this question with another agent as an equal peer."

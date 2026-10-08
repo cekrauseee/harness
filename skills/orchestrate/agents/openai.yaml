@@ -1,0 +1,4 @@
+interface:
+  display_name: "Orchestrate"
+  short_description: "Coordinate an authorized team on a plan."
+  default_prompt: "Use $orchestrate to coordinate the authorized team for this plan."

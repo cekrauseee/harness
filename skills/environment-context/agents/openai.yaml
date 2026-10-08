@@ -1,4 +1,0 @@
-interface:
-  display_name: "Environment Context"
-  short_description: "Discover constraints and resume scoped work."
-  default_prompt: "Use $environment-context to find project constraints relevant to this task."
