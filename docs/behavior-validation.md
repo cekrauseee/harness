@@ -34,7 +34,7 @@ Select cases affected by the change rather than running a fixed campaign after e
 | Persistence behavior under a real-test-database policy | Representative observable results and persisted effects, not mocked persistence or per-function coverage by default |
 | General discussion of product direction | No forced code-defect review or unrequested implementation |
 
-Also inspect boundaries for commit, PR and integration responsibilities when affected. Use disposable local or read-only setups rather than publishing a real PR for a test. Review-only work stays read-only; stored permission notes do not grant new authority. Relevant coordinator checks may resolve concrete gaps without routinely repeating worker verification.
+Also inspect boundaries for commit, PR and integration responsibilities when affected. Judge discovery, preservation and composition rather than catalog coverage: a small fix that loads no skill can be the correct behavior. Use disposable local or read-only setups rather than publishing a real PR for a test. Review-only work stays read-only; stored permission notes do not grant new authority. Relevant coordinator checks may resolve concrete gaps without routinely repeating worker verification.
 
 ## Completion and limits
 

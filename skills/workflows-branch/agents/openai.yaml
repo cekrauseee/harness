@@ -1,4 +1,0 @@
-interface:
-  display_name: "Workflows Branch"
-  short_description: "Prepare branches named for their intended change."
-  default_prompt: "Use $workflows-branch to prepare a semantic branch for this change."

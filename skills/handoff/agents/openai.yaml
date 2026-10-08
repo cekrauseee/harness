@@ -1,0 +1,4 @@
+interface:
+  display_name: "Handoff"
+  short_description: "Transfer or assume scoped agent work."
+  default_prompt: "Use $handoff to transfer this work to another agent."

@@ -59,9 +59,9 @@ class DistributionTest(unittest.TestCase):
                        and any(isinstance(t, ast.Name) and t.id == 'VERSION' for t in n.targets))
         self.assertEqual(version, codex['version'].split('+')[0])
         self.assertEqual({Path(p).name for p in claude['skills']}, names)
-        self.assertEqual(len(names), 16)
+        self.assertEqual(names, {'environment', 'close-work', 'plan', 'implement', 'review', 'handoff',
+                                 'orchestrate', 'deliberate', 'worktree', 'commit-pr'})
         self.assertEqual(codex['skills'], './skills/')
-        self.assertTrue(all(n.startswith(('environment-', 'workflows-')) for n in names))
 
     def test_skill_metadata_and_local_links_resolve_within_installed_skill(self):
         for entry in sorted((ROOT / 'skills').glob('*/SKILL.md')):
@@ -71,7 +71,9 @@ class DistributionTest(unittest.TestCase):
                 frontmatter = content.split('---', 2)[1]
                 name = re.search(r'^name: (.+)$', frontmatter, re.M).group(1)
                 self.assertEqual(name, entry.parent.name)
-                self.assertRegex(frontmatter, r'(?m)^description: .+')
+                # A colon followed by a space inside an unquoted value is invalid YAML for strict
+                # parsers such as the skills CLI; quoting keeps every host able to read the description.
+                self.assertRegex(frontmatter, r'(?m)^description: "[^"]{100,}"$')
                 self.assertTrue((entry.parent / 'agents/openai.yaml').is_file())
                 for path in entry.parent.rglob('*.md'):
                     for target in re.findall(r'\[[^\]]+\]\(([^)]+)\)', path.read_text()):

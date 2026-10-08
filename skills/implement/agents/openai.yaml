@@ -1,0 +1,4 @@
+interface:
+  display_name: "Implement"
+  short_description: "Implement changes and apply review corrections."
+  default_prompt: "Use $implement to implement this change and verify its behavior."
