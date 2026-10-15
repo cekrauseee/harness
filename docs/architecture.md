@@ -25,7 +25,7 @@ The [helper API](helper-api.md) documents the plugin's environment commands; [de
 
 ## Boundaries
 
-- The repository root is the plugin root. Hosts and the skills CLI install from it, so the manifests and `skills/` stay at the top level.
+- The repository root is the plugin root. Hosts install the plugin from it through the marketplace, so the manifests and `skills/` stay at the top level.
 - Inside a skill only `SKILL.md` and `agents/openai.yaml` are authored. A skill's `scripts/` and `schema/` are copies from the root folders of the same name and its `references/` are copies from `docs/`; `tools/build_dist.py` generates them, selecting what each `SKILL.md` names and what those files import or link. Generated documents keep their relative links, so the canonical documents stay directly in `docs/`.
 - An installed skill needs nothing outside its folder: Python 3.9+ standard library, Git and its generated copies.
 - The contract is the only interface between the plugin and the applications. Every JSON document names its format and version (`harness-record-v1`, `harness-event-v1`, `harness-map-v1`).

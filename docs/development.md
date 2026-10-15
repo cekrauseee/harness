@@ -29,9 +29,9 @@ For distribution changes:
 python3 -B tests/verify_install.py
 ```
 
-This check uses the pinned skills CLI and disposable host homes to install each skill selectively in copy and symlink modes for Codex and Claude Code. It removes the source before exercising installed helpers and compares the complete payload. `--cli /path/to/bin/cli.mjs` uses an existing CLI. Ordinary unit tests require neither Node nor network access.
+This check uses the pinned skills CLI only as a test harness: it installs each skill alone, in copy and symlink modes for Codex and Claude Code, in disposable host homes, which proves that every skill is self-contained. Users install the plugin through the marketplace. It removes the source before exercising installed helpers and compares the complete payload. `--cli /path/to/bin/cli.mjs` uses an existing CLI. Ordinary unit tests require neither Node nor network access.
 
-Available host skill/plugin validators are useful for metadata checks, not runtime dependencies. State any unavailable validation rather than installing dependencies into the plugin. Before requested publication, validate the inventory and manifests, inspect the final diff and check discovery with `pnpx skills add . --list`.
+Available host skill/plugin validators are useful for metadata checks, not runtime dependencies. State any unavailable validation rather than installing dependencies into the plugin. Before requested publication, validate the inventory and manifests with `claude plugin validate .` and inspect the final diff. To try unreleased changes in Claude Code, load the checkout for one session with `claude --plugin-dir <checkout>`.
 
 Distinguish running existing checks, authoring tests and evaluating agent behavior. Add tests for uncovered mechanical guarantees or regressions, not each edited function or instruction. Do not encode exact wording, desired skill choices or semantic quality as unit assertions. Apply the user's testing/QA policy; absent cosmetic tests are not automatically a defect.
 

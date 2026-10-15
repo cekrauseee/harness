@@ -56,13 +56,21 @@ Code and developer documentation must make sense without the agents' execution p
 
 ## Install
 
-For standalone skills in supported hosts:
+Install the plugin from the [cekrause marketplace](https://github.com/cekrauseee/cekrause-marketplace) with each host's plugin commands. Claude Code:
 
 ```bash
-pnpx skills add cekrauseee/harness --skill '*' -g -a codex claude-code -y
+claude plugin marketplace add https://github.com/cekrauseee/cekrause-marketplace.git
+claude plugin install harness@cekrause
 ```
 
-Use `.` for a local checkout. Each skill is self-contained. Native Codex and Claude plugin manifests are also included; choose one discovery route per host to avoid duplicates. See [installation](docs/install.md) for plugin setup, the global instruction layout and deliberate replacement of earlier versions.
+Codex:
+
+```bash
+codex plugin marketplace add https://github.com/cekrauseee/cekrause-marketplace.git
+codex plugin add harness@cekrause
+```
+
+Each skill is self-contained. See [installation](docs/install.md) for updates, other marketplaces, the global instruction layout and deliberate replacement of earlier versions.
 
 The bundled helper uses Python 3.9+, Git and POSIX locking. It initializes only external project storage and accepts the current Harness format, with no legacy compatibility or automatic migration. Setup example:
 
