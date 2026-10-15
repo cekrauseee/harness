@@ -24,10 +24,10 @@ function map(cardCount: number, groups = true): HarnessMap {
         ]
       : [],
     cards,
-    // c0 → c1 crosses modules, c0 → c2 stays inside "even"
+    // c0 → c1 crosses modules, c0 → c2 stays inside "even" and was declared by an agent
     edges: [
       { from: 'c0', to: 'c1', kind: 'import' },
-      { from: 'c0', to: 'c2', kind: 'import' },
+      { from: 'c0', to: 'c2', kind: 'authored', label: 'reads' },
     ],
     files: {},
     notes: [],
@@ -46,10 +46,10 @@ describe('canvas grouping', () => {
     expect(graphModel(indexMap(map(GROUP_THRESHOLD)), null).nodes).toHaveLength(GROUP_THRESHOLD)
   })
 
-  it('shows modules above the threshold, with edges between modules only', () => {
+  it('shows modules above the threshold, with unlabelled edges between modules only', () => {
     const model = graphModel(indexMap(map(GROUP_THRESHOLD + 1)), null)
     expect(model.nodes.map((n) => n.id)).toEqual(['even', 'odd'])
-    expect(model.links).toEqual([['even', 'odd']])
+    expect(model.edges).toEqual([{ from: 'even', to: 'odd', authored: false }])
     expect(model.nodeOf('c3')).toBe('odd')
   })
 
@@ -58,7 +58,7 @@ describe('canvas grouping', () => {
     const inside = graphModel(index, 'even')
     expect(inside.scope).toBe('even')
     expect(inside.nodes.every((n) => Number(n.id.slice(1)) % 2 === 0)).toBe(true)
-    expect(inside.links).toEqual([['c0', 'c2']])
+    expect(inside.edges).toEqual([{ from: 'c0', to: 'c2', authored: true, label: 'reads' }])
     expect(inside.nodeOf('c1')).toBeUndefined()
     expect(graphModel(index, 'gone').scope).toBeNull()
   })

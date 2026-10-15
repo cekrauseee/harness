@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Footprints, Route } from 'lucide-react'
 import { useMap, type Selection } from '@/data'
 import { LayerDot, SEVERITY_DOT, STATUS_TEXT } from '@/shared/blocks'
+import { count } from '@/shared/lib/plural'
 import { cn } from '@/shared/lib/utils'
 import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/shared/ui/command'
 import { Kbd } from '@/shared/ui/kbd'
@@ -82,7 +83,7 @@ export function CommandMenu({ open, onOpenChange, onSelectCard, onSelect, onOpen
                   onSelect={run(() => onSelect({ kind: 'flow', id: f.id, step: 0 }))}
                   lead={f.steps.length ? <Footprints className="size-3.5" /> : <Route className="size-3.5" />}
                   title={f.title}
-                  meta={f.steps.length ? `${f.steps.length} steps` : `${f.cards.length} cards`}
+                  meta={f.steps.length ? count(f.steps.length, 'step') : count(f.cards.length, 'card')}
                 />
               ))}
             </CommandGroup>

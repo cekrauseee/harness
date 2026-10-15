@@ -16,12 +16,15 @@ function renderMap() {
   )
   const sheet = () => within(screen.getByRole('complementary', { name: 'Details' }))
   const card = (id: string) => result.container.querySelector<HTMLElement>(`[data-node="${id}"]`)!
-  return { user: userEvent.setup(), sheet, card }
+  return { user: userEvent.setup(), sheet, card, container: result.container }
 }
 
 describe('change map', () => {
   it('opens a card from the canvas and returns to the index', async () => {
-    const { user, sheet, card } = renderMap()
+    const { user, sheet, card, container } = renderMap()
+    // the authored edge is drawn apart from import edges, with its label
+    expect(container.querySelectorAll('.cm-edge.authored')).toHaveLength(1)
+    expect(screen.getByText('posts the invitation')).toBeInTheDocument()
     await user.click(card('invites'))
     expect(sheet().getByRole('heading', { level: 2, name: 'Invitations' })).toBeInTheDocument()
     expect(card('invites')).toHaveAttribute('aria-pressed', 'true')

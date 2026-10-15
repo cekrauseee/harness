@@ -2,6 +2,7 @@ import { motion } from 'motion/react'
 import { useMap, type MapAttention, type Selection } from '@/data'
 import { SEVERITY_DOT, STATUS_TEXT } from '@/shared/blocks'
 import { Item, rise } from '@/shared/motion'
+import { count } from '@/shared/lib/plural'
 import { cn } from '@/shared/lib/utils'
 import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 import { Overview } from './Overview'
@@ -20,13 +21,20 @@ interface Entry {
 }
 
 /** Home view: a segmented control over flows and attention points, then the overview. */
-export function IndexView({ tab, onTab, onSelect }: { tab: IndexTab; onTab: (tab: IndexTab) => void; onSelect: (s: Selection) => void }) {
+interface Props {
+  tab: IndexTab
+  onTab: (tab: IndexTab) => void
+  onSelect: (s: Selection) => void
+  onOpenCode: (path: string) => void
+}
+
+export function IndexView({ tab, onTab, onSelect, onOpenCode }: Props) {
   const { map } = useMap()
   const lists: Record<IndexTab, Entry[]> = {
     flows: map.flows.map((f) => ({
       key: f.id,
       title: f.title,
-      aside: f.steps.length ? `${f.steps.length} steps` : `${f.cards.length} cards`,
+      aside: f.steps.length ? count(f.steps.length, 'step') : count(f.cards.length, 'card'),
       selection: { kind: 'flow', id: f.id, step: 0 },
     })),
     attention: map.attention.map((a) => ({
@@ -95,7 +103,7 @@ export function IndexView({ tab, onTab, onSelect }: { tab: IndexTab; onTab: (tab
           </motion.div>
         </>
       )}
-      <Overview />
+      <Overview onOpenCode={onOpenCode} />
     </>
   )
 }

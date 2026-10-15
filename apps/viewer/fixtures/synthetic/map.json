@@ -35,7 +35,7 @@
       "id": "list-page",
       "layer": "screens",
       "title": "Shared list page",
-      "summary": "Shows a list to its owner or an invited reader; anyone else sees a clear denied state.",
+      "summary": "Shows a list to its owner or an invited reader; anyone else is denied.",
       "files": ["src/app/lists/[id]/page.tsx"],
       "attention": [],
       "flows": ["fl-open"]
@@ -118,7 +118,7 @@
       "from": "share-dialog",
       "to": "share-route",
       "kind": "authored",
-      "label": "POST /share"
+      "label": "posts the invitation"
     },
     {
       "from": "list-page",

@@ -1,10 +1,16 @@
+import { count } from '@/shared/lib/plural'
 import type { HarnessMap, MapAttention, MapCard, MapCode, MapCodeRef, MapFlow, MapGroup, MapNote, MapTest, MapTestRef } from './map.v1'
 
 /** Above this many cards the canvas shows modules first and cards on drill-in. */
 export const GROUP_THRESHOLD = 40
 
-/** A canvas edge: from caller to dependency. */
-export type Link = [from: string, to: string]
+/** A canvas edge, from caller to dependency; authored edges were declared by an agent rather than derived from imports. */
+export interface GraphEdge {
+  from: string
+  to: string
+  authored?: boolean
+  label?: string
+}
 
 export type Selection =
   | { kind: 'card'; id: string }
@@ -16,7 +22,6 @@ export interface MapIndex {
   map: HarnessMap
   cards: Map<string, MapCard>
   groups: Map<string, MapGroup>
-  links: Link[]
   /** Outgoing (dependencies) and incoming (callers) card ids. */
   out: Map<string, string[]>
   in: Map<string, string[]>
@@ -30,12 +35,11 @@ const OTHER_GROUP: MapGroup = { id: '~other', title: 'Other' }
 
 export function indexMap(map: HarnessMap): MapIndex {
   const cards = new Map(map.cards.map((c) => [c.id, c]))
-  const links: Link[] = map.edges.map((e) => [e.from, e.to])
   const out = new Map<string, string[]>(map.cards.map((c) => [c.id, []]))
   const inn = new Map<string, string[]>(map.cards.map((c) => [c.id, []]))
-  links.forEach(([a, b]) => {
-    out.get(a)?.push(b)
-    inn.get(b)?.push(a)
+  map.edges.forEach(({ from, to }) => {
+    out.get(from)?.push(to)
+    inn.get(to)?.push(from)
   })
   const slots = new Map(map.layers.map((l, i) => [l.id, i]))
   const titles = new Map(map.layers.map((l) => [l.id, l.title]))
@@ -44,7 +48,6 @@ export function indexMap(map: HarnessMap): MapIndex {
     map,
     cards,
     groups,
-    links,
     out,
     in: inn,
     layerSlot: (id) => slots.get(id) ?? 0,
@@ -74,7 +77,7 @@ export interface GraphModel {
   /** Module the canvas is drilled into, if any. */
   scope: string | null
   nodes: GraphNode[]
-  links: Link[]
+  edges: GraphEdge[]
   /** Node that stands for a card in this model: the card itself, its module, or none when hidden. */
   nodeOf: (cardId: string) => string | undefined
 }
@@ -91,27 +94,28 @@ const cardNode = (index: MapIndex, c: MapCard): GraphNode => ({
  * (an empty or unknown module falls back to the modules). */
 export function graphModel(index: MapIndex, scope: string | null): GraphModel {
   const { map } = index
+  const cardEdges = map.edges.map(({ from, to, kind, label }): GraphEdge => ({ from, to, authored: kind === 'authored', label }))
   if (!index.grouped) {
     return {
       key: signature(
         map.cards.map((c) => c.id),
-        index.links,
+        cardEdges,
       ),
       scope: null,
       nodes: map.cards.map((c) => cardNode(index, c)),
-      links: index.links,
+      edges: cardEdges,
       nodeOf: (id) => (index.cards.has(id) ? id : undefined),
     }
   }
   const inScope = scope ? map.cards.filter((c) => groupOf(index, c) === scope) : []
   if (scope && inScope.length) {
     const ids = new Set(inScope.map((c) => c.id))
-    const links = index.links.filter(([a, b]) => ids.has(a) && ids.has(b))
+    const edges = cardEdges.filter((e) => ids.has(e.from) && ids.has(e.to))
     return {
-      key: `${scope}:${signature([...ids], links)}`,
+      key: `${scope}:${signature([...ids], edges)}`,
       scope,
       nodes: inScope.map((c) => cardNode(index, c)),
-      links,
+      edges,
       nodeOf: (id) => (ids.has(id) ? id : undefined),
     }
   }
@@ -120,31 +124,31 @@ export function graphModel(index: MapIndex, scope: string | null): GraphModel {
     const g = groupOf(index, c)
     members.set(g, [...(members.get(g) ?? []), c])
   })
-  const seen = new Set<string>()
-  const links: Link[] = []
-  index.links.forEach(([a, b]) => {
-    const ga = groupOf(index, index.cards.get(a)!)
-    const gb = groupOf(index, index.cards.get(b)!)
-    if (ga !== gb && !seen.has(`${ga}>${gb}`)) {
-      seen.add(`${ga}>${gb}`)
-      links.push([ga, gb])
-    }
+  // Module edges aggregate card edges: authored only when every edge behind them is, never labelled.
+  const between = new Map<string, GraphEdge>()
+  cardEdges.forEach((e) => {
+    const from = groupOf(index, index.cards.get(e.from)!)
+    const to = groupOf(index, index.cards.get(e.to)!)
+    if (from === to) return
+    const known = between.get(`${from}>${to}`)
+    between.set(`${from}>${to}`, { from, to, authored: (known?.authored ?? true) && e.authored })
   })
+  const edges = [...between.values()]
   const nodes = [...members].map(([id, cards]) => {
     const g = groupById(index, id) ?? OTHER_GROUP
     return {
       id,
       layer: dominantLayer(index, cards),
-      eyebrow: `${cards.length} cards`,
+      eyebrow: count(cards.length, 'card'),
       title: g.title,
       summary: g.summary ?? cards.map((c) => c.title).join(', '),
     }
   })
   return {
-    key: `groups:${signature([...members.keys()], links)}`,
+    key: `groups:${signature([...members.keys()], edges)}`,
     scope: null,
     nodes,
-    links,
+    edges,
     nodeOf: (id) => {
       const c = index.cards.get(id)
       return c && groupOf(index, c)
@@ -159,9 +163,9 @@ function dominantLayer(index: MapIndex, cards: MapCard[]) {
   return index.layerSlot(layer)
 }
 
-const signature = (ids: string[], links: Link[]) =>
-  `${[...ids].sort().join(',')}|${links
-    .map(([a, b]) => `${a}>${b}`)
+const signature = (ids: string[], edges: GraphEdge[]) =>
+  `${[...ids].sort().join(',')}|${edges
+    .map((e) => `${e.from}>${e.to}`)
     .sort()
     .join(',')}`
 
@@ -269,6 +273,24 @@ export function hunkNote(map: HarnessMap, hunk: NonNullable<MapCode['hunks']>[nu
   if (notes.length) return notes.join(' ')
   const subjects = hunk.commits.flatMap((sha) => map.commits[sha]?.subject ?? [])
   return subjects.length ? [...new Set(subjects)].join('; ') : undefined
+}
+
+/** Changed files no card claims; they stay reachable from the overview and search. */
+export const unassignedFiles = (map: HarnessMap) =>
+  Object.entries(map.files)
+    .filter(([path, f]) => !f.cards.length && !map.cards.some((c) => c.files.includes(path)))
+    .map(([path]) => path)
+    .sort()
+
+/** Labels of a card's authored edges, keyed by the card at the other end. */
+export function edgeLabels(map: HarnessMap, cardId: string, direction: 'out' | 'in'): Record<string, string> {
+  const labels: Record<string, string> = {}
+  map.edges.forEach((e) => {
+    if (!e.label) return
+    if (direction === 'out' && e.from === cardId) labels[e.to] = e.label
+    if (direction === 'in' && e.to === cardId) labels[e.from] = e.label
+  })
+  return labels
 }
 
 /** Tests that prove a card: linked to its attention points or flows, or living in its files. */

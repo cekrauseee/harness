@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { hunkNote, linesLabel, notesFor, refTarget, testMeta, testsFor, useMap, type MapCard, type Selection } from '@/data'
+import { edgeLabels, hunkNote, linesLabel, notesFor, refTarget, testMeta, testsFor, useMap, type MapCard, type Selection } from '@/data'
 import { CardChips, CodeRef, Disclosure, Header, Prose, Refs, Section, SEVERITY_DOT, STATUS_TEXT, StatusBadge } from '@/shared/blocks'
 import { Item } from '@/shared/motion'
+import { count } from '@/shared/lib/plural'
 import { cn } from '@/shared/lib/utils'
 
 interface Actions {
@@ -49,11 +50,7 @@ function FileRow({ path, onOpenCode }: { path: string } & Pick<Actions, 'onOpenC
       )}
       {file?.role && <p className="mt-1 text-[12.5px] leading-normal text-muted-foreground">{file.role}</p>}
       {changes.length > 0 && (
-        <Disclosure
-          label={`${open ? 'Hide' : 'Show'} ${changes.length} ${changes.length === 1 ? 'change' : 'changes'}`}
-          open={open}
-          onOpenChange={setOpen}
-        >
+        <Disclosure label={`${open ? 'Hide' : 'Show'} ${count(changes.length, 'change')}`} open={open} onOpenChange={setOpen}>
           <Refs>
             {changes.map((c) => (
               <CodeRef key={c.id} meta={c.label} text={c.note} onOpen={() => onOpenCode(path, c.id)} />
@@ -107,12 +104,12 @@ export function CardDetail({ card, onSelectCard, onSelect, onOpenCode }: { card:
       </Section>
       {deps.length > 0 && (
         <Section title="Depends on">
-          <CardChips ids={deps} onSelect={onSelectCard} />
+          <CardChips ids={deps} onSelect={onSelectCard} labels={edgeLabels(map, card.id, 'out')} />
         </Section>
       )}
       {usedBy.length > 0 && (
         <Section title="Used by">
-          <CardChips ids={usedBy} onSelect={onSelectCard} />
+          <CardChips ids={usedBy} onSelect={onSelectCard} labels={edgeLabels(map, card.id, 'in')} />
         </Section>
       )}
       {points.length > 0 && (
@@ -138,7 +135,7 @@ export function CardDetail({ card, onSelectCard, onSelect, onOpenCode }: { card:
               <LinkRow
                 key={f.id}
                 title={f.title}
-                meta={`${f.steps.length} steps`}
+                meta={count(f.steps.length, 'step')}
                 onClick={() => onSelect({ kind: 'flow', id: f.id, step: 0 })}
               />
             ))}

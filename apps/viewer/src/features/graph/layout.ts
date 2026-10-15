@@ -1,4 +1,5 @@
-import type { Link as Edge } from '@/data'
+/** From caller to dependency. */
+export type Edge = [from: string, to: string]
 
 // Layered top-down layout: rank = longest path from the sources, barycenter ordering to reduce
 // crossings, then x pulled toward neighbours while keeping order and spacing.

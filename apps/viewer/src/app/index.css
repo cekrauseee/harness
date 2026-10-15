@@ -248,6 +248,27 @@
   .cm-edge.off {
     opacity: 0.14;
   }
+  .cm-edge.authored {
+    stroke-dasharray: 2 4;
+  }
+  .cm-edge-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    fill: var(--muted-foreground);
+    paint-order: stroke;
+    stroke: var(--canvas);
+    stroke-width: 4px;
+    stroke-linejoin: round;
+    transition:
+      fill 0.2s,
+      opacity 0.25s;
+  }
+  .cm-edge-label.on {
+    fill: var(--brand);
+  }
+  .cm-edge-label.off {
+    opacity: 0.14;
+  }
   .cm-edge.flowing {
     stroke-dasharray: 6 5;
     animation: cm-flow 0.9s linear infinite;

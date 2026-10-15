@@ -37,11 +37,11 @@ The viewer renders `map.json` (format `harness-map-v1`) from the served folder; 
 - `src/data/selectors.ts` is the only adapter between the schema and the features: canvas model and grouping, selection, highlights, code references, coverage.
 - The fixtures validate against the schema in the tests.
 
-Every list in a map is present and may be empty; empty sections are hidden. Flows with steps open as a stepper, flows without steps show trigger, outcome and path. Code comes from the map's `code` payload: added files are split by their symbol notes, changed files by hunk, and a hunk without a note shows the subjects of the commits that introduced it.
+Every list in a map is present and may be empty; empty sections are hidden. Edges derived from imports are solid; authored edges are dotted and show their label on the canvas and in the card detail. Changed files that no card claims are listed in the overview. Flows with steps open as a stepper, flows without steps show trigger, outcome and path. Code comes from the map's `code` payload: added files are split by their symbol notes, changed files by hunk, and a hunk without a note shows the subjects of the commits that introduced it.
 
 `plugins/map-source.ts` serves the folder under `/map/`: GET and HEAD only, regular files only, no directory listing, no dotfiles, nothing outside the folder (symlinks included), `Cache-Control: no-store`. In dev it watches the folder and sends a `harness-map:changed` event; `src/data/source.ts` reloads the map on that event. A reload that fails (for example a file read mid-write) keeps the last good map and logs a warning. Missing lists become empty and edges that point at unknown cards are dropped, so a partial map still renders.
 
-Everything shown comes from the data: title, summary, layers, module names, actors. The UI copy in code is generic.
+Everything shown comes from the data: title, summary, layers, module names, actors. The viewer never rewrites that text, so the data must be written for display as `docs/records.md` (Display copy) describes; the UI copy in code is generic.
 
 ## Structure
 

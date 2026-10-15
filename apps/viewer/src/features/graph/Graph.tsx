@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState, type PointerEvent, type Ref } from 'react'
-import type { GraphNode, Highlight, Link as Edge } from '@/data'
+import type { GraphEdge, GraphNode, Highlight } from '@/data'
 import { LayerDot } from '@/shared/blocks'
 import { prefersReducedMotion } from '@/shared/motion'
 import { cn } from '@/shared/lib/utils'
-import { NODE_W, bounds, computeLayout, portOffsets, ranks, type Heights, type Positions } from './layout'
+import { NODE_W, bounds, computeLayout, portOffsets, ranks, type Edge, type Heights, type Positions } from './layout'
 
 export interface GraphHandle {
   fit: () => void
@@ -31,7 +31,7 @@ interface View {
 interface Props {
   ref?: Ref<GraphHandle>
   nodes: GraphNode[]
-  edges: Edge[]
+  edges: GraphEdge[]
   highlight: Highlight | null
   insets: Insets
   onNodeClick: (id: string) => void
@@ -41,6 +41,8 @@ interface Props {
 
 const MARGIN = 48
 const clampK = (k: number) => Math.min(2, Math.max(0.3, k))
+// Labels sit on the edge; long ones are cut on the canvas and shown whole in the card detail.
+const shortLabel = (s: string) => (s.length > 32 ? `${s.slice(0, 31)}…` : s)
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2)
 
 function visibleArea(el: HTMLElement, i: Insets) {
@@ -77,22 +79,23 @@ export function Graph({ ref, nodes, edges, highlight, insets, onNodeClick, onPan
   const [gliding, setGliding] = useState(false)
   const [dragging, setDragging] = useState(false)
   const ids = useMemo(() => nodes.map((n) => n.id), [nodes])
+  const pairs = useMemo(() => edges.map((e): Edge => [e.from, e.to]), [edges])
   const heights = measured?.heights
   const delays = measured?.delays
 
   // Latest values for handlers that outlive a render (rAF ticks, wheel, imperative calls).
-  const live = useRef({ pos, heights, view, insets, ids, edges })
+  const live = useRef({ pos, heights, view, insets, ids, pairs })
   useLayoutEffect(() => {
-    live.current = { pos, heights, view, insets, ids, edges }
+    live.current = { pos, heights, view, insets, ids, pairs }
   })
 
   useLayoutEffect(() => {
     if (measured) return
     const h = Object.fromEntries(ids.map((id) => [id, cards.current[id]?.offsetHeight || 84]))
-    const p = computeLayout(ids, edges, h)
-    setMeasured({ heights: h, delays: cascadeDelays(ids, edges, p) })
+    const p = computeLayout(ids, pairs, h)
+    setMeasured({ heights: h, delays: cascadeDelays(ids, pairs, p) })
     setPos(p)
-  }, [measured, ids, edges])
+  }, [measured, ids, pairs])
 
   useEffect(() => onZoom(view.k), [view.k, onZoom])
 
@@ -177,7 +180,7 @@ export function Graph({ ref, nodes, edges, highlight, insets, onNodeClick, onPan
       zoomOut: () => zoomCentered(1 / 1.2),
       resetZoom: () => zoomCentered(1 / live.current.view.k),
       relayout: () => {
-        const { ids: all, edges: e, heights: h } = live.current
+        const { ids: all, pairs: e, heights: h } = live.current
         if (h) animateTo(computeLayout(all, e, h), () => frame(all))
       },
     }
@@ -271,17 +274,18 @@ export function Graph({ ref, nodes, edges, highlight, insets, onNodeClick, onPan
 
   const paths = useMemo(() => {
     if (!pos || !heights) return []
-    const off = portOffsets(edges, pos)
-    return edges.map(([a, b]) => {
+    const off = portOffsets(pairs, pos)
+    return edges.map(({ from: a, to: b, authored, label }) => {
       const o = off[`${a}>${b}`]!
       const x1 = pos[a]!.x + o.s
       const y1 = pos[a]!.y + heights[a]!
       const x2 = pos[b]!.x + o.t
       const y2 = pos[b]!.y - 4
       const c = Math.max(36, (y2 - y1) * 0.5)
-      return { a, b, d: `M${x1},${y1} C${x1},${y1 + c} ${x2},${y2 - c} ${x2},${y2}` }
+      // The midpoint of this symmetric bezier is the midpoint of its ends.
+      return { a, b, authored, label, mx: (x1 + x2) / 2, my: (y1 + y2) / 2, d: `M${x1},${y1} C${x1},${y1 + c} ${x2},${y2 - c} ${x2},${y2}` }
     })
-  }, [pos, heights, edges])
+  }, [pos, heights, edges, pairs])
   const size = useMemo(() => (pos && heights && ids.length ? bounds(ids, pos, heights) : null), [pos, heights, ids])
   const hl = highlight
 
@@ -318,10 +322,27 @@ export function Graph({ ref, nodes, edges, highlight, insets, onNodeClick, onPan
               <path
                 key={`${p.a}>${p.b}`}
                 d={p.d}
-                className={cn('cm-edge', on && 'on', on && hl.flow && 'flowing', hl && !on && 'off')}
+                className={cn('cm-edge', p.authored && 'authored', on && 'on', on && hl.flow && 'flowing', hl && !on && 'off')}
                 style={on && hl.flow ? undefined : { animation: `cm-edge-in .6s ease ${(delays?.[p.b] ?? 0) + 160}ms both` }}
                 markerEnd={on ? 'url(#cm-arrow-on)' : 'url(#cm-arrow)'}
               />
+            )
+          })}
+          {paths.map((p) => {
+            if (!p.label) return null
+            const on = !!hl && hl.edge(p.a, p.b)
+            return (
+              <text
+                key={`label:${p.a}>${p.b}`}
+                x={p.mx}
+                y={p.my}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                className={cn('cm-edge-label', on && 'on', hl && !on && 'off')}
+                style={{ animation: `cm-edge-in .6s ease ${(delays?.[p.b] ?? 0) + 160}ms both` }}
+              >
+                {shortLabel(p.label)}
+              </text>
             )
           })}
         </svg>

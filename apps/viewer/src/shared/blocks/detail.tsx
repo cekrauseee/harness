@@ -59,18 +59,27 @@ export function Tag({ tone = 'neutral', children, className }: { tone?: Tone; ch
   )
 }
 
-/** Card references as chips; unknown ids (a map still being written) are skipped. */
-export function CardChips({ ids, onSelect }: { ids: string[]; onSelect: (id: string) => void }) {
+/** Card references as chips, with optional secondary text per card; unknown ids (a map still being written) are skipped. */
+export function CardChips({ ids, onSelect, labels }: { ids: string[]; onSelect: (id: string) => void; labels?: Record<string, string> }) {
   const { cards, layerSlot } = useMap()
   return (
     <div className="flex flex-wrap gap-1.5">
       {ids.flatMap((id) => {
         const card = cards.get(id)
+        const label = labels?.[id]
         return card
           ? [
-              <Button key={id} variant="outline" size="sm" className="h-7 rounded-full px-2.5 font-normal" onClick={() => onSelect(id)}>
+              <Button
+                key={id}
+                variant="outline"
+                size="sm"
+                className="h-7 max-w-full rounded-full px-2.5 font-normal"
+                onClick={() => onSelect(id)}
+                title={label}
+              >
                 <LayerDot layer={layerSlot(card.layer)} />
-                {card.title}
+                <span className="truncate">{card.title}</span>
+                {label && <span className="min-w-0 truncate font-mono text-[10.5px] text-muted-foreground">{label}</span>}
               </Button>,
             ]
           : []

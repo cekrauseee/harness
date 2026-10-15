@@ -117,7 +117,7 @@ export function ChangeMap({ theme, onTheme }: { theme: Theme; onTheme: (theme: T
   let body: ReactNode
   let viewKey = 'index'
   if (!resolved) {
-    body = <IndexView tab={tab} onTab={setTab} onSelect={select} />
+    body = <IndexView tab={tab} onTab={setTab} onSelect={select} onOpenCode={openCode} />
   } else if (resolved.kind === 'card') {
     viewKey = `card-${resolved.card.id}`
     body = <CardDetail card={resolved.card} onSelectCard={focusCard} onSelect={select} onOpenCode={openCode} />
@@ -150,7 +150,7 @@ export function ChangeMap({ theme, onTheme }: { theme: Theme; onTheme: (theme: T
           key={model.key}
           ref={graph}
           nodes={model.nodes}
-          edges={model.links}
+          edges={model.edges}
           highlight={highlight}
           insets={insets}
           onNodeClick={onNodeClick}

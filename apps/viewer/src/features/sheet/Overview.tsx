@@ -1,7 +1,8 @@
 import { motion } from 'motion/react'
-import { changeStats, useMap, type MapRun } from '@/data'
-import { LayerDot, Prose, Section } from '@/shared/blocks'
+import { changeStats, unassignedFiles, useMap, type MapRun } from '@/data'
+import { CodeRef, LayerDot, Prose, Refs, Section } from '@/shared/blocks'
 import { Item, rise } from '@/shared/motion'
+import { count } from '@/shared/lib/plural'
 
 const compact = (n: number) => (n >= 1e6 ? `${(n / 1e6).toFixed(1)}M` : n >= 1e3 ? `${Math.round(n / 1e3)}k` : String(n))
 const tokens = (r: MapRun) => {
@@ -11,10 +12,11 @@ const tokens = (r: MapRun) => {
   return t.total !== undefined ? `${compact(t.total)} tokens` : ''
 }
 
-/** The change at a glance: summary, counts, follow-ups, the runs it was built from and the layer legend. */
-export function Overview() {
+/** The change at a glance: summary, counts, follow-ups, files no card claims, the runs it was built from and the legend. */
+export function Overview({ onOpenCode }: { onOpenCode: (path: string) => void }) {
   const { map } = useMap()
   const s = changeStats(map)
+  const loose = unassignedFiles(map)
   const stats: [number, string][] = [
     [s.files, 'files changed'],
     [s.added, 'new files'],
@@ -52,8 +54,17 @@ export function Overview() {
           </ul>
         </Section>
       )}
+      {loose.length > 0 && (
+        <Section title={`Files without a card · ${loose.length}`}>
+          <Refs>
+            {loose.map((p) => (
+              <CodeRef key={p} meta={p} text={map.files[p]?.role} onOpen={() => onOpenCode(p)} />
+            ))}
+          </Refs>
+        </Section>
+      )}
       {map.runs.length > 0 && (
-        <Section title={`Built from · ${map.runs.length} ${map.runs.length === 1 ? 'run' : 'runs'}`}>
+        <Section title={`Built from · ${count(map.runs.length, 'run')}`}>
           <ul className="grid gap-2">
             {map.runs.map((r) => {
               const meta = [r.kind, r.host, r.model, tokens(r)].filter(Boolean).join(' · ')
@@ -79,7 +90,9 @@ export function Overview() {
           ))}
         </div>
         <p className="text-xs leading-relaxed text-muted-foreground/80">
-          Arrows point from caller to dependency. Drag to pan, ⌘/Ctrl + scroll to zoom, ⌘K to search.
+          Arrows point from caller to dependency
+          {map.edges.some((e) => e.kind === 'authored') && '; dotted ones were declared by an agent instead of derived from imports'}. Drag
+          to pan, ⌘/Ctrl + scroll to zoom, ⌘K to search.
         </p>
       </Section>
     </>
