@@ -1,6 +1,6 @@
 # Helper API
 
-`src/harness.py` is the canonical Python 3.9+ standard-library helper. Its copies are generated only into skills that use it. Git and POSIX file locking are required on macOS/Linux. Each command returns JSON; errors return `error.code`, `message` and `details` with exit status 1.
+`src/harness.py` is the canonical Python 3.9+ standard-library helper. Its copies are generated only into skills that use it. It stays limited to environments and Markdown context; the records, launcher and map scripts (`src/records.py`, `src/run.py`, `src/changemap.py`) reuse its file guarantees and are described in [execution records](records.md). Git and POSIX file locking are required on macOS/Linux. Each command returns JSON; errors return `error.code`, `message` and `details` with exit status 1.
 
 ## Resolve and initialize
 

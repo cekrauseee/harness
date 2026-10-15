@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate only the helper/reference copies a self-contained skill actually uses."""
+"""Generate only the script, schema and reference copies a self-contained skill actually uses."""
 import argparse
 from pathlib import Path
 import sys
@@ -8,6 +8,40 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'src'))
 from harness import atomic_write, make_directory
 
+# A path named in SKILL.md, or needed by another generated file, is copied from its canonical source.
+SOURCES = {
+    'scripts/harness.py': 'src/harness.py',
+    'scripts/records.py': 'src/records.py',
+    'scripts/run.py': 'src/run.py',
+    'scripts/changemap.py': 'src/changemap.py',
+    'references/file-context.md': 'docs/file-context.md',
+    'references/records.md': 'docs/records.md',
+}
+# Imports and links between generated files; 'schema' stands for every schema/*.json.
+NEEDS = {
+    'scripts/records.py': ('scripts/harness.py', 'schema'),
+    'scripts/run.py': ('scripts/records.py',),
+    'scripts/changemap.py': ('scripts/records.py',),
+    'references/file-context.md': ('references/records.md',),
+    'references/records.md': ('schema',),
+}
+
+
+def generated(text):
+    selected = {path for path in SOURCES if path in text}
+    pending = list(selected)
+    while pending:
+        for needed in NEEDS.get(pending.pop(), ()):
+            if needed not in selected:
+                selected.add(needed)
+                pending.append(needed)
+    for path in sorted(selected):
+        if path == 'schema':
+            for schema in sorted((ROOT / 'schema').glob('*.json')):
+                yield schema, f'schema/{schema.name}'
+        else:
+            yield ROOT / SOURCES[path], path
+
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -15,11 +49,7 @@ def main():
     args = parser.parse_args()
     copies = []
     for entry in sorted((ROOT / 'skills').glob('*/SKILL.md')):
-        text = entry.read_text()
-        if 'scripts/harness.py' in text:
-            copies.append((ROOT / 'src/harness.py', entry.parent / 'scripts/harness.py'))
-        if 'references/file-context.md' in text:
-            copies.append((ROOT / 'docs/file-context.md', entry.parent / 'references/file-context.md'))
+        copies += [(source, entry.parent / target) for source, target in generated(entry.read_text())]
     problems = []
     for source, target in copies:
         content = source.read_bytes()
@@ -33,7 +63,7 @@ def main():
     if problems:
         print('Generated content drift: ' + ', '.join(problems))
         return 1
-    print(f'{len(copies)} standalone helper/reference copies match canonical sources.')
+    print(f'{len(copies)} standalone script/schema/reference copies match canonical sources.')
     return 0
 
 

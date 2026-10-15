@@ -18,9 +18,10 @@ class DistributionTest(unittest.TestCase):
     def test_generation_is_selective_idempotent_and_preserves_authored_resources(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary).resolve()
-            for folder in ('src', 'scripts', 'docs', 'skills/example/scripts/assets', 'skills/plain'):
+            for folder in ('src', 'scripts', 'docs', 'schema', 'skills/example/scripts/assets', 'skills/plain'):
                 (root / folder).mkdir(parents=True)
-            for file in ('src/harness.py', 'scripts/build_dist.py', 'docs/file-context.md'):
+            for file in ('src/harness.py', 'scripts/build_dist.py', 'docs/file-context.md', 'docs/records.md',
+                         *(p.relative_to(ROOT) for p in (ROOT / 'schema').glob('*.json'))):
                 shutil.copyfile(ROOT / file, root / file)
             skill = root / 'skills/example'
             (skill / 'SKILL.md').write_text('Use scripts/harness.py and references/file-context.md\n')
@@ -38,6 +39,9 @@ class DistributionTest(unittest.TestCase):
             self.assertEqual(run().returncode, 0)
             self.assertEqual(generated.read_bytes(), (root / 'src/harness.py').read_bytes())
             self.assertEqual((skill / 'references/file-context.md').read_bytes(), (root / 'docs/file-context.md').read_bytes())
+            # Generated files bring what they link to: the records contract and its schemas.
+            self.assertEqual((skill / 'references/records.md').read_bytes(), (root / 'docs/records.md').read_bytes())
+            self.assertEqual({p.name for p in (skill / 'schema').iterdir()}, {p.name for p in (root / 'schema').iterdir()})
             modified = generated.stat().st_mtime_ns
             self.assertEqual(run().returncode, 0)
             self.assertEqual(generated.stat().st_mtime_ns, modified)
