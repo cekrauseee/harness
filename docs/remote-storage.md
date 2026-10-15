@@ -1,6 +1,6 @@
 # Remote storage boundary
 
-Harness currently uses local files and path-based project bindings. This document describes requirements for a separate future file service accessed through MCP, not an implemented interface or a second storage backend. No endpoint names, provider, schemas or migration procedure are defined here.
+Harness currently uses local files and path-based project bindings. This document describes requirements for a separate future file service accessed through MCP, not an implemented interface or a second storage backend. It is distinct from the platform direction in [architecture](architecture.md), where applications operate local environments and local files stay the source of truth. No endpoint names, provider, schemas or migration procedure are defined here.
 
 ## Project identity and local execution
 
@@ -8,7 +8,7 @@ A shared project needs a stable identity independent of checkout paths, machine 
 
 For example, two machines can associate their different checkout roots with the same explicitly selected shared project and retrieve the same context. A fork remains separate unless deliberately associated. References to source files identify the project and repository-relative path, plus a revision when validity depends on it; each machine resolves them against its own checkout. Absolute execution paths remain local facts.
 
-Checkouts and worktrees remain local execution resources. Remote context storage does not need to contain them. Adopting the service will require an explicit local worktree-location policy compatible with the host; the current local helper continues to require worktrees inside its environment until that change is implemented.
+Checkouts and worktrees remain local execution resources wherever they live, whether in the environment's `worktrees/` or where the host manages them. Remote context storage does not contain them or their paths.
 
 ## File guarantees
 

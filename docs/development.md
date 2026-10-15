@@ -1,6 +1,6 @@
 # Development
 
-Edit `src/*.py`, `schema/*.json`, the canonical docs and the authored skills. `scripts/build_dist.py` generates the script, schema and reference copies each skill uses, by what its `SKILL.md` names and what those files need. Keep bundled scripts in the Python standard library and tests outside installed skills. Application code under `apps/` is never installed; each app's README states its stack, structure and checks.
+Edit `src/*.py`, `schema/*.json`, `docs/` and the authored skill files (`SKILL.md`, `agents/openai.yaml`). `scripts/build_dist.py` generates the script, schema and reference copies each skill uses, by what its `SKILL.md` names and what those files need; [architecture](architecture.md) describes the layout. Keep bundled scripts in the Python standard library and tests outside installed skills. Application code under `apps/` is never installed; each app's README states its stack, structure and checks.
 
 | Changed surface | Sufficient verification |
 | --- | --- |
