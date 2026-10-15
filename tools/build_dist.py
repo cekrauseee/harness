@@ -5,15 +5,15 @@ from pathlib import Path
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / 'src'))
+sys.path.insert(0, str(ROOT / 'scripts'))
 from harness import atomic_write, make_directory
 
 # A path named in SKILL.md, or needed by another generated file, is copied from its canonical source.
 SOURCES = {
-    'scripts/harness.py': 'src/harness.py',
-    'scripts/records.py': 'src/records.py',
-    'scripts/run.py': 'src/run.py',
-    'scripts/changemap.py': 'src/changemap.py',
+    'scripts/harness.py': 'scripts/harness.py',
+    'scripts/records.py': 'scripts/records.py',
+    'scripts/run.py': 'scripts/run.py',
+    'scripts/changemap.py': 'scripts/changemap.py',
     'references/file-context.md': 'docs/file-context.md',
     'references/records.md': 'docs/records.md',
     'references/host-integration.md': 'docs/host-integration.md',

@@ -67,7 +67,7 @@ class LauncherTest(unittest.TestCase):
         self.prompt.write_text('Implement the sessions module.\n')
 
     def cli(self, *args, mode='ok'):
-        result = subprocess.run([sys.executable, '-B', str(ROOT / 'src/run.py'), '--home', str(self.home), args[0],
+        result = subprocess.run([sys.executable, '-B', str(ROOT / 'scripts/run.py'), '--home', str(self.home), args[0],
                                  '--environment', str(self.env), '--work', WORK, '--front', 'sessions', *args[1:]],
                                 capture_output=True, text=True, timeout=60, env=dict(self.environ, FAKE_MODE=mode))
         return result.returncode, json.loads(result.stdout)

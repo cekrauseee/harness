@@ -7,17 +7,17 @@ This repository holds three parts of Harness: the plugin that agents install, th
 ```text
 .claude-plugin/  .codex-plugin/   plugin manifests; the repository root is the plugin root
 skills/<skill>/                   installed skills: SKILL.md and agents/ authored; scripts/, references/ and schema/ generated
-src/                              canonical Python of the scripts bundled in skills
+scripts/                          canonical Python of the scripts bundled in skills
 schema/                           JSON Schemas of the record, event and map formats
 docs/                             canonical documentation; the contracts are also generated into skills
 apps/<app>/                       local applications over environment files, never installed; today the change map viewer
-scripts/build_dist.py             generator of the copies inside skills
+tools/build_dist.py               generator of the copies inside skills
 tests/                            Python tests and the installation check
 ```
 
 | Part | Paths | Reaches users as |
 | --- | --- | --- |
-| Plugin | manifests, `skills/`, `src/` | Installed skills, each with only the scripts and references it uses |
+| Plugin | manifests, `skills/`, `scripts/` | Installed skills, each with only the scripts and references it uses |
 | Contract | [file context](file-context.md) (environment layout), [execution records](records.md) and `schema/` (JSON formats) | References and schemas generated into the skills that use them |
 | Applications | `apps/` | A checkout of this repository; never installed |
 
@@ -26,7 +26,7 @@ The [helper API](helper-api.md) documents the plugin's environment commands; [de
 ## Boundaries
 
 - The repository root is the plugin root. Hosts and the skills CLI install from it, so the manifests and `skills/` stay at the top level.
-- Inside a skill only `SKILL.md` and `agents/openai.yaml` are authored. `scripts/build_dist.py` generates `scripts/`, `references/` and `schema/` from `src/`, `docs/` and `schema/`, selecting what each `SKILL.md` names and what those files import or link. Generated documents keep their relative links, so the canonical documents stay directly in `docs/`.
+- Inside a skill only `SKILL.md` and `agents/openai.yaml` are authored. A skill's `scripts/` and `schema/` are copies from the root folders of the same name and its `references/` are copies from `docs/`; `tools/build_dist.py` generates them, selecting what each `SKILL.md` names and what those files import or link. Generated documents keep their relative links, so the canonical documents stay directly in `docs/`.
 - An installed skill needs nothing outside its folder: Python 3.9+ standard library, Git and its generated copies.
 - The contract is the only interface between the plugin and the applications. Every JSON document names its format and version (`harness-record-v1`, `harness-event-v1`, `harness-map-v1`).
 - Applications depend on the contract, never on plugin code, and the plugin never depends on an application. A skill may start an application from a checkout, as the map skill's `view` does, but its output stays valid without it.
