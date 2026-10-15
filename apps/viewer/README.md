@@ -19,6 +19,8 @@ pnpm dev --map /path/to/work/<work>/map
 
 `scripts/serve.mjs` turns `--map` into `HARNESS_MAP_DIR` and hands every other argument to the Vite CLI.
 
+Dependencies are pinned to exact versions. `pnpm-workspace.yaml` exempts two of them (`jsdom@30.1.3` and its dependency `@asamuzakjp/dom-selector@10.0.3`) from pnpm's minimum release age, because they were newer than that window when pinned; remove the exemption once they are older.
+
 Checks:
 
 ```bash
@@ -31,7 +33,7 @@ pnpm check          # generated types up to date, then all of the above
 
 ## Data contract
 
-The viewer renders `map.json` (format `harness-map-v1`) from the served folder; the map skill writes it to `work/<work>/map/`. Other files there, such as `supplement.json`, are inputs to the map skill and are ignored. The contract is `schema/map.v1.json` at the repository root, with field meanings in `docs/records.md`; the viewer never defines its own shape:
+The viewer renders `map.json` (format `harness-map-v1`) from the served folder; the map skill writes it to `work/<work>/map/`. Other files there, such as `supplement.json`, are inputs to the map skill and are ignored. The contract is `schema/map.v1.json` at the repository root, with field meanings in `docs/records.md` (Map fields); the viewer never defines its own shape:
 
 - `src/data/map.v1.ts` is generated from the schema with `pnpm gen:types` (`HARNESS_MAP_SCHEMA=<file>` points at another copy). `pnpm check` fails when it is out of date, and skips that step when the schema is absent.
 - `src/data/selectors.ts` is the only adapter between the schema and the features: canvas model and grouping, selection, highlights, code references, coverage.

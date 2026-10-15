@@ -11,7 +11,7 @@ Edit `src/*.py`, `schema/*.json`, the canonical docs and the authored skills. `s
 | Shared identity or persistence | Run the full helper suite |
 | Records, events or map consolidation | Run the records and map tests on synthetic fixtures; schema changes also need the viewer's checks |
 | Launcher | Run the launcher tests on synthetic host output (no network, no real CLI); report a manual smoke run per host, or that it was not run |
-| Viewer app (`apps/viewer`) | Run `pnpm check` in `apps/viewer` (generated types, typecheck, lint, format, tests) and render a fixture map without console errors, as its README describes; the Python suite and `verify_install.py` stay unaffected |
+| Viewer app (`apps/viewer`) | Run `pnpm check` in `apps/viewer` (generated types, typecheck, lint, format, tests) and open the synthetic fixture with `pnpm dev` to confirm it renders without console errors; the Python suite and `verify_install.py` stay unaffected |
 | Helper/reference distribution | Generate copies and check byte equality |
 | Discovery or installation | Check the affected installation boundary in disposable homes |
 
