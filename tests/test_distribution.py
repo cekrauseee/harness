@@ -93,13 +93,15 @@ class DistributionTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_bundled_imports_use_standard_library(self):
-        source = ast.parse((ROOT / 'src/harness.py').read_text())
+        bundled = {path.stem for path in (ROOT / 'src').glob('*.py')}
         modules = set()
-        for node in ast.walk(source):
-            if isinstance(node, ast.Import):
-                modules.update(alias.name.split('.')[0] for alias in node.names)
-            elif isinstance(node, ast.ImportFrom) and node.module:
-                modules.add(node.module.split('.')[0])
+        for path in (ROOT / 'src').glob('*.py'):
+            for node in ast.walk(ast.parse(path.read_text())):
+                if isinstance(node, ast.Import):
+                    modules.update(alias.name.split('.')[0] for alias in node.names)
+                elif isinstance(node, ast.ImportFrom) and node.module:
+                    modules.add(node.module.split('.')[0])
+        modules -= bundled
         stdlib = Path(sysconfig.get_path('stdlib')).resolve()
         for module in modules:
             spec = importlib.util.find_spec(module)
