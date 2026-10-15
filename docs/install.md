@@ -1,30 +1,41 @@
 # Installation
 
-Choose one discovery route per host. Installing both the native plugin and standalone copies of its skills can expose duplicate entries. A new host session is the reliable boundary for discovering a changed inventory.
+Harness installs as a native plugin from the [cekrause marketplace](https://github.com/cekrauseee/cekrause-marketplace), through each host's own plugin commands. The marketplace pins the plugin to a release tag, so every installation of a version has the same content; [releasing](releasing.md) describes how versions and tags are made. A new host session is the reliable boundary for discovering a changed inventory.
 
-## Standalone skills
+## Install
 
-```bash
-pnpx skills add cekrauseee/harness --skill '*' -g -a codex claude-code -y
-```
-
-Select only the desired host or skills when appropriate. Use `.` to install the current local checkout, including unpublished changes, rather than fetching the remote release. For Codex only:
+Claude Code:
 
 ```bash
-pnpx skills add . --skill '*' -g -a codex -y
+claude plugin marketplace add https://github.com/cekrauseee/cekrause-marketplace.git
+claude plugin install harness@cekrause
 ```
 
-The CLI requires Node.js on `PATH`. `npx skills` is an alternative to `pnpx skills`. Each skill contains its own needed helper and references; it does not require its siblings or access to this repository after installation. Viewing a change map is the exception: the [viewer](../apps/viewer/README.md) runs from a checkout of this repository and needs Node and pnpm. This route installs the standalone skills from the default branch, which can hold changes not yet released; it does not register a native plugin or an MCP server.
+Codex:
 
-## Native plugins
+```bash
+codex plugin marketplace add https://github.com/cekrauseee/cekrause-marketplace.git
+codex plugin add harness@cekrause
+```
 
-The repository includes `.codex-plugin/plugin.json` and `.claude-plugin/plugin.json`. Register the source using the host's supported plugin installation mechanism. In a marketplace manifest, point the plugin at its HTTPS Git URL with a `url` source and a release tag as `ref`, rather than a `github` shorthand or a branch: Claude Code clones `github` sources over SSH, which fails on a machine without a GitHub SSH setup, while HTTPS works for this public repository on both hosts, and a tag gives every installation of a version the same content. The published [cekrause marketplace](https://github.com/cekrauseee/cekrause-marketplace) does this for Codex and Claude Code. For a Codex local marketplace, use the Plugin Creator flow to register the source and obtain the actual marketplace name, then install `harness@<marketplace-name>` with `codex plugin add`. The implicit personal marketplace and an explicitly registered marketplace have different setup requirements; do not add a fictitious marketplace or edit the host's cache manually.
+`claude plugin list` and `codex plugin list` show the installed version. Each skill carries its own helper and references and needs neither its siblings nor this repository after installation. Viewing a change map is the exception: the [viewer](../apps/viewer/README.md) runs from a checkout of this repository and needs Node and pnpm.
 
-Hosts cache an installed plugin by its version. After a [release](releasing.md) moves the marketplace to the new tag, refresh the marketplace and update the plugin with the host's own commands (`claude plugin marketplace update <marketplace>` and `claude plugin update harness@<marketplace>`; `codex plugin add harness@<marketplace>`), then start a new chat to pick up the changes. Confirm that the selected marketplace actually points to the source being updated. A standalone skills installation is an alternative, not a prerequisite.
+## Update
+
+Hosts cache an installed plugin by its version, and a release moves the marketplace to the new tag. Refresh the marketplace, update the plugin, then start a new chat:
+
+- Claude Code: `claude plugin marketplace update cekrause`, then `claude plugin update harness@cekrause`.
+- Codex: `codex plugin marketplace upgrade cekrause`, then `codex plugin add harness@cekrause`.
+
+A marketplace registered from a local directory is read from that directory, so pull its checkout first; `codex plugin marketplace upgrade` refreshes only Git marketplaces. Confirm that the registered marketplace points to the source you expect, and never edit a host's plugin cache by hand.
+
+## Other marketplaces
+
+The plugin manifests are `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json` at the repository root. A marketplace that lists Harness points at its HTTPS Git URL with a `url` source and a release tag as `ref`, rather than a `github` shorthand or a branch: Claude Code clones `github` sources over SSH, which fails on a machine without a GitHub SSH setup, while HTTPS works for this public repository on both hosts, and a tag gives every installation of a version the same content.
 
 ## Existing installations and data
 
-Replacing older skills or plugins is a deliberate operation. Identify the installed discovery entries and their backing paths, preserve unrelated configuration and keep any helper paths still used by active chats available until those consumers finish. Removing an old skill from discovery and deleting its files need not happen at the same time.
+Replacing older skills or plugins is a deliberate operation. Copies of the skills installed separately, for example with a skills CLI, duplicate the plugin's entries in discovery; remove them when switching to the plugin. Identify the installed discovery entries and their backing paths, preserve unrelated configuration and keep any helper paths still used by active chats available until those consumers finish. Removing an old skill from discovery and deleting its files need not happen at the same time.
 
 Back up needed knowledge and continuations outside target repositories before converting old data. The new helper uses `HARNESS_HOME` (default `~/.harness`), a current-only descriptor and one environment per project. It does not modify or import Continuity data. A previous environment shared by several projects needs explicit allocation of knowledge and pending work; never infer that all its material belongs to whichever project is initialized first.
 
