@@ -25,6 +25,7 @@ The repository holds the plugin, the file contract and the applications; [archit
 - Do not add lifecycle hooks, automatic context injection or agent claims. Solo work needs no records. An orchestration records events and run deliveries under its fronts as [execution records](docs/records.md) describes; raw host output is evidence, not context.
 - Never store secrets, chat transcripts or chain-of-thought in context files, or add environment state to a target repository.
 - Use Conventional Commits and semantic branches such as `feat/access-control`. PRs describe the macro behavior in normal prose.
+- Do not change the plugin version in feature work; a release changes it, tags it and publishes it as [releasing](docs/releasing.md) describes.
 
 ## Verification
 
