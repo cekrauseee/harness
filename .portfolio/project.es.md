@@ -2,17 +2,17 @@
 description: >-
   Contexto externo por proyecto y procesos de ingeniería específicos para agentes.
 metaDescription: >-
-  Harness conserva conocimiento útil y contexto de continuación en archivos Markdown locales, fuera del repositorio. Diez skills independientes apoyan la planificación, deliberación entre pares, implementación, revisión y operaciones Git en Codex y Claude Code.
+  Harness conserva conocimiento útil y contexto de continuación en archivos Markdown locales, fuera del repositorio. Once skills independientes apoyan la planificación, deliberación entre pares, implementación, revisión, mapas de cambios y operaciones Git en Codex y Claude Code.
 summary: >-
-  Harness proporciona a cada proyecto un entorno externo compartido por sus worktrees de Git. Diez skills independientes cubren contexto, planificación modular, handoffs, coordinación de agentes, deliberación entre pares y procesos de ingeniería en Codex y Claude Code, con un único archivo de instrucciones compartido. Los procesos orientan a los agentes hacia el contexto relevante para cada tarea.
+  Harness proporciona a cada proyecto un entorno externo compartido por sus worktrees de Git. Once skills independientes cubren contexto, planificación modular, handoffs, coordinación de agentes, deliberación entre pares, mapas de cambios y procesos de ingeniería en Codex y Claude Code, con un único archivo de instrucciones compartido. Los procesos orientan a los agentes hacia el contexto relevante para cada tarea.
 highlights:
   - un entorno por proyecto y sus worktrees
-  - diez skills independientes para Codex y Claude Code
+  - once skills independientes para Codex y Claude Code
   - contexto en archivos consultado cuando hace falta
   - actualizaciones atómicas de Markdown sin reservas de archivos
 ---
 
-Harness proporciona a cada proyecto un entorno externo compartido por sus worktrees de Git. Diez skills independientes cubren contexto, planificación modular, handoffs, coordinación de agentes, deliberación entre pares y procesos de ingeniería en Codex y Claude Code, con un único archivo de instrucciones compartido. Los procesos orientan a los agentes hacia el contexto relevante para cada tarea.
+Harness proporciona a cada proyecto un entorno externo compartido por sus worktrees de Git. Once skills independientes cubren contexto, planificación modular, handoffs, coordinación de agentes, deliberación entre pares, mapas de cambios y procesos de ingeniería en Codex y Claude Code, con un único archivo de instrucciones compartido. Los procesos orientan a los agentes hacia el contexto relevante para cada tarea.
 
 ## Contexto del proyecto fuera del repositorio
 
@@ -23,6 +23,10 @@ Cada repositorio o monorepo tiene un entorno local. Su mapa resumido ayuda a los
 Los planes macro son modulares independientemente del número de agentes. Los frentes de implementación y revisión pueden referenciar los mismos entregables y mantener separados sus contextos de ejecución. Los handoffs transfieren responsabilidad mediante referencias a archivos canónicos, sin copiar conversaciones.
 
 Cuando se solicita, la deliberación entre pares reúne a los agentes para desarrollar un análisis, una decisión o una propuesta. Los participantes aportan y cuestionan ideas en igualdad, refinan una síntesis conjunta y conservan los desacuerdos relevantes. La coordinación organiza el intercambio sin determinar qué perspectiva debe prevalecer.
+
+## Registros de ejecución y mapas de cambios
+
+Cuando una orquestación se organiza en frentes, los agentes que hicieron el trabajo dejan registros de ejecución y eventos al entregar: qué cambió, los puntos de atención y flujos que comprobaron y las pruebas que los respaldan. Un mapa de cambios consolida esos registros con datos de Git en una vista por capas del cambio para revisión y QA, que muestra un visor local de solo lectura. El trabajo individual no requiere registros.
 
 ## Dos hosts, un solo conjunto de instrucciones
 
