@@ -16,6 +16,7 @@ SOURCES = {
     'scripts/changemap.py': 'src/changemap.py',
     'references/file-context.md': 'docs/file-context.md',
     'references/records.md': 'docs/records.md',
+    'references/host-integration.md': 'docs/host-integration.md',
 }
 # Imports and links between generated files; 'schema' stands for every schema/*.json.
 NEEDS = {

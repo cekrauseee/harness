@@ -2,7 +2,7 @@
 
 A local, read-only web app that renders a Harness change map: the cards, flows, attention points and code that an execution produced. It serves one map folder, watches it, and updates the page while an orchestration is still writing to it. It never writes.
 
-The viewer is application source, not part of any installed skill. It needs Node and pnpm; the map data stays valid without it, and the Python test suite never needs Node.
+The viewer is application source, not part of any installed skill; [architecture](../../docs/architecture.md) describes how applications relate to the plugin and the file contract. It needs Node and pnpm; the map data stays valid without it, and the Python test suite never needs Node.
 
 ## Commands
 
@@ -33,7 +33,7 @@ pnpm check          # generated types up to date, then all of the above
 
 ## Data contract
 
-The viewer renders `map.json` (format `harness-map-v1`) from the served folder; the map skill writes it to `work/<work>/map/`. Other files there, such as `supplement.json`, are inputs to the map skill and are ignored. The contract is `schema/map.v1.json` at the repository root, with field meanings in `docs/records.md` (Map fields); the viewer never defines its own shape:
+The viewer renders `map.json` (format `harness-map-v1`) from the served folder; the map skill writes it to `work/<work>/map/`. Other files there, such as `supplement.json`, are inputs to the map skill and are ignored. The contract is [`schema/map.v1.json`](../../schema/map.v1.json) at the repository root, with field meanings in [map fields](../../docs/records.md#map-fields); the viewer never defines its own shape:
 
 - `src/data/map.v1.ts` is generated from the schema with `pnpm gen:types` (`HARNESS_MAP_SCHEMA=<file>` points at another copy). `pnpm check` fails when it is out of date, and skips that step when the schema is absent.
 - `src/data/selectors.ts` is the only adapter between the schema and the features: canvas model and grouping, selection, highlights, code references, coverage.
@@ -43,7 +43,7 @@ Every list in a map is present and may be empty; empty sections are hidden. Edge
 
 `plugins/map-source.ts` serves the folder under `/map/`: GET and HEAD only, regular files only, no directory listing, no dotfiles, nothing outside the folder (symlinks included), `Cache-Control: no-store`. In dev it watches the folder and sends a `harness-map:changed` event; `src/data/source.ts` reloads the map on that event. A reload that fails (for example a file read mid-write) keeps the last good map and logs a warning. Missing lists become empty and edges that point at unknown cards are dropped, so a partial map still renders.
 
-Everything shown comes from the data: title, summary, layers, module names, actors. The viewer never rewrites that text, so the data must be written for display as `docs/records.md` (Display copy) describes; the UI copy in code is generic.
+Everything shown comes from the data: title, summary, layers, module names, actors. The viewer never rewrites that text, so the data must be written for display as [display copy](../../docs/records.md#display-copy) describes; the UI copy in code is generic.
 
 ## Structure
 
