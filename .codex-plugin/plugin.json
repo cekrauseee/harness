@@ -21,7 +21,7 @@
   "interface": {
     "displayName": "Harness",
     "shortDescription": "Project context and focused agent workflows.",
-    "longDescription": "Ten self-contained skills for project environments, modular planning, handoffs, agent coordination, peer deliberation, implementation, reviews, worktrees, commits and pull requests. Persistent context stays outside the repository; closed work moves to the environment trash.",
+    "longDescription": "Eleven self-contained skills for project environments, modular planning, handoffs, agent coordination, peer deliberation, implementation, reviews, change maps, worktrees, commits and pull requests. Persistent context stays outside the repository; closed work moves to the environment trash.",
     "developerName": "Henrique Krause",
     "category": "Productivity",
     "capabilities": [

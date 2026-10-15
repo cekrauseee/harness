@@ -1,0 +1,4 @@
+interface:
+  display_name: "Map"
+  short_description: "Build a change map for review and QA."
+  default_prompt: "Use $map to build a change map for this branch."

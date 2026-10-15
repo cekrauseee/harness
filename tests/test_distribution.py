@@ -64,7 +64,7 @@ class DistributionTest(unittest.TestCase):
         self.assertEqual(version, codex['version'].split('+')[0])
         self.assertEqual({Path(p).name for p in claude['skills']}, names)
         self.assertEqual(names, {'environment', 'close-work', 'plan', 'implement', 'review', 'handoff',
-                                 'orchestrate', 'deliberate', 'worktree', 'commit-pr'})
+                                 'orchestrate', 'deliberate', 'worktree', 'commit-pr', 'map'})
         self.assertEqual(codex['skills'], './skills/')
 
     def test_skill_metadata_and_local_links_resolve_within_installed_skill(self):

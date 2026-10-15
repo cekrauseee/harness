@@ -12,6 +12,7 @@
     "./skills/environment",
     "./skills/handoff",
     "./skills/implement",
+    "./skills/map",
     "./skills/orchestrate",
     "./skills/plan",
     "./skills/review",

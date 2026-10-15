@@ -1,6 +1,6 @@
 # Harness
 
-Harness keeps project context in external files and provides focused engineering workflows for agents on Codex and Claude Code. It combines predictable places for knowledge, plans and continuation with ten skills that load only when they serve the task. There are no lifecycle hooks, automatic context injection, mandatory task records or agent reservations.
+Harness keeps project context in external files and provides focused engineering workflows for agents on Codex and Claude Code. It combines predictable places for knowledge, plans and continuation with eleven skills that load only when they serve the task. Orchestrations also leave execution records, from which a change map is built for review. There are no lifecycle hooks, automatic context injection or agent reservations, and solo work needs no records.
 
 ## Skills
 
@@ -19,6 +19,7 @@ Harness keeps project context in external files and provides focused engineering
 | [deliberate](skills/deliberate/SKILL.md) | Develop analyses and decisions through peer deliberation |
 | [worktree](skills/worktree/SKILL.md) | Create, reuse or retire an isolated checkout and its branch |
 | [commit-pr](skills/commit-pr/SKILL.md) | Prepare Conventional Commits and prose pull requests |
+| [map](skills/map/SKILL.md) | Consolidate execution records into a change map for review and QA |
 
 Skills are selected by the responsibility of the requested outcome or a necessary operation, without the user naming them, except `close-work`, which the user invokes because it moves files. Suboperations covered by the active skill need no separate skill: a worktree covers its branch, and planning inside authorized implementation returns to implementation. A planning-only request still stops at the plan. Conventions that must hold in every session, such as commit format, documentation boundaries and integration rules, live in the user's global instructions rather than in skills; see [host integration](skills/environment/references/host-integration.md) for the shared instruction file, the host sections and the settings checklist.
 
@@ -37,8 +38,11 @@ environment/
     modules/<module>.md
     team.md
     fronts/<front>/context.md
+    fronts/<front>/events.jsonl
+    fronts/<front>/runs/<run>.record.json
     fronts/<review-front>/findings.md
     handoffs/<recipient-scope>.md
+    map/
   worktrees/<checkout>/
   trash/<work>-<timestamp>/
 ```
@@ -49,7 +53,7 @@ Preserve decisions, useful investigation and continuation when losing the conver
 
 Worktrees Harness creates default to the environment's `worktrees/` directory; worktrees the host manages are accepted where they are, and every checkout resolves to the same environment. Cooperating agents can alternate writes in one front; independent writing fronts use separate checkouts. Retiring a checkout is separate from closing a work item.
 
-When the whole work is complete, consolidate durable knowledge and preserve retained deliverables with updated references, then close the work: the helper moves `work/<work>/` to `trash/` in one atomic rename, and the user purges the trash. Preserve anything still needed by active fronts, pending handoffs or other ongoing work. See the [file context contract](docs/file-context.md) for the canonical responsibilities and destinations.
+When the whole work is complete, consolidate durable knowledge and preserve retained deliverables with updated references, then close the work: the helper moves `work/<work>/` to `trash/` in one atomic rename, and the user purges the trash. Preserve anything still needed by active fronts, pending handoffs or other ongoing work. See the [file context contract](docs/file-context.md) for the canonical responsibilities and destinations, and [execution records](docs/records.md) for attention points, run records, events and the change map.
 
 Storage is currently local. The [remote storage boundary](docs/remote-storage.md) specifies requirements for a separate future file service; this release does not synchronize environments or expose an MCP service.
 
@@ -73,6 +77,8 @@ The bundled helper uses Python 3.9+, Git and POSIX locking. It initializes only 
 python3 skills/environment/scripts/harness.py init --project /path/to/project
 ```
 
-Read the [helper API](docs/helper-api.md) for command contracts, the [development guide](docs/development.md) for contribution checks and [host integration](skills/environment/references/host-integration.md) for the shared instruction file. Repository publication and installation do not modify user environments or host instructions by themselves.
+Viewing a change map uses the local viewer application in `apps/viewer`, which needs Node and pnpm and is not installed with the skills; the map data stays valid without it.
+
+Read the [helper API](docs/helper-api.md) and [execution records](docs/records.md) for command contracts, the [development guide](docs/development.md) for contribution checks and [host integration](skills/environment/references/host-integration.md) for the shared instruction file. Repository publication and installation do not modify user environments or host instructions by themselves.
 
 [MIT license](LICENSE), Henrique Krause.
