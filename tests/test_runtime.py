@@ -10,7 +10,7 @@ import unittest
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / 'src'))
+sys.path.insert(0, str(ROOT / 'scripts'))
 import harness
 
 
@@ -337,7 +337,7 @@ class RuntimeTest(unittest.TestCase):
         self.assertEqual(self.call('resolve')['trash'], str(folder / 'trash'))
 
     def test_cli_json_input_stdin_and_errors(self):
-        command = [sys.executable, '-B', str(ROOT / 'src/harness.py'), '--home', str(self.home)]
+        command = [sys.executable, '-B', str(ROOT / 'scripts/harness.py'), '--home', str(self.home)]
         init = subprocess.run(command + ['init', '--project', str(self.project)], capture_output=True, text=True)
         self.assertEqual(init.returncode, 0, init.stderr)
         result = subprocess.run(command + ['write', '--project', str(self.project), '--file', 'work/one/README.md',

@@ -58,7 +58,7 @@ class ChangeMapTest(unittest.TestCase):
         records.append_event(self.env, WORK, 'web', {'kind': 'accepted', 'run': 'web-1'})
 
     def cli(self, *args):
-        result = subprocess.run([sys.executable, '-B', str(ROOT / 'src/changemap.py'), '--home', str(self.home), *args,
+        result = subprocess.run([sys.executable, '-B', str(ROOT / 'scripts/changemap.py'), '--home', str(self.home), *args,
                                  '--environment', str(self.env), '--work', WORK], capture_output=True, text=True, timeout=60,
                                 env={k: v for k, v in os.environ.items() if k != 'HARNESS_VIEWER'})
         return result.returncode, json.loads(result.stdout)

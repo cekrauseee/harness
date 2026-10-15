@@ -39,7 +39,7 @@ class RecordsTest(unittest.TestCase):
         return records.complete(record, self.project)
 
     def cli(self, *args, stdin=None):
-        result = subprocess.run([sys.executable, '-B', str(ROOT / 'src/records.py'), '--home', str(self.home), *args],
+        result = subprocess.run([sys.executable, '-B', str(ROOT / 'scripts/records.py'), '--home', str(self.home), *args],
                                 capture_output=True, text=True, input=stdin, timeout=30)
         return result.returncode, json.loads(result.stdout)
 
