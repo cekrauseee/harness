@@ -18,13 +18,12 @@ SOURCES = {
     'references/records.md': 'docs/records.md',
     'references/host-integration.md': 'docs/host-integration.md',
 }
-# Imports and links between generated files; 'schema' stands for every schema/*.json.
+# Imports and links between generated files; 'schema' stands for every schema/*.json, shipped only with scripts that load it.
 NEEDS = {
     'scripts/records.py': ('scripts/harness.py', 'schema'),
     'scripts/run.py': ('scripts/records.py',),
     'scripts/changemap.py': ('scripts/records.py',),
     'references/file-context.md': ('references/records.md',),
-    'references/records.md': ('schema',),
 }
 
 

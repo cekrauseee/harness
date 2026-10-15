@@ -20,12 +20,15 @@ class DistributionTest(unittest.TestCase):
             root = Path(temporary).resolve()
             for folder in ('scripts', 'tools', 'docs', 'schema', 'skills/example/scripts/assets', 'skills/plain'):
                 (root / folder).mkdir(parents=True)
-            for file in ('scripts/harness.py', 'tools/build_dist.py', 'docs/file-context.md', 'docs/records.md',
+            for file in ('scripts/harness.py', 'scripts/records.py', 'tools/build_dist.py', 'docs/file-context.md', 'docs/records.md',
                          *(p.relative_to(ROOT) for p in (ROOT / 'schema').glob('*.json'))):
                 shutil.copyfile(ROOT / file, root / file)
             skill = root / 'skills/example'
             (skill / 'SKILL.md').write_text('Use scripts/harness.py and references/file-context.md\n')
             (root / 'skills/plain/SKILL.md').write_text('Instruction-only skill\n')
+            validator = root / 'skills/validator'
+            validator.mkdir()
+            (validator / 'SKILL.md').write_text('Use scripts/records.py\n')
             authored = skill / 'scripts/custom.py'
             authored.write_text("print('keep')\n")
             generated = skill / 'scripts/harness.py'
@@ -39,9 +42,11 @@ class DistributionTest(unittest.TestCase):
             self.assertEqual(run().returncode, 0)
             self.assertEqual(generated.read_bytes(), (root / 'scripts/harness.py').read_bytes())
             self.assertEqual((skill / 'references/file-context.md').read_bytes(), (root / 'docs/file-context.md').read_bytes())
-            # Generated files bring what they link to: the records contract and its schemas.
+            # Generated documents bring what they link to; schemas come only with the scripts that load them.
             self.assertEqual((skill / 'references/records.md').read_bytes(), (root / 'docs/records.md').read_bytes())
-            self.assertEqual({p.name for p in (skill / 'schema').iterdir()}, {p.name for p in (root / 'schema').iterdir()})
+            self.assertFalse((skill / 'schema').exists())
+            self.assertTrue((validator / 'scripts/harness.py').is_file())
+            self.assertEqual({p.name for p in (validator / 'schema').iterdir()}, {p.name for p in (root / 'schema').iterdir()})
             modified = generated.stat().st_mtime_ns
             self.assertEqual(run().returncode, 0)
             self.assertEqual(generated.stat().st_mtime_ns, modified)
