@@ -2,7 +2,7 @@
 
 Orchestrations produce, as a by-product of the work, the data a reviewer needs: attention points and flows declared in the plan, run records written by the agents that did the work, events that make a running orchestration observable, and a change map consolidated from them. Facts come from scripts; judgment is written once, by the agent that holds the context. Coordinators read summaries and validator output, not raw logs.
 
-The JSON formats are versioned and defined by the schemas beside this contract: [record](../schema/record.v1.json), [event](../schema/event.v1.json) and [map](../schema/map.v1.json). The bundled scripts return JSON like the environment helper and, like it, accept `--project <path>` wherever an example shows `--environment <env>`, and `--home` before the command.
+The JSON formats are versioned and defined by JSON Schemas in `schema/`: `record.v1.json`, `event.v1.json` and `map.v1.json`. They sit at the repository root and in every skill whose scripts validate them. The bundled scripts return JSON like the environment helper and, like it, accept `--project <path>` wherever an example shows `--environment <env>`, and `--home` before the command.
 
 ## When records exist
 
