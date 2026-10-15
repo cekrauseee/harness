@@ -1,0 +1,391 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-heading: var(--font-sans);
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, monospace;
+  --color-brand: var(--brand);
+  --color-brand-soft: var(--brand-soft);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-danger: var(--danger);
+  --color-glass: var(--glass);
+  --color-canvas: var(--canvas);
+  --color-l0: var(--l0);
+  --color-l1: var(--l1);
+  --color-l2: var(--l2);
+  --color-l3: var(--l3);
+  --color-l4: var(--l4);
+  --color-l5: var(--l5);
+  --ease-out-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #111111;
+  --card: #ffffff;
+  --card-foreground: #111111;
+  --popover: #ffffff;
+  --popover-foreground: #111111;
+  --primary: #111111;
+  --primary-foreground: #ffffff;
+  --secondary: #f6f6f6;
+  --secondary-foreground: #111111;
+  --muted: #f6f6f6;
+  --muted-foreground: #666666;
+  --accent: #f3f3f3;
+  --accent-foreground: #111111;
+  --destructive: #d93036;
+  --border: #e8e8e8;
+  --input: #e8e8e8;
+  --ring: #0068e6;
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+  --background: #121212;
+  --foreground: #ededed;
+  --card: #121212;
+  --card-foreground: #ededed;
+  --popover: #191919;
+  --popover-foreground: #ededed;
+  --primary: #ededed;
+  --primary-foreground: #111111;
+  --secondary: #191919;
+  --secondary-foreground: #ededed;
+  --muted: #191919;
+  --muted-foreground: #a1a1a1;
+  --accent: #1f1f1f;
+  --accent-foreground: #ededed;
+  --destructive: #ff6369;
+  --border: #262626;
+  --input: #2e2e2e;
+  --ring: #3b8cff;
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+  html {
+    @apply font-sans;
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
+    overflow: hidden;
+  }
+  body {
+    font-size: 13px;
+    line-height: 1.5;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+/* ───────── Viewer tokens (on top of the shadcn theme) ───────── */
+:root {
+  --brand: #0068e6;
+  --brand-soft: rgba(0, 104, 230, 0.09);
+  --brand-ring: rgba(0, 104, 230, 0.22);
+  --ok: #0f9d58;
+  --warn: #c77700;
+  --danger: var(--destructive);
+  --l0: #8b5cf6;
+  --l1: #0ea5e9;
+  --l2: #f59e0b;
+  --l3: #14b8a6;
+  --l4: #f43f5e;
+  --l5: #84cc16;
+  --canvas: #fafafa;
+  --dot: #e3e3e3;
+  --edge: #cfcfcf;
+  --glass: rgba(255, 255, 255, 0.86);
+  --diff-add: rgba(15, 157, 88, 0.08);
+  --diff-del: rgba(217, 48, 54, 0.07);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-hover: 0 1px 2px rgba(0, 0, 0, 0.04), 0 6px 20px rgba(0, 0, 0, 0.06);
+  --shadow-float: 0 2px 6px rgba(0, 0, 0, 0.04), 0 16px 48px rgba(0, 0, 0, 0.1);
+}
+.dark {
+  --brand: #3b8cff;
+  --brand-soft: rgba(59, 140, 255, 0.13);
+  --brand-ring: rgba(59, 140, 255, 0.3);
+  --ok: #3ecf8e;
+  --warn: #f0a33a;
+  --canvas: #0a0a0a;
+  --dot: #1d1d1d;
+  --edge: #383838;
+  --glass: rgba(18, 18, 18, 0.84);
+  --diff-add: rgba(62, 207, 142, 0.11);
+  --diff-del: rgba(255, 99, 105, 0.11);
+  --shadow-card: none;
+  --shadow-hover: 0 0 0 1px rgba(255, 255, 255, 0.02), 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-float: 0 0 0 1px rgba(255, 255, 255, 0.03), 0 20px 60px rgba(0, 0, 0, 0.55);
+}
+
+@layer components {
+  .cm-float {
+    background: var(--glass);
+    backdrop-filter: blur(20px) saturate(1.4);
+    -webkit-backdrop-filter: blur(20px) saturate(1.4);
+    box-shadow: var(--shadow-float);
+  }
+  .cm-eyebrow {
+    @apply text-[10.5px] font-medium tracking-[0.08em] text-muted-foreground uppercase;
+  }
+
+  /* Canvas */
+  .cm-canvas {
+    background-color: var(--canvas);
+    background-image: radial-gradient(var(--dot) 1px, transparent 1px);
+  }
+  .cm-world.gliding {
+    transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .cm-node {
+    transition:
+      border-color 0.2s,
+      box-shadow 0.25s,
+      opacity 0.25s,
+      translate 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    animation: cm-node-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  @keyframes cm-node-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .cm-edge {
+    fill: none;
+    stroke: var(--edge);
+    stroke-width: 1.5;
+    transition:
+      stroke 0.2s,
+      opacity 0.25s,
+      stroke-width 0.2s;
+  }
+  .cm-edge.on {
+    stroke: var(--brand);
+    stroke-width: 2;
+  }
+  .cm-edge.off {
+    opacity: 0.14;
+  }
+  .cm-edge.flowing {
+    stroke-dasharray: 6 5;
+    animation: cm-flow 0.9s linear infinite;
+  }
+  .cm-arrow {
+    fill: var(--edge);
+  }
+  .cm-arrow.on {
+    fill: var(--brand);
+  }
+  @keyframes cm-flow {
+    to {
+      stroke-dashoffset: -11;
+    }
+  }
+  @keyframes cm-edge-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  /* Code */
+  .cm-code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.7;
+  }
+  .cm-code .tok,
+  .cm-code .tok span {
+    color: var(--shiki-light);
+  }
+  .dark .cm-code .tok,
+  .dark .cm-code .tok span {
+    color: var(--shiki-dark);
+  }
+  .cm-line.add {
+    background: var(--diff-add);
+  }
+  .cm-line.del {
+    background: var(--diff-del);
+  }
+  .cm-line.flash {
+    animation: cm-flash 1.8s var(--ease-out-soft);
+  }
+  .cm-block.flash {
+    animation: cm-flash-ring 1.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  @keyframes cm-flash-ring {
+    0%,
+    35% {
+      box-shadow: 0 0 0 3px var(--brand-soft);
+      border-color: var(--brand);
+    }
+  }
+  @keyframes cm-flash {
+    0%,
+    45% {
+      background: var(--brand-soft);
+    }
+  }
+
+  /* Stepper rail */
+  .cm-step::before {
+    content: '';
+    position: absolute;
+    left: 13px;
+    top: 32px;
+    bottom: 0;
+    width: 1px;
+    background: var(--border);
+    transition: background 0.3s;
+  }
+  .cm-step.is-past::before {
+    background: color-mix(in oklch, var(--brand) 35%, transparent);
+  }
+  .cm-step:last-child::before {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus: one treatment app-wide, shown only for keyboard interaction. Libraries that focus
+   programmatically on click (Radix tabs, roving focus) can still match :focus-visible, so the
+   input modality is tracked in main.tsx and drives the style. Unlayered, so it wins over ring utilities. */
+html[data-input='keyboard'] :where(button, a, input, textarea, [role='button'], [role='tab'], [tabindex]):focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+html[data-input='keyboard'] [data-slot='tabs-trigger']:focus-visible {
+  outline-offset: 0;
+}
+:focus-visible {
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-ring-offset-shadow: 0 0 #0000;
+}
+html:not([data-input='keyboard']) :focus-visible,
+[cmdk-input]:focus-visible {
+  outline: none;
+}
+
+/* Cursors: every state says what will happen (shadcn --pointer covers buttons; this extends it). */
+@layer base {
+  :where(
+    a[href],
+    button,
+    summary,
+    label[for],
+    select,
+    [role='button'],
+    [role='tab'],
+    [role='option'],
+    [role='menuitem'],
+    [role='switch'],
+    [role='checkbox'],
+    [cmdk-item],
+    [data-slot='tooltip-trigger']
+  ):not(:disabled, [aria-disabled='true'], [data-disabled]) {
+    cursor: pointer;
+  }
+  :where(button, [role='button'], [role='tab'], [cmdk-item]):is(:disabled, [aria-disabled='true'], [data-disabled='true']) {
+    cursor: not-allowed;
+  }
+  :where(input:not([type='checkbox'], [type='radio'], [type='range']), textarea, [contenteditable='true']) {
+    cursor: text;
+  }
+  :where(.select-text, code, .cm-code .tok) {
+    cursor: text;
+  }
+  [role='tab'][aria-selected='true'],
+  [aria-current='step'] {
+    cursor: default;
+  }
+}

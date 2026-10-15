@@ -1,0 +1,854 @@
+{
+  "format": "harness-map-v1",
+  "title": "Shared reading lists",
+  "subtitle": "Owners share a reading list by email; invited readers open it read-only, and every list read now goes through the access rules.",
+  "work": "shared-lists",
+  "source": {
+    "repository": "shelf",
+    "base": "1405df66cbe219b0bf6355bc3d60361a8376b6b4",
+    "head": "1a954628a960aaef81d7b2d4521929579f3541e6",
+    "baseRef": "main",
+    "headRef": "feat/shared-lists",
+    "headDate": "2026-10-14T16:20:00+02:00"
+  },
+  "layers": [
+    {
+      "id": "screens",
+      "title": "Screens"
+    },
+    {
+      "id": "api",
+      "title": "API routes"
+    },
+    {
+      "id": "domain",
+      "title": "Domain"
+    },
+    {
+      "id": "storage",
+      "title": "Storage and services"
+    }
+  ],
+  "groups": [],
+  "cards": [
+    {
+      "id": "list-page",
+      "layer": "screens",
+      "title": "Shared list page",
+      "summary": "Shows a list to its owner or an invited reader; anyone else sees a clear denied state.",
+      "files": ["src/app/lists/[id]/page.tsx"],
+      "attention": [],
+      "flows": ["fl-open"]
+    },
+    {
+      "id": "share-dialog",
+      "layer": "screens",
+      "title": "Share dialog",
+      "summary": "Owner enters an email to invite a reader.",
+      "files": ["src/components/share-dialog.tsx"],
+      "attention": [],
+      "flows": ["fl-share"]
+    },
+    {
+      "id": "share-route",
+      "layer": "api",
+      "title": "Share endpoint",
+      "summary": "Validates the owner and the email, then creates an invite.",
+      "files": ["src/api/lists/share.ts"],
+      "attention": ["ap-share-rate"],
+      "flows": ["fl-share"]
+    },
+    {
+      "id": "list-route",
+      "layer": "api",
+      "title": "List endpoint",
+      "summary": "Returns a list only to users with a role on it.",
+      "files": ["src/api/lists/get.ts"],
+      "attention": [],
+      "flows": ["fl-open"]
+    },
+    {
+      "id": "invites",
+      "layer": "domain",
+      "title": "Invitations",
+      "summary": "Issues hashed, expiring tokens and accepts them once.",
+      "files": ["src/domain/invites.ts", "tests/invites.test.ts"],
+      "attention": ["ap-token-scope", "ap-mail-failure"],
+      "flows": ["fl-share"]
+    },
+    {
+      "id": "access",
+      "layer": "domain",
+      "title": "Access rules",
+      "summary": "Owner, reader or no access, for every read.",
+      "files": ["src/domain/access.ts"],
+      "attention": ["ap-token-scope", "ap-revoke-race"],
+      "flows": ["fl-open"]
+    },
+    {
+      "id": "lists-repo",
+      "layer": "storage",
+      "title": "List repository",
+      "summary": "List queries, now with reader membership.",
+      "files": ["src/db/lists.ts"],
+      "attention": [],
+      "flows": ["fl-open"]
+    },
+    {
+      "id": "invites-repo",
+      "layer": "storage",
+      "title": "Invite repository",
+      "summary": "Invites table and its active-token query.",
+      "files": ["src/db/invites.ts", "src/db/migrations/0007_invites.sql"],
+      "attention": ["ap-token-scope", "ap-revoke-race"],
+      "flows": ["fl-share"]
+    },
+    {
+      "id": "mailer",
+      "layer": "storage",
+      "title": "Mailer",
+      "summary": "Sends the invitation email from a template.",
+      "files": ["src/infra/mailer.ts"],
+      "attention": ["ap-mail-failure"],
+      "flows": ["fl-share"]
+    }
+  ],
+  "edges": [
+    {
+      "from": "share-dialog",
+      "to": "share-route",
+      "kind": "authored",
+      "label": "POST /share"
+    },
+    {
+      "from": "list-page",
+      "to": "list-route",
+      "kind": "import"
+    },
+    {
+      "from": "share-route",
+      "to": "invites",
+      "kind": "import"
+    },
+    {
+      "from": "share-route",
+      "to": "access",
+      "kind": "import"
+    },
+    {
+      "from": "list-route",
+      "to": "access",
+      "kind": "import"
+    },
+    {
+      "from": "list-route",
+      "to": "lists-repo",
+      "kind": "import"
+    },
+    {
+      "from": "invites",
+      "to": "invites-repo",
+      "kind": "import"
+    },
+    {
+      "from": "invites",
+      "to": "mailer",
+      "kind": "import"
+    },
+    {
+      "from": "access",
+      "to": "lists-repo",
+      "kind": "import"
+    },
+    {
+      "from": "access",
+      "to": "invites-repo",
+      "kind": "import"
+    }
+  ],
+  "files": {
+    "src/app/lists/[id]/page.tsx": {
+      "status": "added",
+      "added": 22,
+      "deleted": 0,
+      "role": "Page for a shared list: owners can share it, readers see it read-only.",
+      "cards": ["list-page"]
+    },
+    "src/components/share-dialog.tsx": {
+      "status": "added",
+      "added": 25,
+      "deleted": 0,
+      "role": "Form that sends an invitation by email and reports a failed send.",
+      "cards": ["share-dialog"]
+    },
+    "src/api/lists/share.ts": {
+      "status": "added",
+      "added": 11,
+      "deleted": 0,
+      "role": "Endpoint that lets the owner invite a reader by email.",
+      "cards": ["share-route"]
+    },
+    "src/domain/invites.ts": {
+      "status": "added",
+      "added": 24,
+      "deleted": 0,
+      "role": "Creates, mails and accepts invitations; tokens are stored hashed.",
+      "cards": ["invites"]
+    },
+    "src/db/invites.ts": {
+      "status": "added",
+      "added": 11,
+      "deleted": 0,
+      "role": "Queries for the invites table.",
+      "cards": ["invites-repo"]
+    },
+    "src/db/migrations/0007_invites.sql": {
+      "status": "added",
+      "added": 13,
+      "deleted": 0,
+      "role": "Adds the invites table with a hashed, unique token.",
+      "cards": ["invites-repo"]
+    },
+    "tests/invites.test.ts": {
+      "status": "added",
+      "added": 18,
+      "deleted": 0,
+      "role": "Proves that a token opens exactly one list and expires.",
+      "cards": ["invites"]
+    },
+    "src/api/lists/get.ts": {
+      "status": "modified",
+      "added": 4,
+      "deleted": 2,
+      "role": "List endpoint, now behind the access rules.",
+      "cards": ["list-route"]
+    },
+    "src/domain/access.ts": {
+      "status": "modified",
+      "added": 5,
+      "deleted": 2,
+      "role": "Decides whether a user owns, reads or cannot see a list.",
+      "cards": ["access"]
+    },
+    "src/db/lists.ts": {
+      "status": "modified",
+      "added": 2,
+      "deleted": 0,
+      "role": "Queries for lists, including reader membership.",
+      "cards": ["lists-repo"]
+    },
+    "src/infra/mailer.ts": {
+      "status": "modified",
+      "added": 1,
+      "deleted": 0,
+      "role": "Transactional email with a template per message.",
+      "cards": ["mailer"]
+    }
+  },
+  "notes": [
+    {
+      "path": "src/app/lists/[id]/page.tsx",
+      "symbol": "ListPage",
+      "text": "Loads the list through the access check and renders the denied state instead of throwing.",
+      "start": 4,
+      "end": 6
+    },
+    {
+      "path": "src/app/lists/[id]/page.tsx",
+      "symbol": "ListPage.header",
+      "text": "Only owners see the share control; readers get the same page without it.",
+      "start": 11,
+      "end": 11
+    },
+    {
+      "path": "src/components/share-dialog.tsx",
+      "symbol": "ShareDialog.send",
+      "text": "Posts the invitation and keeps a failed send visible so the owner can retry.",
+      "start": 8,
+      "end": 16
+    },
+    {
+      "path": "src/api/lists/share.ts",
+      "symbol": "POST",
+      "text": "Only the owner may invite; the email is validated before anything is written.",
+      "start": 4,
+      "end": 7
+    },
+    {
+      "path": "src/api/lists/share.ts",
+      "symbol": "POST.response",
+      "text": "Returns the invite id and expiry, never the token.",
+      "start": 9,
+      "end": 10
+    },
+    {
+      "path": "src/domain/invites.ts",
+      "symbol": "createInvite",
+      "text": "The token is random, stored only as a hash, and expires after seven days.",
+      "start": 8,
+      "end": 17
+    },
+    {
+      "path": "src/domain/invites.ts",
+      "symbol": "acceptInvite",
+      "text": "Accepting binds the invite to one user and one list; unknown or expired tokens return null.",
+      "start": 19,
+      "end": 24
+    },
+    {
+      "path": "src/db/invites.ts",
+      "symbol": "invites.findActiveByHash",
+      "text": "Active means not revoked and not expired, checked in the same query.",
+      "start": 6,
+      "end": 7
+    },
+    {
+      "path": "src/api/lists/get.ts",
+      "symbol": "getList",
+      "text": "Every read now goes through the access rules; a missing role becomes the denied state.",
+      "start": 3,
+      "end": 8
+    },
+    {
+      "path": "src/domain/access.ts",
+      "symbol": "roles",
+      "text": "Imports the invite repository for revocation.",
+      "start": 1,
+      "end": 2
+    },
+    {
+      "path": "src/domain/access.ts",
+      "symbol": "roleFor",
+      "text": "Readers are a second role; anything else has no access.",
+      "start": 13,
+      "end": 19
+    },
+    {
+      "path": "src/db/lists.ts",
+      "symbol": "lists",
+      "text": "Reader membership is derived from accepted, non-revoked invites; there is no second table to keep in sync.",
+      "start": 8,
+      "end": 11
+    }
+  ],
+  "commits": {
+    "9c791f8ddc4da5ac57a9309adf5028aaab20837f": {
+      "subject": "feat(sharing): invite readers by email",
+      "body": "Tokens are random, stored hashed and expire after seven days."
+    },
+    "0f12541afcce175fb34bb05a79c95b76e765488b": {
+      "subject": "feat(access): add the reader role",
+      "body": "Every list read asks for a role; readers come from accepted invites."
+    },
+    "a8908e9178125acc5b13a0ad99a1da6ededa2ccc": {
+      "subject": "feat(mailer): add the list invitation template",
+      "body": ""
+    }
+  },
+  "attention": [
+    {
+      "id": "ap-token-scope",
+      "title": "An invite token opens exactly one list",
+      "status": "handled",
+      "category": "security",
+      "severity": "critical",
+      "proof": "test",
+      "owner": "sharing",
+      "scenario": "A reader reuses or alters an invitation token to reach another owner's list.",
+      "handling": "Tokens are random, stored only as SHA-256 hashes, bound to one list and one accepting user, and expire after seven days.",
+      "cards": ["invites", "invites-repo", "access"],
+      "evidence": [
+        {
+          "path": "src/domain/invites.ts",
+          "symbol": "createInvite",
+          "start": 8,
+          "end": 17,
+          "note": "Random token, hashed before storage, with expiry."
+        },
+        {
+          "path": "src/db/invites.ts",
+          "symbol": "invites.findActiveByHash",
+          "start": 6,
+          "end": 7,
+          "note": "Lookup requires not revoked and not expired."
+        }
+      ],
+      "tests": [
+        {
+          "path": "tests/invites.test.ts",
+          "title": "invites grants read access to exactly one list",
+          "line": 6
+        },
+        {
+          "path": "tests/invites.test.ts",
+          "title": "invites rejects an expired token",
+          "line": 14
+        }
+      ],
+      "qa": ["Change one character of a token in the link and check the list does not open."]
+    },
+    {
+      "id": "ap-revoke-race",
+      "title": "Revoking while an invitation is pending",
+      "status": "partial",
+      "category": "data integrity",
+      "severity": "high",
+      "proof": "review",
+      "scenario": "The owner revokes a reader while an unaccepted invitation for the same email is still valid.",
+      "handling": "Revocation marks every open invite of the list as revoked in one statement; accepted readers lose access on the next request.",
+      "residual": "An invite accepted in the same instant as the revocation can still succeed once; no lock covers both statements.",
+      "cards": ["access", "invites-repo"],
+      "evidence": [
+        {
+          "path": "src/db/lists.ts",
+          "start": 10,
+          "end": 11,
+          "note": "Reader membership ignores revoked invites."
+        }
+      ],
+      "tests": [],
+      "qa": []
+    },
+    {
+      "id": "ap-mail-failure",
+      "title": "Mail failure after the invite is stored",
+      "status": "open",
+      "category": "delivery",
+      "severity": "medium",
+      "proof": "qa",
+      "scenario": "The mail provider rejects the message after the invite row was written.",
+      "handling": "The dialog reports the failure and the owner can retry; the stored invite stays valid but unknown to the reader.",
+      "cards": ["invites", "mailer", "share-dialog"],
+      "evidence": [
+        {
+          "path": "src/domain/invites.ts",
+          "start": 15,
+          "note": "Mail is sent after the insert, outside a transaction."
+        }
+      ],
+      "tests": [],
+      "qa": ["Stop the mail catcher, share a list, and check the dialog shows the retry message."]
+    },
+    {
+      "id": "ap-share-rate",
+      "title": "Invitation flooding",
+      "status": "unreported",
+      "category": "security",
+      "severity": "low",
+      "proof": "review",
+      "owner": "sharing",
+      "scenario": "An owner sends thousands of invitations to unrelated addresses.",
+      "cards": ["share-route"],
+      "evidence": [],
+      "tests": [],
+      "qa": []
+    }
+  ],
+  "flows": [
+    {
+      "id": "fl-share",
+      "title": "Invite a reader and revoke access",
+      "actor": "Owner",
+      "trigger": "The owner shares a list by email.",
+      "outcome": "The reader opens the list read-only until the owner revokes access.",
+      "cards": ["share-dialog", "share-route", "invites", "invites-repo", "mailer"],
+      "test": {
+        "path": "tests/invites.test.ts",
+        "title": "invites grants read access to exactly one list",
+        "line": 6
+      },
+      "steps": [
+        {
+          "actor": "Developer",
+          "title": "Start the app",
+          "do": "Start the app with the seeded database.",
+          "expect": "The app answers on the local URL with two seeded users.",
+          "commands": ["pnpm db:seed", "pnpm dev"],
+          "cards": [],
+          "code": []
+        },
+        {
+          "actor": "Owner",
+          "title": "Share a list",
+          "do": "Sign in as the owner, open “Summer reading” and share it with reader@example.test.",
+          "expect": "The dialog confirms the invitation; the mail catcher shows one message.",
+          "url": "http://localhost:3000/lists/summer",
+          "commands": [],
+          "cards": ["share-dialog", "share-route", "invites", "mailer"],
+          "code": [
+            {
+              "path": "src/domain/invites.ts",
+              "symbol": "createInvite",
+              "start": 8,
+              "end": 17
+            }
+          ]
+        },
+        {
+          "actor": "Reader",
+          "title": "Open the invitation",
+          "do": "Follow the link from the email while signed in as the reader.",
+          "expect": "The list opens read-only, without the share control.",
+          "commands": [],
+          "cards": ["list-page", "list-route", "access"],
+          "test": {
+            "path": "tests/invites.test.ts",
+            "title": "invites grants read access to exactly one list",
+            "line": 6
+          },
+          "code": [
+            {
+              "path": "src/api/lists/get.ts",
+              "symbol": "getList",
+              "start": 3,
+              "end": 7
+            }
+          ]
+        },
+        {
+          "actor": "Owner",
+          "title": "Revoke and reload",
+          "do": "Remove the reader from the list, then reload the reader's tab.",
+          "expect": "The reader sees “You no longer have access to this list.”",
+          "commands": [],
+          "cards": ["access", "invites-repo"],
+          "code": [
+            {
+              "path": "src/db/invites.ts",
+              "symbol": "invites.findActiveByHash",
+              "start": 6,
+              "end": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fl-open",
+      "title": "Open a shared list",
+      "actor": "Reader",
+      "trigger": "A signed-in user opens a list URL.",
+      "outcome": "Owners and readers see the list; anyone else gets the denied state with no list data.",
+      "cards": ["list-page", "list-route", "access", "lists-repo"],
+      "steps": []
+    }
+  ],
+  "tests": [
+    {
+      "path": "tests/invites.test.ts",
+      "title": "invites grants read access to exactly one list",
+      "line": 6,
+      "ids": ["ap-token-scope", "fl-share"]
+    },
+    {
+      "path": "tests/invites.test.ts",
+      "title": "invites rejects an expired token",
+      "line": 14,
+      "ids": ["ap-token-scope"]
+    }
+  ],
+  "followups": [
+    {
+      "text": "Send invitations through the outbox so a mail failure can be retried without a new token.",
+      "front": "sharing",
+      "run": "implement-2"
+    },
+    {
+      "text": "Rate-limit invitations per owner."
+    }
+  ],
+  "runs": [
+    {
+      "front": "sharing",
+      "run": "implement-2",
+      "kind": "implement",
+      "iteration": 2,
+      "host": "claude",
+      "model": "model-a",
+      "accepted": "2026-10-14T15:02:00+02:00",
+      "record": "fronts/sharing/runs/implement-2.record.json",
+      "tokens": {
+        "input": 2140000,
+        "cached": 1800000,
+        "output": 41000
+      }
+    },
+    {
+      "front": "access",
+      "run": "implement-1",
+      "kind": "implement",
+      "iteration": 1,
+      "host": "codex",
+      "accepted": "2026-10-14T15:40:00+02:00",
+      "record": "fronts/access/runs/implement-1.record.json",
+      "tokens": {
+        "total": 980000
+      }
+    },
+    {
+      "front": "review",
+      "run": "review-1",
+      "kind": "review",
+      "record": "fronts/review/runs/review-1.record.json"
+    }
+  ],
+  "code": {
+    "src/app/lists/[id]/page.tsx": {
+      "lines": [
+        "import { getList } from '@/api/lists/get'",
+        "import { ShareDialog } from '@/components/share-dialog'",
+        "",
+        "export default async function ListPage({ params }: { params: { id: string } }) {",
+        "  const result = await getList(params.id)",
+        "  if (result.kind === 'denied') return <p className=\"empty\">You no longer have access to this list.</p>",
+        "",
+        "  const { list, role } = result",
+        "  return (",
+        "    <main>",
+        "      <header>",
+        "        <h1>{list.title}</h1>",
+        "        {role === 'owner' && <ShareDialog listId={list.id} />}",
+        "      </header>",
+        "      <ol>",
+        "        {list.books.map((book) => (",
+        "          <li key={book.id}>{book.title}</li>",
+        "        ))}",
+        "      </ol>",
+        "    </main>",
+        "  )",
+        "}"
+      ],
+      "commits": ["0f12541afcce175fb34bb05a79c95b76e765488b"]
+    },
+    "src/components/share-dialog.tsx": {
+      "lines": [
+        "'use client'",
+        "import { useState } from 'react'",
+        "",
+        "export function ShareDialog({ listId }: { listId: string }) {",
+        "  const [email, setEmail] = useState('')",
+        "  const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle')",
+        "",
+        "  async function send() {",
+        "    setState('sending')",
+        "    const res = await fetch(`/api/lists/${listId}/share`, {",
+        "      method: 'POST',",
+        "      headers: { 'content-type': 'application/json' },",
+        "      body: JSON.stringify({ email }),",
+        "    })",
+        "    setState(res.ok ? 'sent' : 'failed')",
+        "  }",
+        "",
+        "  return (",
+        "    <form onSubmit={(e) => { e.preventDefault(); void send() }}>",
+        "      <input type=\"email\" value={email} onChange={(e) => setEmail(e.target.value)} required />",
+        "      <button disabled={state === 'sending'}>Share</button>",
+        "      {state === 'failed' && <p role=\"alert\">The invitation was not sent. Try again.</p>}",
+        "    </form>",
+        "  )",
+        "}"
+      ],
+      "commits": ["9c791f8ddc4da5ac57a9309adf5028aaab20837f"]
+    },
+    "src/api/lists/share.ts": {
+      "lines": [
+        "import { requireOwner } from '@/domain/access'",
+        "import { createInvite } from '@/domain/invites'",
+        "",
+        "export async function POST(req: Request, { params }: { params: { id: string } }) {",
+        "  const user = await requireOwner(req, params.id)",
+        "  const { email } = (await req.json()) as { email?: string }",
+        "  if (!email || !email.includes('@')) return Response.json({ error: 'invalid_email' }, { status: 400 })",
+        "",
+        "  const invite = await createInvite({ listId: params.id, email, invitedBy: user.id })",
+        "  return Response.json({ id: invite.id, expiresAt: invite.expiresAt }, { status: 201 })",
+        "}"
+      ],
+      "commits": ["9c791f8ddc4da5ac57a9309adf5028aaab20837f"]
+    },
+    "src/domain/invites.ts": {
+      "lines": [
+        "import { randomBytes, createHash } from 'node:crypto'",
+        "import { invites } from '@/db/invites'",
+        "import { mailer } from '@/infra/mailer'",
+        "",
+        "const TTL_MS = 7 * 24 * 60 * 60 * 1000",
+        "const hash = (token: string) => createHash('sha256').update(token).digest('hex')",
+        "",
+        "export async function createInvite(input: { listId: string; email: string; invitedBy: string }) {",
+        "  const token = randomBytes(24).toString('base64url')",
+        "  const invite = await invites.insert({",
+        "    ...input,",
+        "    tokenHash: hash(token),",
+        "    expiresAt: new Date(Date.now() + TTL_MS),",
+        "  })",
+        "  await mailer.send({ to: input.email, template: 'list-invite', data: { token, listId: input.listId } })",
+        "  return invite",
+        "}",
+        "",
+        "export async function acceptInvite(token: string, userId: string) {",
+        "  const invite = await invites.findActiveByHash(hash(token))",
+        "  if (!invite) return null",
+        "  await invites.markAccepted(invite.id, userId)",
+        "  return invite.listId",
+        "}"
+      ],
+      "commits": ["9c791f8ddc4da5ac57a9309adf5028aaab20837f"]
+    },
+    "src/db/invites.ts": {
+      "lines": [
+        "import { sql } from './client'",
+        "",
+        "export const invites = {",
+        "  insert: (row: { listId: string; email: string; invitedBy: string; tokenHash: string; expiresAt: Date }) =>",
+        "    sql.one`insert into invites ${sql.values(row)} returning *`,",
+        "  findActiveByHash: (tokenHash: string) =>",
+        "    sql.maybeOne`select * from invites where token_hash = ${tokenHash} and revoked_at is null and expires_at > now()`,",
+        "  markAccepted: (id: string, userId: string) =>",
+        "    sql.run`update invites set accepted_by = ${userId}, accepted_at = now() where id = ${id} and accepted_at is null`,",
+        "  revokeForList: (listId: string) => sql.run`update invites set revoked_at = now() where list_id = ${listId} and revoked_at is null`,",
+        "}"
+      ],
+      "commits": ["9c791f8ddc4da5ac57a9309adf5028aaab20837f"]
+    },
+    "src/db/migrations/0007_invites.sql": {
+      "lines": [
+        "create table invites (",
+        "  id uuid primary key default gen_random_uuid(),",
+        "  list_id uuid not null references lists(id) on delete cascade,",
+        "  email text not null,",
+        "  invited_by uuid not null references users(id),",
+        "  token_hash text not null unique,",
+        "  expires_at timestamptz not null,",
+        "  accepted_by uuid references users(id),",
+        "  accepted_at timestamptz,",
+        "  revoked_at timestamptz",
+        ");",
+        "",
+        "create index invites_list_idx on invites (list_id) where revoked_at is null;"
+      ],
+      "commits": ["9c791f8ddc4da5ac57a9309adf5028aaab20837f"]
+    },
+    "tests/invites.test.ts": {
+      "lines": [
+        "import { describe, expect, it } from 'vitest'",
+        "import { acceptInvite, createInvite } from '@/domain/invites'",
+        "import { canRead } from '@/domain/access'",
+        "",
+        "describe('invites', () => {",
+        "  it('grants read access to exactly one list', async () => {",
+        "    const token = await inviteAndCaptureToken({ listId: 'l1', email: 'reader@example.test' })",
+        "    const listId = await acceptInvite(token, 'u2')",
+        "    expect(listId).toBe('l1')",
+        "    expect(await canRead('u2', 'l1')).toBe(true)",
+        "    expect(await canRead('u2', 'l2')).toBe(false)",
+        "  })",
+        "",
+        "  it('rejects an expired token', async () => {",
+        "    const token = await inviteAndCaptureToken({ listId: 'l1', email: 'late@example.test', ageDays: 8 })",
+        "    expect(await acceptInvite(token, 'u3')).toBeNull()",
+        "  })",
+        "})"
+      ],
+      "commits": ["9c791f8ddc4da5ac57a9309adf5028aaab20837f"]
+    },
+    "src/api/lists/get.ts": {
+      "hunks": [
+        {
+          "header": "@@ -3,4 +3,6 @@ export async function getList",
+          "context": "export async function getList",
+          "oldStart": 3,
+          "oldLines": 4,
+          "newStart": 3,
+          "newLines": 6,
+          "lines": [
+            " export async function getList(id: string) {",
+            "-  const list = await lists.byId(id)",
+            "-  return { list }",
+            "+  const user = await currentUser()",
+            "+  const role = await roleFor(user.id, id)",
+            "+  if (!role) return { kind: 'denied' as const }",
+            "+  return { kind: 'ok' as const, list: await lists.byId(id), role }",
+            " }"
+          ],
+          "notes": [8],
+          "commits": ["0f12541afcce175fb34bb05a79c95b76e765488b"]
+        }
+      ]
+    },
+    "src/domain/access.ts": {
+      "hunks": [
+        {
+          "header": "@@ -1,1 +1,2 @@ roles",
+          "context": "roles",
+          "oldStart": 1,
+          "oldLines": 1,
+          "newStart": 1,
+          "newLines": 2,
+          "lines": [
+            "-import { lists } from '@/db/lists'",
+            "+import { lists } from '@/db/lists'",
+            "+import { invites } from '@/db/invites'"
+          ],
+          "notes": [9],
+          "commits": ["0f12541afcce175fb34bb05a79c95b76e765488b"]
+        },
+        {
+          "header": "@@ -12,5 +13,7 @@ export async function roleFor",
+          "context": "export async function roleFor",
+          "oldStart": 12,
+          "oldLines": 5,
+          "newStart": 13,
+          "newLines": 7,
+          "lines": [
+            " export async function roleFor(userId: string, listId: string) {",
+            "   if (await lists.isOwner(userId, listId)) return 'owner'",
+            "-  return null",
+            "+  if (await lists.hasReader(userId, listId)) return 'reader'",
+            "+  return null",
+            " }",
+            " ",
+            "+export const canRead = async (userId: string, listId: string) => (await roleFor(userId, listId)) !== null"
+          ],
+          "notes": [10],
+          "commits": ["0f12541afcce175fb34bb05a79c95b76e765488b"]
+        }
+      ]
+    },
+    "src/db/lists.ts": {
+      "hunks": [
+        {
+          "header": "@@ -8,2 +8,4 @@ export const lists",
+          "context": "export const lists",
+          "oldStart": 8,
+          "oldLines": 2,
+          "newStart": 8,
+          "newLines": 4,
+          "lines": [
+            "   isOwner: (userId: string, listId: string) =>",
+            "     sql.exists`select 1 from lists where id = ${listId} and owner_id = ${userId}`,",
+            "+  hasReader: (userId: string, listId: string) =>",
+            "+    sql.exists`select 1 from invites where list_id = ${listId} and accepted_by = ${userId} and revoked_at is null`,"
+          ],
+          "notes": [11],
+          "commits": ["0f12541afcce175fb34bb05a79c95b76e765488b"]
+        }
+      ]
+    },
+    "src/infra/mailer.ts": {
+      "hunks": [
+        {
+          "header": "@@ -4,3 +4,4 @@ templates",
+          "context": "templates",
+          "oldStart": 4,
+          "oldLines": 3,
+          "newStart": 4,
+          "newLines": 4,
+          "lines": [" const templates = {", "   welcome: welcomeTemplate,", "+  'list-invite': listInviteTemplate,", " }"],
+          "notes": [],
+          "commits": ["a8908e9178125acc5b13a0ad99a1da6ededa2ccc"]
+        }
+      ]
+    }
+  }
+}

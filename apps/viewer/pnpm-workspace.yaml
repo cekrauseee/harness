@@ -1,0 +1,3 @@
+minimumReleaseAgeExclude:
+  - '@asamuzakjp/dom-selector@10.0.3'
+  - jsdom@30.1.3
