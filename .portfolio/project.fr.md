@@ -2,17 +2,17 @@
 description: >-
   Contexte externe par projet et procédures de développement ciblées pour les agents.
 metaDescription: >-
-  Harness conserve les connaissances utiles et le contexte de reprise dans des fichiers Markdown locaux, hors du dépôt. Dix skills indépendants couvrent la planification, la délibération entre pairs, la réalisation, la revue et les opérations Git sur Codex et Claude Code.
+  Harness conserve les connaissances utiles et le contexte de reprise dans des fichiers Markdown locaux, hors du dépôt. Onze skills indépendants couvrent la planification, la délibération entre pairs, la réalisation, la revue, les cartes de modifications et les opérations Git sur Codex et Claude Code.
 summary: >-
-  Harness fournit à chaque projet un environnement externe partagé par ses worktrees Git. Dix skills indépendants couvrent le contexte, la planification modulaire, les transmissions, la coordination des agents, la délibération entre pairs et les procédures de développement sur Codex et Claude Code, avec un seul fichier d’instructions partagé. Ces procédures guident les agents vers le contexte pertinent pour chaque tâche.
+  Harness fournit à chaque projet un environnement externe partagé par ses worktrees Git. Onze skills indépendants couvrent le contexte, la planification modulaire, les transmissions, la coordination des agents, la délibération entre pairs, les cartes de modifications et les procédures de développement sur Codex et Claude Code, avec un seul fichier d’instructions partagé. Ces procédures guident les agents vers le contexte pertinent pour chaque tâche.
 highlights:
   - un environnement par projet et ses worktrees
-  - dix skills indépendants pour Codex et Claude Code
+  - onze skills indépendants pour Codex et Claude Code
   - contexte conservé dans des fichiers et consulté au besoin
   - mises à jour atomiques de Markdown sans réservation de fichiers
 ---
 
-Harness fournit à chaque projet un environnement externe partagé par ses worktrees Git. Dix skills indépendants couvrent le contexte, la planification modulaire, les transmissions, la coordination des agents, la délibération entre pairs et les procédures de développement sur Codex et Claude Code, avec un seul fichier d’instructions partagé. Ces procédures guident les agents vers le contexte pertinent pour chaque tâche.
+Harness fournit à chaque projet un environnement externe partagé par ses worktrees Git. Onze skills indépendants couvrent le contexte, la planification modulaire, les transmissions, la coordination des agents, la délibération entre pairs, les cartes de modifications et les procédures de développement sur Codex et Claude Code, avec un seul fichier d’instructions partagé. Ces procédures guident les agents vers le contexte pertinent pour chaque tâche.
 
 ## Le contexte du projet en dehors du dépôt
 
@@ -23,6 +23,10 @@ Chaque dépôt ou monorepo possède un environnement local. Son index succinct a
 Les plans globaux sont modulaires quel que soit le nombre d’agents. Les équipes de réalisation et de revue peuvent référencer les mêmes livrables tout en conservant un contexte d’exécution distinct. Une transmission transfère la responsabilité par des références aux fichiers canoniques, sans recopier les conversations.
 
 Sur demande, la délibération entre pairs réunit les agents pour élaborer une analyse, une décision ou une proposition. Les participants contribuent et questionnent les idées sur un pied d’égalité, affinent une synthèse commune et préservent les désaccords importants. La coordination organise les échanges sans déterminer quel point de vue doit prévaloir.
+
+## Journaux d’exécution et cartes de modifications
+
+Lorsqu’une orchestration s’organise en équipes, les agents qui ont réalisé le travail laissent des journaux d’exécution et des événements à la livraison : ce qui a changé, les points d’attention et les parcours qu’ils ont démontrés, et les tests qui les étayent. Une carte de modifications consolide ces journaux avec les faits Git en une vue par couches de la modification, pour la revue et la recette, affichée par une visionneuse locale en lecture seule. Le travail individuel ne nécessite aucun journal.
 
 ## Deux hôtes, un seul jeu d’instructions
 
