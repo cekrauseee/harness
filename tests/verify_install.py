@@ -61,6 +61,10 @@ def check_install(skill, copy_mode, command, env):
             identity = json.loads(run([sys.executable, str(helper), "init", "--project", str(project)],
                                       project, child))
             assert (Path(identity["environment"]) / "environment.json").is_file()
+        for script in ("records.py", "changemap.py", "run.py"):
+            # Importing their installed siblings proves these scripts run without the source checkout.
+            if (canonical / "scripts" / script).is_file():
+                run([sys.executable, str(canonical / "scripts" / script), "--help"], project, child)
         assert not list(project.iterdir()), "Installation or initialization wrote into the project"
 
 

@@ -1,0 +1,396 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/cekrauseee/harness/schema/map.v1.json",
+  "title": "HarnessMap",
+  "description": "Change map (harness-map-v1): Git facts and accepted run records consolidated for a read-only viewer. Every list is present and may be empty; viewers hide empty sections. Contract: docs/records.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "title", "source", "layers", "groups", "cards", "edges", "files", "notes", "commits", "attention", "flows", "tests", "followups", "runs", "code"],
+  "properties": {
+    "format": {"const": "harness-map-v1"},
+    "title": {"type": "string", "minLength": 1, "maxLength": 200},
+    "subtitle": {"type": "string", "maxLength": 1000},
+    "work": {"$ref": "#/$defs/slug"},
+    "source": {"$ref": "#/$defs/source"},
+    "layers": {"type": "array", "description": "Project-declared layers, ordered from the user-facing side inward.", "items": {"$ref": "#/$defs/layer"}},
+    "groups": {"type": "array", "description": "Optional grouping of cards, normally plan modules; used when there are many cards.", "items": {"$ref": "#/$defs/group"}},
+    "cards": {"type": "array", "items": {"$ref": "#/$defs/card"}},
+    "edges": {"type": "array", "items": {"$ref": "#/$defs/edge"}},
+    "files": {"type": "object", "description": "Every path changed in base...head.", "additionalProperties": {"$ref": "#/$defs/file"}},
+    "notes": {"type": "array", "description": "Symbol notes resolved to line ranges at head.", "items": {"$ref": "#/$defs/note"}},
+    "commits": {"type": "object", "description": "Commits in base..head keyed by full SHA; hunks without a note fall back to these messages.", "additionalProperties": {"$ref": "#/$defs/commit"}},
+    "attention": {"type": "array", "items": {"$ref": "#/$defs/attention"}},
+    "flows": {"type": "array", "items": {"$ref": "#/$defs/flow"}},
+    "tests": {"type": "array", "items": {"$ref": "#/$defs/test"}},
+    "followups": {"type": "array", "items": {"$ref": "#/$defs/followup"}},
+    "runs": {"type": "array", "description": "Accepted runs the map was built from.", "items": {"$ref": "#/$defs/run"}},
+    "code": {"type": "object", "description": "Code payload keyed by path; a subset of files.", "additionalProperties": {"$ref": "#/$defs/code"}}
+  },
+  "$defs": {
+    "slug": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$", "maxLength": 80},
+    "attentionId": {"type": "string", "pattern": "^ap-[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "flowId": {"type": "string", "pattern": "^fl-[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "path": {"type": "string", "description": "Repository-relative POSIX path.", "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.?(?:/|$))[^\\\\\\u0000]+$"},
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{40,64}$"},
+    "text": {"type": "string", "maxLength": 2000},
+    "source": {
+      "title": "MapSource",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "base", "head"],
+      "properties": {
+        "repository": {"type": "string", "description": "Repository name, not a local path."},
+        "base": {"$ref": "#/$defs/sha"},
+        "head": {"$ref": "#/$defs/sha"},
+        "baseRef": {"type": "string"},
+        "headRef": {"type": "string"},
+        "headDate": {"type": "string", "description": "Committer date of head, ISO 8601."}
+      }
+    },
+    "layer": {
+      "title": "MapLayer",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title"],
+      "properties": {"id": {"$ref": "#/$defs/id"}, "title": {"type": "string", "minLength": 1, "maxLength": 200}}
+    },
+    "group": {
+      "title": "MapGroup",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title"],
+      "properties": {"id": {"$ref": "#/$defs/id"}, "title": {"type": "string", "minLength": 1, "maxLength": 200}, "summary": {"$ref": "#/$defs/text"}}
+    },
+    "card": {
+      "title": "MapCard",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "layer", "title", "summary", "files", "attention", "flows"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "layer": {"$ref": "#/$defs/id"},
+        "group": {"$ref": "#/$defs/id"},
+        "title": {"type": "string", "minLength": 1, "maxLength": 200},
+        "summary": {"$ref": "#/$defs/text"},
+        "files": {"type": "array", "items": {"$ref": "#/$defs/path"}},
+        "attention": {"type": "array", "items": {"$ref": "#/$defs/attentionId"}},
+        "flows": {"type": "array", "items": {"$ref": "#/$defs/flowId"}}
+      }
+    },
+    "edge": {
+      "title": "MapEdge",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "to", "kind"],
+      "properties": {
+        "from": {"$ref": "#/$defs/id"},
+        "to": {"$ref": "#/$defs/id"},
+        "kind": {"enum": ["import", "authored"], "description": "import: derived from source imports at head; authored: declared by an agent."},
+        "label": {"type": "string", "maxLength": 200}
+      }
+    },
+    "file": {
+      "title": "MapFile",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "added", "deleted", "cards"],
+      "properties": {
+        "status": {"enum": ["added", "modified", "deleted", "renamed", "copied", "type-changed"]},
+        "added": {"type": ["integer", "null"], "minimum": 0, "description": "Added lines; null for binary files."},
+        "deleted": {"type": ["integer", "null"], "minimum": 0},
+        "previous": {"$ref": "#/$defs/path"},
+        "role": {"$ref": "#/$defs/text"},
+        "cards": {"type": "array", "items": {"$ref": "#/$defs/id"}}
+      }
+    },
+    "note": {
+      "title": "MapNote",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "symbol", "text", "start", "end"],
+      "properties": {
+        "path": {"$ref": "#/$defs/path"},
+        "symbol": {"type": "string", "minLength": 1, "maxLength": 200},
+        "text": {"$ref": "#/$defs/text"},
+        "start": {"type": "integer", "minimum": 1, "description": "First line at head, 1-based."},
+        "end": {"type": "integer", "minimum": 1, "description": "Last line at head, inclusive."}
+      }
+    },
+    "commit": {
+      "title": "MapCommit",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["subject", "body"],
+      "properties": {"subject": {"type": "string"}, "body": {"type": "string"}}
+    },
+    "codeRef": {
+      "title": "MapCodeRef",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path"],
+      "properties": {
+        "path": {"$ref": "#/$defs/path"},
+        "symbol": {"type": "string", "minLength": 1, "maxLength": 200},
+        "start": {"type": "integer", "minimum": 1},
+        "end": {"type": "integer", "minimum": 1},
+        "note": {"$ref": "#/$defs/text"}
+      }
+    },
+    "testRef": {
+      "title": "MapTestRef",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "title", "line"],
+      "properties": {
+        "path": {"$ref": "#/$defs/path"},
+        "title": {"type": "string", "minLength": 1, "maxLength": 500},
+        "line": {"type": "integer", "minimum": 1}
+      }
+    },
+    "attention": {
+      "title": "MapAttention",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "status", "cards", "evidence", "tests", "qa"],
+      "properties": {
+        "id": {"$ref": "#/$defs/attentionId"},
+        "title": {"type": "string", "minLength": 1, "maxLength": 200},
+        "status": {"enum": ["handled", "partial", "open", "unreported"], "description": "unreported: declared in the plan, no accepted run reported on it."},
+        "category": {"type": "string", "maxLength": 80},
+        "severity": {"enum": ["critical", "high", "medium", "low"]},
+        "proof": {"enum": ["test", "qa", "review"]},
+        "owner": {"type": "string", "maxLength": 200},
+        "scenario": {"$ref": "#/$defs/text"},
+        "handling": {"$ref": "#/$defs/text"},
+        "residual": {"$ref": "#/$defs/text"},
+        "cards": {"type": "array", "items": {"$ref": "#/$defs/id"}},
+        "evidence": {"type": "array", "items": {"$ref": "#/$defs/codeRef"}},
+        "tests": {"type": "array", "items": {"$ref": "#/$defs/testRef"}},
+        "qa": {"type": "array", "items": {"$ref": "#/$defs/text"}}
+      }
+    },
+    "flow": {
+      "title": "MapFlow",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "cards", "steps"],
+      "properties": {
+        "id": {"$ref": "#/$defs/flowId"},
+        "title": {"type": "string", "minLength": 1, "maxLength": 200},
+        "actor": {"type": "string", "maxLength": 80},
+        "trigger": {"$ref": "#/$defs/text"},
+        "outcome": {"$ref": "#/$defs/text"},
+        "cards": {"type": "array", "items": {"$ref": "#/$defs/id"}},
+        "test": {"$ref": "#/$defs/testRef"},
+        "steps": {"type": "array", "items": {"$ref": "#/$defs/step"}}
+      }
+    },
+    "step": {
+      "title": "MapStep",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actor", "do", "expect", "commands", "cards", "code"],
+      "properties": {
+        "actor": {"type": "string", "minLength": 1, "maxLength": 80},
+        "title": {"type": "string", "maxLength": 200},
+        "do": {"$ref": "#/$defs/text"},
+        "expect": {"$ref": "#/$defs/text"},
+        "url": {"type": "string", "pattern": "^(/|https?://(localhost|127\\.0\\.0\\.1|\\[::1\\])([:/]|$))", "description": "App path or local URL."},
+        "commands": {"type": "array", "items": {"type": "string", "maxLength": 1000}},
+        "cards": {"type": "array", "items": {"$ref": "#/$defs/id"}},
+        "code": {"type": "array", "items": {"$ref": "#/$defs/codeRef"}},
+        "test": {"$ref": "#/$defs/testRef"}
+      }
+    },
+    "test": {
+      "title": "MapTest",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "title", "line", "ids"],
+      "properties": {
+        "path": {"$ref": "#/$defs/path"},
+        "title": {"type": "string", "minLength": 1, "maxLength": 500},
+        "line": {"type": "integer", "minimum": 1},
+        "ids": {"type": "array", "items": {"type": "string", "pattern": "^(ap|fl)-[a-z0-9]+(?:-[a-z0-9]+)*$"}}
+      }
+    },
+    "followup": {
+      "title": "MapFollowup",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text"],
+      "properties": {"text": {"$ref": "#/$defs/text"}, "front": {"$ref": "#/$defs/slug"}, "run": {"$ref": "#/$defs/slug"}}
+    },
+    "tokens": {
+      "title": "Tokens",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "input": {"type": "integer", "minimum": 0, "description": "All input tokens, cached included."},
+        "cached": {"type": "integer", "minimum": 0},
+        "output": {"type": "integer", "minimum": 0},
+        "total": {"type": "integer", "minimum": 0, "description": "Used when the host reports only a total."}
+      }
+    },
+    "run": {
+      "title": "MapRun",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["front", "run", "kind", "record"],
+      "properties": {
+        "front": {"$ref": "#/$defs/slug"},
+        "run": {"$ref": "#/$defs/slug"},
+        "kind": {"enum": ["implement", "test", "review"]},
+        "iteration": {"type": "integer", "minimum": 1},
+        "host": {"type": "string", "maxLength": 80},
+        "model": {"type": "string", "maxLength": 120},
+        "accepted": {"type": "string", "description": "Timestamp of the accepting event."},
+        "record": {"type": "string", "description": "Record path relative to the work directory."},
+        "tokens": {"$ref": "#/$defs/tokens"}
+      }
+    },
+    "hunk": {
+      "title": "MapHunk",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["header", "oldStart", "oldLines", "newStart", "newLines", "lines", "notes", "commits"],
+      "properties": {
+        "header": {"type": "string", "description": "The @@ line as Git printed it."},
+        "context": {"type": "string", "description": "Function context Git printed after the @@ markers."},
+        "oldStart": {"type": "integer", "minimum": 0},
+        "oldLines": {"type": "integer", "minimum": 0},
+        "newStart": {"type": "integer", "minimum": 0},
+        "newLines": {"type": "integer", "minimum": 0},
+        "lines": {"type": "array", "description": "Unified diff body: each line starts with '+', '-' or ' '.", "items": {"type": "string"}},
+        "notes": {"type": "array", "description": "Indexes into notes whose range overlaps this hunk's new side.", "items": {"type": "integer", "minimum": 0}},
+        "commits": {"type": "array", "description": "Commits that introduced this hunk's added lines.", "items": {"$ref": "#/$defs/sha"}}
+      }
+    },
+    "code": {
+      "title": "MapCode",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "lines": {"type": "array", "description": "Added files: full content at head.", "items": {"type": "string"}},
+        "hunks": {"type": "array", "description": "Modified, renamed or deleted files.", "items": {"$ref": "#/$defs/hunk"}},
+        "commits": {"type": "array", "description": "Added files: commits that introduced their lines.", "items": {"$ref": "#/$defs/sha"}},
+        "omitted": {"enum": ["binary", "excluded", "too-large"]}
+      }
+    },
+    "supplement": {
+      "title": "MapSupplement",
+      "description": "Agent-authored gap fills (map/supplement.json, format harness-map-supplement-v1). Entries override records by id, path or path and symbol.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["format"],
+      "properties": {
+        "format": {"const": "harness-map-supplement-v1"},
+        "title": {"type": "string", "minLength": 1, "maxLength": 200},
+        "subtitle": {"type": "string", "maxLength": 1000},
+        "layers": {"type": "array", "items": {"$ref": "#/$defs/layer"}},
+        "groups": {"type": "array", "items": {"$ref": "#/$defs/group"}},
+        "cards": {"type": "array", "items": {"$ref": "#/$defs/supplementCard"}},
+        "edges": {"type": "array", "items": {"$ref": "#/$defs/supplementEdge"}},
+        "files": {"type": "object", "description": "Role per path.", "additionalProperties": {"$ref": "#/$defs/text"}},
+        "notes": {"type": "array", "items": {"$ref": "#/$defs/supplementNote"}},
+        "attention": {"type": "array", "items": {"$ref": "#/$defs/supplementAttention"}},
+        "flows": {"type": "array", "items": {"$ref": "#/$defs/supplementFlow"}},
+        "followups": {"type": "array", "items": {"$ref": "#/$defs/text"}}
+      }
+    },
+    "supplementCard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "layer", "title", "summary", "files"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "layer": {"$ref": "#/$defs/id"},
+        "group": {"$ref": "#/$defs/id"},
+        "title": {"type": "string", "minLength": 1, "maxLength": 200},
+        "summary": {"$ref": "#/$defs/text"},
+        "files": {"type": "array", "items": {"$ref": "#/$defs/path"}}
+      }
+    },
+    "supplementEdge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "to"],
+      "properties": {"from": {"$ref": "#/$defs/id"}, "to": {"$ref": "#/$defs/id"}, "label": {"type": "string", "maxLength": 200}}
+    },
+    "supplementNote": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "symbol", "text"],
+      "properties": {
+        "path": {"$ref": "#/$defs/path"},
+        "symbol": {"type": "string", "minLength": 1, "maxLength": 200},
+        "text": {"$ref": "#/$defs/text"},
+        "replaces": {"type": "string", "minLength": 1, "maxLength": 200, "description": "Symbol of a record note on the same path that this note replaces, such as an anchor that no longer resolves."}
+      }
+    },
+    "supplementRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path"],
+      "properties": {"path": {"$ref": "#/$defs/path"}, "symbol": {"type": "string", "minLength": 1, "maxLength": 200}, "note": {"$ref": "#/$defs/text"}}
+    },
+    "supplementTest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "title"],
+      "properties": {"path": {"$ref": "#/$defs/path"}, "title": {"type": "string", "minLength": 1, "maxLength": 500}}
+    },
+    "supplementAttention": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "properties": {
+        "id": {"$ref": "#/$defs/attentionId"},
+        "title": {"type": "string", "minLength": 1, "maxLength": 200},
+        "status": {"enum": ["handled", "partial", "open"]},
+        "category": {"type": "string", "maxLength": 80},
+        "severity": {"enum": ["critical", "high", "medium", "low"]},
+        "scenario": {"$ref": "#/$defs/text"},
+        "handling": {"$ref": "#/$defs/text"},
+        "residual": {"$ref": "#/$defs/text"},
+        "cards": {"type": "array", "items": {"$ref": "#/$defs/id"}},
+        "evidence": {"type": "array", "items": {"$ref": "#/$defs/supplementRef"}},
+        "tests": {"type": "array", "items": {"$ref": "#/$defs/supplementTest"}},
+        "qa": {"type": "array", "items": {"$ref": "#/$defs/text"}}
+      }
+    },
+    "supplementFlow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "steps"],
+      "properties": {
+        "id": {"$ref": "#/$defs/flowId"},
+        "title": {"type": "string", "minLength": 1, "maxLength": 200},
+        "actor": {"type": "string", "maxLength": 80},
+        "cards": {"type": "array", "items": {"$ref": "#/$defs/id"}},
+        "test": {"$ref": "#/$defs/supplementTest"},
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["actor", "do", "expect"],
+            "properties": {
+              "actor": {"type": "string", "minLength": 1, "maxLength": 80},
+              "title": {"type": "string", "maxLength": 200},
+              "do": {"$ref": "#/$defs/text"},
+              "expect": {"$ref": "#/$defs/text"},
+              "url": {"type": "string", "pattern": "^(/|https?://(localhost|127\\.0\\.0\\.1|\\[::1\\])([:/]|$))"},
+              "commands": {"type": "array", "items": {"type": "string", "maxLength": 1000}},
+              "cards": {"type": "array", "items": {"$ref": "#/$defs/id"}},
+              "code": {"type": "array", "items": {"$ref": "#/$defs/supplementRef"}},
+              "test": {"$ref": "#/$defs/supplementTest"}
+            }
+          }
+        }
+      }
+    }
+  }
+}

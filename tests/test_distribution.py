@@ -18,26 +18,35 @@ class DistributionTest(unittest.TestCase):
     def test_generation_is_selective_idempotent_and_preserves_authored_resources(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary).resolve()
-            for folder in ('src', 'scripts', 'docs', 'skills/example/scripts/assets', 'skills/plain'):
+            for folder in ('scripts', 'tools', 'docs', 'schema', 'skills/example/scripts/assets', 'skills/plain'):
                 (root / folder).mkdir(parents=True)
-            for file in ('src/harness.py', 'scripts/build_dist.py', 'docs/file-context.md'):
+            for file in ('scripts/harness.py', 'scripts/records.py', 'tools/build_dist.py', 'docs/file-context.md', 'docs/records.md',
+                         *(p.relative_to(ROOT) for p in (ROOT / 'schema').glob('*.json'))):
                 shutil.copyfile(ROOT / file, root / file)
             skill = root / 'skills/example'
             (skill / 'SKILL.md').write_text('Use scripts/harness.py and references/file-context.md\n')
             (root / 'skills/plain/SKILL.md').write_text('Instruction-only skill\n')
+            validator = root / 'skills/validator'
+            validator.mkdir()
+            (validator / 'SKILL.md').write_text('Use scripts/records.py\n')
             authored = skill / 'scripts/custom.py'
             authored.write_text("print('keep')\n")
             generated = skill / 'scripts/harness.py'
 
             def run(*args):
-                return subprocess.run([sys.executable, '-B', str(root / 'scripts/build_dist.py'), *args],
+                return subprocess.run([sys.executable, '-B', str(root / 'tools/build_dist.py'), *args],
                                       capture_output=True, text=True, timeout=20)
 
             self.assertEqual(run('--check').returncode, 1)
             self.assertFalse(generated.exists())
             self.assertEqual(run().returncode, 0)
-            self.assertEqual(generated.read_bytes(), (root / 'src/harness.py').read_bytes())
+            self.assertEqual(generated.read_bytes(), (root / 'scripts/harness.py').read_bytes())
             self.assertEqual((skill / 'references/file-context.md').read_bytes(), (root / 'docs/file-context.md').read_bytes())
+            # Generated documents bring what they link to; schemas come only with the scripts that load them.
+            self.assertEqual((skill / 'references/records.md').read_bytes(), (root / 'docs/records.md').read_bytes())
+            self.assertFalse((skill / 'schema').exists())
+            self.assertTrue((validator / 'scripts/harness.py').is_file())
+            self.assertEqual({p.name for p in (validator / 'schema').iterdir()}, {p.name for p in (root / 'schema').iterdir()})
             modified = generated.stat().st_mtime_ns
             self.assertEqual(run().returncode, 0)
             self.assertEqual(generated.stat().st_mtime_ns, modified)
@@ -54,13 +63,13 @@ class DistributionTest(unittest.TestCase):
         self.assertEqual(codex['name'], 'harness')
         self.assertEqual(claude['name'], codex['name'])
         self.assertEqual(claude['version'], codex['version'])
-        source = ast.parse((ROOT / 'src/harness.py').read_text())
+        source = ast.parse((ROOT / 'scripts/harness.py').read_text())
         version = next(ast.literal_eval(n.value) for n in source.body if isinstance(n, ast.Assign)
                        and any(isinstance(t, ast.Name) and t.id == 'VERSION' for t in n.targets))
         self.assertEqual(version, codex['version'].split('+')[0])
         self.assertEqual({Path(p).name for p in claude['skills']}, names)
         self.assertEqual(names, {'environment', 'close-work', 'plan', 'implement', 'review', 'handoff',
-                                 'orchestrate', 'deliberate', 'worktree', 'commit-pr'})
+                                 'orchestrate', 'deliberate', 'worktree', 'commit-pr', 'map'})
         self.assertEqual(codex['skills'], './skills/')
 
     def test_skill_metadata_and_local_links_resolve_within_installed_skill(self):
@@ -84,18 +93,20 @@ class DistributionTest(unittest.TestCase):
                         self.assertTrue(resolved.exists(), f'{path}: {target}')
 
     def test_generated_content_has_no_drift(self):
-        result = subprocess.run([sys.executable, '-B', str(ROOT / 'scripts/build_dist.py'), '--check'],
+        result = subprocess.run([sys.executable, '-B', str(ROOT / 'tools/build_dist.py'), '--check'],
                                 capture_output=True, text=True, timeout=20)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_bundled_imports_use_standard_library(self):
-        source = ast.parse((ROOT / 'src/harness.py').read_text())
+        bundled = {path.stem for path in (ROOT / 'scripts').glob('*.py')}
         modules = set()
-        for node in ast.walk(source):
-            if isinstance(node, ast.Import):
-                modules.update(alias.name.split('.')[0] for alias in node.names)
-            elif isinstance(node, ast.ImportFrom) and node.module:
-                modules.add(node.module.split('.')[0])
+        for path in (ROOT / 'scripts').glob('*.py'):
+            for node in ast.walk(ast.parse(path.read_text())):
+                if isinstance(node, ast.Import):
+                    modules.update(alias.name.split('.')[0] for alias in node.names)
+                elif isinstance(node, ast.ImportFrom) and node.module:
+                    modules.add(node.module.split('.')[0])
+        modules -= bundled
         stdlib = Path(sysconfig.get_path('stdlib')).resolve()
         for module in modules:
             spec = importlib.util.find_spec(module)

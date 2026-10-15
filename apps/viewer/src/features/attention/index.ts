@@ -1,0 +1,1 @@
+export { AttentionDetail } from './AttentionDetail'

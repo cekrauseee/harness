@@ -14,7 +14,7 @@ Select only the desired host or skills when appropriate. Use `.` to install the 
 pnpx skills add . --skill '*' -g -a codex -y
 ```
 
-The CLI requires Node.js on `PATH`. `npx skills` is an alternative to `pnpx skills`. Each skill contains its own needed helper and references; it does not require its siblings or access to this repository after installation. This route installs the standalone skills; it does not register a native plugin or an MCP server.
+The CLI requires Node.js on `PATH`. `npx skills` is an alternative to `pnpx skills`. Each skill contains its own needed helper and references; it does not require its siblings or access to this repository after installation. Viewing a change map is the exception: the [viewer](../apps/viewer/README.md) runs from a checkout of this repository and needs Node and pnpm. This route installs the standalone skills; it does not register a native plugin or an MCP server.
 
 ## Native plugins
 
@@ -32,6 +32,6 @@ Bind the intended project with the `environment` skill and verify resolution fro
 
 ## Host behavior
 
-Installing Harness does not rewrite AGENTS.md, CLAUDE.md or host settings. The recommended layout is one shared instruction file owned by the user, read by Codex through a symlink at `~/.codex/AGENTS.md` and imported by a thin `~/.claude/CLAUDE.md`; it carries the user's principles and practical choices, the versioned Harness block and one short section per host. [Host integration](../skills/environment/references/host-integration.md) holds the block, the host sections and the settings checklist; apply or update them only on request, preserving unrelated rules. Do not introduce hooks, broad context injection or a required sequence of skills.
+Installing Harness does not rewrite AGENTS.md, CLAUDE.md or host settings. The recommended layout is one shared instruction file owned by the user, read by Codex through a symlink at `~/.codex/AGENTS.md` and imported by a thin `~/.claude/CLAUDE.md`; it carries the user's principles and practical choices, the versioned Harness block and one short section per host. [Host integration](host-integration.md) holds the block, the host sections and the settings checklist; apply or update them only on request, preserving unrelated rules. Do not introduce hooks, broad context injection or a required sequence of skills.
 
 Discovery metadata enables automatic selection; the global instruction requires selection by responsibility without making the user name skills. Neither installation nor that instruction guarantees every model invocation. Verify the installed inventory separately from observed selection and application. A successful CLI install alone does not establish behavioral reliability.

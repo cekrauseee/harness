@@ -1,0 +1,1190 @@
+{
+  "format": "harness-map-v1",
+  "title": "Reading platform refresh",
+  "work": "refresh",
+  "source": {
+    "repository": "shelf",
+    "base": "1405df66cbe219b0bf6355bc3d60361a8376b6b4",
+    "head": "26b56c1bdfb048c3e46419fde332bab76deb2cd3",
+    "baseRef": "main",
+    "headRef": "feat/refresh"
+  },
+  "layers": [
+    {
+      "id": "screens",
+      "title": "Screens"
+    },
+    {
+      "id": "api",
+      "title": "API routes"
+    },
+    {
+      "id": "domain",
+      "title": "Domain"
+    },
+    {
+      "id": "storage",
+      "title": "Storage and services"
+    }
+  ],
+  "groups": [
+    {
+      "id": "catalog",
+      "title": "Catalog",
+      "summary": "Book records and search."
+    },
+    {
+      "id": "lists",
+      "title": "Lists",
+      "summary": "Reading lists and their items."
+    },
+    {
+      "id": "sharing",
+      "title": "Sharing",
+      "summary": "Invitations and reader access."
+    },
+    {
+      "id": "accounts",
+      "title": "Accounts",
+      "summary": "Sign-in and profiles."
+    },
+    {
+      "id": "notify",
+      "title": "Notifications",
+      "summary": "Email and in-app notices."
+    },
+    {
+      "id": "billing",
+      "title": "Billing",
+      "summary": "Plans and invoices."
+    }
+  ],
+  "cards": [
+    {
+      "id": "catalog-page",
+      "layer": "screens",
+      "group": "catalog",
+      "title": "Catalog page",
+      "summary": "Page of the catalog module.",
+      "files": ["src/catalog/page.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "catalog-form",
+      "layer": "screens",
+      "group": "catalog",
+      "title": "Catalog form",
+      "summary": "Form of the catalog module.",
+      "files": ["src/catalog/form.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "catalog-read",
+      "layer": "api",
+      "group": "catalog",
+      "title": "Catalog read endpoint",
+      "summary": "Read endpoint of the catalog module.",
+      "files": ["src/catalog/read.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "catalog-write",
+      "layer": "api",
+      "group": "catalog",
+      "title": "Catalog write endpoint",
+      "summary": "Write endpoint of the catalog module.",
+      "files": ["src/catalog/write.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "catalog-rules",
+      "layer": "domain",
+      "group": "catalog",
+      "title": "Catalog rules",
+      "summary": "Rules of the catalog module.",
+      "files": ["src/catalog/rules.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "catalog-service",
+      "layer": "domain",
+      "group": "catalog",
+      "title": "Catalog service",
+      "summary": "Service of the catalog module.",
+      "files": ["src/catalog/service.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "catalog-repo",
+      "layer": "storage",
+      "group": "catalog",
+      "title": "Catalog repository",
+      "summary": "Repository of the catalog module.",
+      "files": ["src/catalog/repo.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "catalog-jobs",
+      "layer": "storage",
+      "group": "catalog",
+      "title": "Catalog background jobs",
+      "summary": "Background jobs of the catalog module.",
+      "files": ["src/catalog/jobs.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "lists-page",
+      "layer": "screens",
+      "group": "lists",
+      "title": "Lists page",
+      "summary": "Page of the lists module.",
+      "files": ["src/lists/page.ts"],
+      "attention": [],
+      "flows": ["fl-share"]
+    },
+    {
+      "id": "lists-form",
+      "layer": "screens",
+      "group": "lists",
+      "title": "Lists form",
+      "summary": "Form of the lists module.",
+      "files": ["src/lists/form.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "lists-read",
+      "layer": "api",
+      "group": "lists",
+      "title": "Lists read endpoint",
+      "summary": "Read endpoint of the lists module.",
+      "files": ["src/lists/read.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "lists-write",
+      "layer": "api",
+      "group": "lists",
+      "title": "Lists write endpoint",
+      "summary": "Write endpoint of the lists module.",
+      "files": ["src/lists/write.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "lists-rules",
+      "layer": "domain",
+      "group": "lists",
+      "title": "Lists rules",
+      "summary": "Rules of the lists module.",
+      "files": ["src/lists/rules.ts"],
+      "attention": ["ap-access"],
+      "flows": ["fl-share"]
+    },
+    {
+      "id": "lists-service",
+      "layer": "domain",
+      "group": "lists",
+      "title": "Lists service",
+      "summary": "Service of the lists module.",
+      "files": ["src/lists/service.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "lists-repo",
+      "layer": "storage",
+      "group": "lists",
+      "title": "Lists repository",
+      "summary": "Repository of the lists module.",
+      "files": ["src/lists/repo.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "lists-jobs",
+      "layer": "storage",
+      "group": "lists",
+      "title": "Lists background jobs",
+      "summary": "Background jobs of the lists module.",
+      "files": ["src/lists/jobs.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "sharing-page",
+      "layer": "screens",
+      "group": "sharing",
+      "title": "Sharing page",
+      "summary": "Page of the sharing module.",
+      "files": ["src/sharing/page.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "sharing-form",
+      "layer": "screens",
+      "group": "sharing",
+      "title": "Sharing form",
+      "summary": "Form of the sharing module.",
+      "files": ["src/sharing/form.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "sharing-read",
+      "layer": "api",
+      "group": "sharing",
+      "title": "Sharing read endpoint",
+      "summary": "Read endpoint of the sharing module.",
+      "files": ["src/sharing/read.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "sharing-write",
+      "layer": "api",
+      "group": "sharing",
+      "title": "Sharing write endpoint",
+      "summary": "Write endpoint of the sharing module.",
+      "files": ["src/sharing/write.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "sharing-rules",
+      "layer": "domain",
+      "group": "sharing",
+      "title": "Sharing rules",
+      "summary": "Rules of the sharing module.",
+      "files": ["src/sharing/rules.ts"],
+      "attention": ["ap-access"],
+      "flows": []
+    },
+    {
+      "id": "sharing-service",
+      "layer": "domain",
+      "group": "sharing",
+      "title": "Sharing service",
+      "summary": "Service of the sharing module.",
+      "files": ["src/sharing/service.ts"],
+      "attention": [],
+      "flows": ["fl-share"]
+    },
+    {
+      "id": "sharing-repo",
+      "layer": "storage",
+      "group": "sharing",
+      "title": "Sharing repository",
+      "summary": "Repository of the sharing module.",
+      "files": ["src/sharing/repo.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "sharing-jobs",
+      "layer": "storage",
+      "group": "sharing",
+      "title": "Sharing background jobs",
+      "summary": "Background jobs of the sharing module.",
+      "files": ["src/sharing/jobs.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "accounts-page",
+      "layer": "screens",
+      "group": "accounts",
+      "title": "Accounts page",
+      "summary": "Page of the accounts module.",
+      "files": ["src/accounts/page.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "accounts-form",
+      "layer": "screens",
+      "group": "accounts",
+      "title": "Accounts form",
+      "summary": "Form of the accounts module.",
+      "files": ["src/accounts/form.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "accounts-read",
+      "layer": "api",
+      "group": "accounts",
+      "title": "Accounts read endpoint",
+      "summary": "Read endpoint of the accounts module.",
+      "files": ["src/accounts/read.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "accounts-write",
+      "layer": "api",
+      "group": "accounts",
+      "title": "Accounts write endpoint",
+      "summary": "Write endpoint of the accounts module.",
+      "files": ["src/accounts/write.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "accounts-rules",
+      "layer": "domain",
+      "group": "accounts",
+      "title": "Accounts rules",
+      "summary": "Rules of the accounts module.",
+      "files": ["src/accounts/rules.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "accounts-service",
+      "layer": "domain",
+      "group": "accounts",
+      "title": "Accounts service",
+      "summary": "Service of the accounts module.",
+      "files": ["src/accounts/service.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "accounts-repo",
+      "layer": "storage",
+      "group": "accounts",
+      "title": "Accounts repository",
+      "summary": "Repository of the accounts module.",
+      "files": ["src/accounts/repo.ts"],
+      "attention": ["ap-access"],
+      "flows": []
+    },
+    {
+      "id": "accounts-jobs",
+      "layer": "storage",
+      "group": "accounts",
+      "title": "Accounts background jobs",
+      "summary": "Background jobs of the accounts module.",
+      "files": ["src/accounts/jobs.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "notify-page",
+      "layer": "screens",
+      "group": "notify",
+      "title": "Notifications page",
+      "summary": "Page of the notifications module.",
+      "files": ["src/notify/page.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "notify-form",
+      "layer": "screens",
+      "group": "notify",
+      "title": "Notifications form",
+      "summary": "Form of the notifications module.",
+      "files": ["src/notify/form.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "notify-read",
+      "layer": "api",
+      "group": "notify",
+      "title": "Notifications read endpoint",
+      "summary": "Read endpoint of the notifications module.",
+      "files": ["src/notify/read.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "notify-write",
+      "layer": "api",
+      "group": "notify",
+      "title": "Notifications write endpoint",
+      "summary": "Write endpoint of the notifications module.",
+      "files": ["src/notify/write.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "notify-rules",
+      "layer": "domain",
+      "group": "notify",
+      "title": "Notifications rules",
+      "summary": "Rules of the notifications module.",
+      "files": ["src/notify/rules.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "notify-service",
+      "layer": "domain",
+      "group": "notify",
+      "title": "Notifications service",
+      "summary": "Service of the notifications module.",
+      "files": ["src/notify/service.ts"],
+      "attention": [],
+      "flows": ["fl-share"]
+    },
+    {
+      "id": "notify-repo",
+      "layer": "storage",
+      "group": "notify",
+      "title": "Notifications repository",
+      "summary": "Repository of the notifications module.",
+      "files": ["src/notify/repo.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "notify-jobs",
+      "layer": "storage",
+      "group": "notify",
+      "title": "Notifications background jobs",
+      "summary": "Background jobs of the notifications module.",
+      "files": ["src/notify/jobs.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "billing-page",
+      "layer": "screens",
+      "group": "billing",
+      "title": "Billing page",
+      "summary": "Page of the billing module.",
+      "files": ["src/billing/page.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "billing-form",
+      "layer": "screens",
+      "group": "billing",
+      "title": "Billing form",
+      "summary": "Form of the billing module.",
+      "files": ["src/billing/form.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "billing-read",
+      "layer": "api",
+      "group": "billing",
+      "title": "Billing read endpoint",
+      "summary": "Read endpoint of the billing module.",
+      "files": ["src/billing/read.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "billing-write",
+      "layer": "api",
+      "group": "billing",
+      "title": "Billing write endpoint",
+      "summary": "Write endpoint of the billing module.",
+      "files": ["src/billing/write.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "billing-rules",
+      "layer": "domain",
+      "group": "billing",
+      "title": "Billing rules",
+      "summary": "Rules of the billing module.",
+      "files": ["src/billing/rules.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "billing-service",
+      "layer": "domain",
+      "group": "billing",
+      "title": "Billing service",
+      "summary": "Service of the billing module.",
+      "files": ["src/billing/service.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "billing-repo",
+      "layer": "storage",
+      "group": "billing",
+      "title": "Billing repository",
+      "summary": "Repository of the billing module.",
+      "files": ["src/billing/repo.ts"],
+      "attention": [],
+      "flows": []
+    },
+    {
+      "id": "billing-jobs",
+      "layer": "storage",
+      "group": "billing",
+      "title": "Billing background jobs",
+      "summary": "Background jobs of the billing module.",
+      "files": ["src/billing/jobs.ts"],
+      "attention": [],
+      "flows": []
+    }
+  ],
+  "edges": [
+    {
+      "from": "catalog-page",
+      "to": "catalog-read",
+      "kind": "import"
+    },
+    {
+      "from": "catalog-form",
+      "to": "catalog-write",
+      "kind": "import"
+    },
+    {
+      "from": "catalog-read",
+      "to": "catalog-rules",
+      "kind": "import"
+    },
+    {
+      "from": "catalog-write",
+      "to": "catalog-service",
+      "kind": "import"
+    },
+    {
+      "from": "catalog-service",
+      "to": "catalog-rules",
+      "kind": "import"
+    },
+    {
+      "from": "catalog-rules",
+      "to": "catalog-repo",
+      "kind": "import"
+    },
+    {
+      "from": "catalog-service",
+      "to": "catalog-jobs",
+      "kind": "import"
+    },
+    {
+      "from": "catalog-jobs",
+      "to": "catalog-repo",
+      "kind": "import"
+    },
+    {
+      "from": "lists-page",
+      "to": "lists-read",
+      "kind": "import"
+    },
+    {
+      "from": "lists-form",
+      "to": "lists-write",
+      "kind": "import"
+    },
+    {
+      "from": "lists-read",
+      "to": "lists-rules",
+      "kind": "import"
+    },
+    {
+      "from": "lists-write",
+      "to": "lists-service",
+      "kind": "import"
+    },
+    {
+      "from": "lists-service",
+      "to": "lists-rules",
+      "kind": "import"
+    },
+    {
+      "from": "lists-rules",
+      "to": "lists-repo",
+      "kind": "import"
+    },
+    {
+      "from": "lists-service",
+      "to": "lists-jobs",
+      "kind": "import"
+    },
+    {
+      "from": "lists-jobs",
+      "to": "lists-repo",
+      "kind": "import"
+    },
+    {
+      "from": "sharing-page",
+      "to": "sharing-read",
+      "kind": "import"
+    },
+    {
+      "from": "sharing-form",
+      "to": "sharing-write",
+      "kind": "import"
+    },
+    {
+      "from": "sharing-read",
+      "to": "sharing-rules",
+      "kind": "import"
+    },
+    {
+      "from": "sharing-write",
+      "to": "sharing-service",
+      "kind": "import"
+    },
+    {
+      "from": "sharing-service",
+      "to": "sharing-rules",
+      "kind": "import"
+    },
+    {
+      "from": "sharing-rules",
+      "to": "sharing-repo",
+      "kind": "import"
+    },
+    {
+      "from": "sharing-service",
+      "to": "sharing-jobs",
+      "kind": "import"
+    },
+    {
+      "from": "sharing-jobs",
+      "to": "sharing-repo",
+      "kind": "import"
+    },
+    {
+      "from": "accounts-page",
+      "to": "accounts-read",
+      "kind": "import"
+    },
+    {
+      "from": "accounts-form",
+      "to": "accounts-write",
+      "kind": "import"
+    },
+    {
+      "from": "accounts-read",
+      "to": "accounts-rules",
+      "kind": "import"
+    },
+    {
+      "from": "accounts-write",
+      "to": "accounts-service",
+      "kind": "import"
+    },
+    {
+      "from": "accounts-service",
+      "to": "accounts-rules",
+      "kind": "import"
+    },
+    {
+      "from": "accounts-rules",
+      "to": "accounts-repo",
+      "kind": "import"
+    },
+    {
+      "from": "accounts-service",
+      "to": "accounts-jobs",
+      "kind": "import"
+    },
+    {
+      "from": "accounts-jobs",
+      "to": "accounts-repo",
+      "kind": "import"
+    },
+    {
+      "from": "notify-page",
+      "to": "notify-read",
+      "kind": "import"
+    },
+    {
+      "from": "notify-form",
+      "to": "notify-write",
+      "kind": "import"
+    },
+    {
+      "from": "notify-read",
+      "to": "notify-rules",
+      "kind": "import"
+    },
+    {
+      "from": "notify-write",
+      "to": "notify-service",
+      "kind": "import"
+    },
+    {
+      "from": "notify-service",
+      "to": "notify-rules",
+      "kind": "import"
+    },
+    {
+      "from": "notify-rules",
+      "to": "notify-repo",
+      "kind": "import"
+    },
+    {
+      "from": "notify-service",
+      "to": "notify-jobs",
+      "kind": "import"
+    },
+    {
+      "from": "notify-jobs",
+      "to": "notify-repo",
+      "kind": "import"
+    },
+    {
+      "from": "billing-page",
+      "to": "billing-read",
+      "kind": "import"
+    },
+    {
+      "from": "billing-form",
+      "to": "billing-write",
+      "kind": "import"
+    },
+    {
+      "from": "billing-read",
+      "to": "billing-rules",
+      "kind": "import"
+    },
+    {
+      "from": "billing-write",
+      "to": "billing-service",
+      "kind": "import"
+    },
+    {
+      "from": "billing-service",
+      "to": "billing-rules",
+      "kind": "import"
+    },
+    {
+      "from": "billing-rules",
+      "to": "billing-repo",
+      "kind": "import"
+    },
+    {
+      "from": "billing-service",
+      "to": "billing-jobs",
+      "kind": "import"
+    },
+    {
+      "from": "billing-jobs",
+      "to": "billing-repo",
+      "kind": "import"
+    },
+    {
+      "from": "lists-rules",
+      "to": "catalog-repo",
+      "kind": "import"
+    },
+    {
+      "from": "sharing-service",
+      "to": "lists-rules",
+      "kind": "import"
+    },
+    {
+      "from": "sharing-service",
+      "to": "notify-service",
+      "kind": "import"
+    },
+    {
+      "from": "lists-page",
+      "to": "accounts-rules",
+      "kind": "import"
+    },
+    {
+      "from": "billing-service",
+      "to": "notify-jobs",
+      "kind": "import"
+    },
+    {
+      "from": "sharing-rules",
+      "to": "accounts-repo",
+      "kind": "import"
+    },
+    {
+      "from": "catalog-page",
+      "to": "accounts-rules",
+      "kind": "import"
+    }
+  ],
+  "files": {
+    "src/catalog/page.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Page for catalog.",
+      "cards": ["catalog-page"]
+    },
+    "src/catalog/form.ts": {
+      "status": "added",
+      "added": 20,
+      "deleted": 0,
+      "role": "Form for catalog.",
+      "cards": ["catalog-form"]
+    },
+    "src/catalog/read.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Read endpoint for catalog.",
+      "cards": ["catalog-read"]
+    },
+    "src/catalog/write.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Write endpoint for catalog.",
+      "cards": ["catalog-write"]
+    },
+    "src/catalog/rules.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Rules for catalog.",
+      "cards": ["catalog-rules"]
+    },
+    "src/catalog/service.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Service for catalog.",
+      "cards": ["catalog-service"]
+    },
+    "src/catalog/repo.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Repository for catalog.",
+      "cards": ["catalog-repo"]
+    },
+    "src/catalog/jobs.ts": {
+      "status": "added",
+      "added": 20,
+      "deleted": 0,
+      "role": "Background jobs for catalog.",
+      "cards": ["catalog-jobs"]
+    },
+    "src/lists/page.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Page for lists.",
+      "cards": ["lists-page"]
+    },
+    "src/lists/form.ts": {
+      "status": "added",
+      "added": 20,
+      "deleted": 0,
+      "role": "Form for lists.",
+      "cards": ["lists-form"]
+    },
+    "src/lists/read.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Read endpoint for lists.",
+      "cards": ["lists-read"]
+    },
+    "src/lists/write.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Write endpoint for lists.",
+      "cards": ["lists-write"]
+    },
+    "src/lists/rules.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Rules for lists.",
+      "cards": ["lists-rules"]
+    },
+    "src/lists/service.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Service for lists.",
+      "cards": ["lists-service"]
+    },
+    "src/lists/repo.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Repository for lists.",
+      "cards": ["lists-repo"]
+    },
+    "src/lists/jobs.ts": {
+      "status": "added",
+      "added": 20,
+      "deleted": 0,
+      "role": "Background jobs for lists.",
+      "cards": ["lists-jobs"]
+    },
+    "src/sharing/page.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Page for sharing.",
+      "cards": ["sharing-page"]
+    },
+    "src/sharing/form.ts": {
+      "status": "added",
+      "added": 20,
+      "deleted": 0,
+      "role": "Form for sharing.",
+      "cards": ["sharing-form"]
+    },
+    "src/sharing/read.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Read endpoint for sharing.",
+      "cards": ["sharing-read"]
+    },
+    "src/sharing/write.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Write endpoint for sharing.",
+      "cards": ["sharing-write"]
+    },
+    "src/sharing/rules.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Rules for sharing.",
+      "cards": ["sharing-rules"]
+    },
+    "src/sharing/service.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Service for sharing.",
+      "cards": ["sharing-service"]
+    },
+    "src/sharing/repo.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Repository for sharing.",
+      "cards": ["sharing-repo"]
+    },
+    "src/sharing/jobs.ts": {
+      "status": "added",
+      "added": 20,
+      "deleted": 0,
+      "role": "Background jobs for sharing.",
+      "cards": ["sharing-jobs"]
+    },
+    "src/accounts/page.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Page for accounts.",
+      "cards": ["accounts-page"]
+    },
+    "src/accounts/form.ts": {
+      "status": "added",
+      "added": 20,
+      "deleted": 0,
+      "role": "Form for accounts.",
+      "cards": ["accounts-form"]
+    },
+    "src/accounts/read.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Read endpoint for accounts.",
+      "cards": ["accounts-read"]
+    },
+    "src/accounts/write.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Write endpoint for accounts.",
+      "cards": ["accounts-write"]
+    },
+    "src/accounts/rules.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Rules for accounts.",
+      "cards": ["accounts-rules"]
+    },
+    "src/accounts/service.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Service for accounts.",
+      "cards": ["accounts-service"]
+    },
+    "src/accounts/repo.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Repository for accounts.",
+      "cards": ["accounts-repo"]
+    },
+    "src/accounts/jobs.ts": {
+      "status": "added",
+      "added": 20,
+      "deleted": 0,
+      "role": "Background jobs for accounts.",
+      "cards": ["accounts-jobs"]
+    },
+    "src/notify/page.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Page for notifications.",
+      "cards": ["notify-page"]
+    },
+    "src/notify/form.ts": {
+      "status": "added",
+      "added": 20,
+      "deleted": 0,
+      "role": "Form for notifications.",
+      "cards": ["notify-form"]
+    },
+    "src/notify/read.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Read endpoint for notifications.",
+      "cards": ["notify-read"]
+    },
+    "src/notify/write.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Write endpoint for notifications.",
+      "cards": ["notify-write"]
+    },
+    "src/notify/rules.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Rules for notifications.",
+      "cards": ["notify-rules"]
+    },
+    "src/notify/service.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Service for notifications.",
+      "cards": ["notify-service"]
+    },
+    "src/notify/repo.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Repository for notifications.",
+      "cards": ["notify-repo"]
+    },
+    "src/notify/jobs.ts": {
+      "status": "added",
+      "added": 20,
+      "deleted": 0,
+      "role": "Background jobs for notifications.",
+      "cards": ["notify-jobs"]
+    },
+    "src/billing/page.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Page for billing.",
+      "cards": ["billing-page"]
+    },
+    "src/billing/form.ts": {
+      "status": "added",
+      "added": 20,
+      "deleted": 0,
+      "role": "Form for billing.",
+      "cards": ["billing-form"]
+    },
+    "src/billing/read.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Read endpoint for billing.",
+      "cards": ["billing-read"]
+    },
+    "src/billing/write.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Write endpoint for billing.",
+      "cards": ["billing-write"]
+    },
+    "src/billing/rules.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Rules for billing.",
+      "cards": ["billing-rules"]
+    },
+    "src/billing/service.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Service for billing.",
+      "cards": ["billing-service"]
+    },
+    "src/billing/repo.ts": {
+      "status": "modified",
+      "added": 20,
+      "deleted": 4,
+      "role": "Repository for billing.",
+      "cards": ["billing-repo"]
+    },
+    "src/billing/jobs.ts": {
+      "status": "added",
+      "added": 20,
+      "deleted": 0,
+      "role": "Background jobs for billing.",
+      "cards": ["billing-jobs"]
+    }
+  },
+  "notes": [],
+  "commits": {},
+  "attention": [
+    {
+      "id": "ap-access",
+      "title": "Readers never see other lists",
+      "status": "handled",
+      "category": "security",
+      "severity": "critical",
+      "scenario": "A reader guesses another list id.",
+      "handling": "Every read goes through the list rules.",
+      "cards": ["lists-rules", "sharing-rules", "accounts-repo"],
+      "evidence": [],
+      "tests": [],
+      "qa": []
+    }
+  ],
+  "flows": [
+    {
+      "id": "fl-share",
+      "title": "Share a list",
+      "trigger": "An owner shares a list.",
+      "outcome": "The reader is notified and can open it.",
+      "cards": ["lists-page", "sharing-service", "notify-service", "lists-rules"],
+      "steps": []
+    }
+  ],
+  "tests": [],
+  "followups": [],
+  "runs": [],
+  "code": {}
+}
