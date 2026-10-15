@@ -79,6 +79,6 @@ Viewing a change map uses the [local viewer](apps/viewer/README.md) from a check
 | Using Harness | [Installation](docs/install.md), [host integration](docs/host-integration.md) |
 | Reference | [File context](docs/file-context.md), [execution records](docs/records.md), [helper API](docs/helper-api.md), JSON Schemas in [`schema/`](schema) |
 | Design | [Architecture](docs/architecture.md), [remote storage boundary](docs/remote-storage.md) |
-| Contributing | [Contributor guidance](AGENTS.md), [development](docs/development.md), [behavior validation](docs/behavior-validation.md), [viewer](apps/viewer/README.md) |
+| Contributing | [Contributor guidance](AGENTS.md), [development](docs/development.md), [behavior validation](docs/behavior-validation.md), [releasing](docs/releasing.md), [viewer](apps/viewer/README.md) |
 
 [MIT license](LICENSE), Henrique Krause.
