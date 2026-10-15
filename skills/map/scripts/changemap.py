@@ -179,6 +179,7 @@ def plan_tables(work_dir):
         for line in safe_path(path).read_text(errors="replace").split("\n"):
             if title is None and line.startswith("# "):
                 title = re.sub(r"^#\s+(?:Plan:\s*)?", "", line).strip()
+                title = title[:1].upper() + title[1:]
             for identifier in PLAN_ID.findall(line):
                 if identifier not in order:
                     order.append(identifier)
@@ -235,10 +236,6 @@ def accepted_records(work_dir):
         loaded.append((record, entry))
     unaccepted = sorted(f"fronts/{f}/runs/{r}.record.json" for f, r in present - seen)
     return loaded, unaccepted
-
-
-def humanize(identifier):
-    return identifier.replace("-", " ").replace("_", " ").capitalize()
 
 
 def build(repo, work_dir, base_ref, head_ref, exclude=EXCLUDE, max_lines=MAX_LINES):
@@ -379,8 +376,10 @@ def build(repo, work_dir, base_ref, head_ref, exclude=EXCLUDE, max_lines=MAX_LIN
         if identifier not in declared:
             gap("invalid_reference", at="attention", id=identifier, problem="id is not declared in the plan")
         meta, item = cells.get(identifier, {}), attention.get(identifier, {})
-        result = {"id": identifier, "title": item.get("title") or humanize(identifier[3:]),
-                  "status": item.get("status", "unreported")}
+        # Display text is never derived from ids: a missing title shows the id and is a gap.
+        result = {"id": identifier, "title": item.get("title") or identifier, "status": item.get("status", "unreported")}
+        if not item.get("title"):
+            gap("untitled", id=identifier)
         for key in ("category", "severity", "scenario", "handling", "proof", "owner"):
             value = item.get(key) or meta.get(key, "").strip("`")
             if key == "severity":
@@ -405,7 +404,9 @@ def build(repo, work_dir, base_ref, head_ref, exclude=EXCLUDE, max_lines=MAX_LIN
         if identifier not in declared:
             gap("invalid_reference", at="flows", id=identifier, problem="id is not declared in the plan")
         meta, flow = cells.get(identifier, {}), flows.get(identifier, {})
-        result = {"id": identifier, "title": flow.get("title") or humanize(identifier[3:])}
+        result = {"id": identifier, "title": flow.get("title") or identifier}
+        if not flow.get("title"):
+            gap("untitled", id=identifier)
         actor = flow.get("actor") or meta.get("actor", "")
         if actor:
             result["actor"] = actor[:80]
@@ -430,6 +431,10 @@ def build(repo, work_dir, base_ref, head_ref, exclude=EXCLUDE, max_lines=MAX_LIN
         if test:
             result["test"] = test
         result["cards"] = list(dict.fromkeys(list(flow.get("cards", [])) + [c for s in steps for c in s["cards"]]))
+        if not result["cards"]:
+            # A flow nobody reported on yet still shows its path: the cards or groups named in the plan's Modules column.
+            modules = {m.strip().strip("`") for m in meta.get("modules", "").split(",")}
+            result["cards"] = [c["id"] for c in card_list if c["id"] in modules or c.get("group") in modules]
         if not steps:
             gap("unreported_id", id=identifier)
         flow_list.append(result)
@@ -449,22 +454,30 @@ def build(repo, work_dir, base_ref, head_ref, exclude=EXCLUDE, max_lines=MAX_LIN
         card["flows"] = [f["id"] for f in flow_list if card["id"] in f["cards"]]
 
     # Layers and groups: declared in the supplement, otherwise derived from the cards.
-    layers = list(supplement.get("layers", [])) or [{"id": i, "title": humanize(i)} for i in dict.fromkeys(c["layer"] for c in card_list)]
+    layers = list(supplement.get("layers", []))
+    if not layers:
+        layers = [{"id": i, "title": i} for i in dict.fromkeys(c["layer"] for c in card_list)]
+        for layer in layers:
+            gap("untitled", layer=layer["id"])
     for card in card_list:
         if card["layer"] not in {layer["id"] for layer in layers}:
             gap("invalid_reference", at=f"card {card['id']}", layer=card["layer"], problem="layer is not declared")
     groups = list(supplement.get("groups", []))
     for identifier in dict.fromkeys(c["group"] for c in card_list if c.get("group")):
         if identifier not in {g["id"] for g in groups}:
-            groups.append({"id": identifier, "title": humanize(identifier)})
+            groups.append({"id": identifier, "title": identifier})
+            gap("untitled", group=identifier)
     if len(card_list) > GROUP_ABOVE:
         for card in card_list:
             if not card.get("group"):
                 gap("ungrouped_card", card=card["id"])
 
+    title = supplement.get("title") or plan_title
+    if not title:
+        gap("untitled", work=work_dir.name)
     view = {
         "format": "harness-map-v1",
-        "title": supplement.get("title") or plan_title or humanize(work_dir.name),
+        "title": title or work_dir.name,
         "work": work_dir.name,
         "source": {"repository": Path(probe(repo)[0]["root"]).name, "base": base, "head": head, "baseRef": base_ref,
                    "headRef": head_ref, "headDate": git(repo, "show", "-s", "--format=%cI", head).strip()},

@@ -41,7 +41,7 @@ Map: yes. 30+ files across three layers and one critical attention point.
 - Each module lists the ids it owns. Executors may add ids to the plan, never silently drop one. Owned ids are the floor of test plans and reviews, not the ceiling: findings outside the list become new `ap-` ids.
 - The map decision is `Map: yes` when the change is expected to touch more than about ten files, cross two or more layers or modules, or carries any critical attention point; otherwise `Map: no`. Recheck it when the work closes.
 
-Helpers find ids by scanning the plan for tokens; only the map consolidator reads the table rows, by their header names, to show category, severity and scenario.
+Helpers find ids by scanning the plan for tokens; only the map consolidator reads the table rows, by their header names, to show category, severity, scenario, handling, actor, trigger and outcome. Those cells are shown as written, so they follow [display copy](#display-copy).
 
 ## Run record
 
@@ -93,6 +93,21 @@ python3 scripts/records.py event --environment <env> --work <work> --front <fron
 
 Optional fields: `run`, `actor`, `host`, `model`, `effort`, `session`, `iteration`, `ref`, `tokens` (`input` including cached, `cached`, `output`, or `total` when only a total is reported), `duration_ms`, `pr` and a `note` of at most 140 characters. Events replace progress diaries: a front's `context.md` stays continuation only.
 
+## Display copy
+
+The viewer shows every text field of a map exactly as written: titles of cards, layers, groups, attention points, flows and steps; summaries, file roles and notes; scenario, handling, residual and checks; step actions and expectations; edge labels, follow-ups and the map title and subtitle. Nothing is reformatted, so whoever writes a field writes it ready for a reviewer who has not seen the work. This applies to records, the supplement and the plan cells the map shows.
+
+- English, plain and specific. Name the behavior or component, not the task that produced it: no run ids, module numbers, agent or model names.
+- Titles are short noun phrases in sentence case, without a final period: `Sign-in API`, `Session store`, `Invite token reuse`. Acronyms and names keep their real form (`API`, `UI`, `SQL`, `GitHub`); a title is never an identifier with a capital letter (`Api`, `Ui`, `Session_store`).
+- Prose fields are complete sentences that end with a period, one idea each. A summary says what the component does now; a file role says why the file exists; a note says why a symbol is shaped as it is, not what its code already shows.
+- A scenario is the concrete failure (`A session is issued while the credential rotates.`); handling is how the change prevents it; residual is what can still happen. Checks and step actions are instructions in the imperative; an expectation is what the person observes.
+- Edge labels are verb phrases read from the caller: `reads the generation`, `posts the sign-in form`.
+- Plain text only: no Markdown, backticks, HTML or emoji. Code belongs in code references and symbols, paths in `files`.
+- Fit the surface: card titles about 30 characters and summaries about 80 (two lines on a card), layer and group titles about 24, edge labels about 32. Longer text is cut on the canvas.
+- One term per concept across the records of a work; attention points and flows keep the plan's wording.
+
+The consolidator never derives display text from identifiers. A layer, group, attention point, flow or map without a written title shows its id and is reported as an `untitled` gap.
+
 ## Launcher
 
 `scripts/run.py`, bundled with the orchestrate skill, runs one Codex or Claude CLI session on a coordinator's explicit command. It never queues or dispatches work by itself.
@@ -117,6 +132,7 @@ python3 scripts/run.py resume --environment <env> --work <work> --front <front> 
 | `unresolved_anchor` | error | A corrected symbol in the supplement. |
 | `invalid_reference` | error | Correcting the path, test title or card id it names. |
 | `ungrouped_card` | error | A group for every card, required above 40 cards. |
+| `untitled` | error | A title written as [display copy](#display-copy): layers and groups in the supplement, attention points and flows in a record or the supplement, the map in the supplement or the plan heading. |
 | `isolated_card` | warning | An authored edge, when the card has files without an import extractor. |
 
 ```bash

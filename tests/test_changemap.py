@@ -21,7 +21,8 @@ SUPPLEMENT = {
                'files': ['db/sessions.sql']}],
     'edges': [{'from': 'sessions', 'to': 'storage', 'label': 'reads the generation'}],
     'notes': [{'path': 'web/page.ts', 'symbol': 'SignInPage', 'replaces': 'SignIn', 'text': 'Renders the page.'}],
-    'attention': [{'id': 'ap-schema-drift', 'status': 'handled', 'handling': 'One table definition.',
+    'attention': [{'id': 'ap-session-race', 'title': 'Session issued during rotation'},
+                  {'id': 'ap-schema-drift', 'title': 'Sessions table drift', 'status': 'handled', 'handling': 'One table definition.',
                    'evidence': [{'path': 'db/sessions.sql', 'symbol': 'sessions', 'note': 'The only definition.'}]}],
     'flows': [{'id': 'fl-sign-in', 'title': 'Sign in', 'steps': [
         {'actor': 'customer', 'do': 'Open the sign-in page.', 'expect': 'The cart appears.', 'url': '/sign-in',
@@ -71,12 +72,23 @@ class ChangeMapTest(unittest.TestCase):
         self.assertEqual([{k: v for k, v in g.items() if k != 'at'} for g in result['gaps']], [
             {'kind': 'unassigned_file', 'level': 'error', 'path': 'db/sessions.sql'},
             {'kind': 'unresolved_anchor', 'level': 'error', 'path': 'web/page.ts', 'symbol': 'SignIn'},
+            {'kind': 'untitled', 'level': 'error', 'id': 'ap-session-race'},
+            {'kind': 'untitled', 'level': 'error', 'id': 'ap-schema-drift'},
             {'kind': 'unreported_id', 'level': 'error', 'id': 'ap-schema-drift'},
+            {'kind': 'untitled', 'level': 'error', 'id': 'fl-sign-in'},
             {'kind': 'unreported_id', 'level': 'error', 'id': 'fl-sign-in'},
+            {'kind': 'untitled', 'level': 'error', 'layer': 'domain'},
+            {'kind': 'untitled', 'level': 'error', 'layer': 'api'},
+            {'kind': 'untitled', 'level': 'error', 'layer': 'ui'},
         ])
         self.assertEqual(result['unaccepted'], ['fronts/web/runs/web-0.record.json'])
         view = json.loads(Path(result['map']).read_text())
         self.assertEqual(records.schema_errors(view, 'map.v1.json'), [])
+        self.assertEqual(view['title'], 'Checkout sessions')
+        # Untitled items show their id instead of text derived from it.
+        self.assertEqual([layer['title'] for layer in view['layers']], ['domain', 'api', 'ui'])
+        # An unreported flow shows the cards its plan row names as modules.
+        self.assertEqual(view['flows'][0]['cards'], ['sessions', 'web'])
         self.assertEqual([r['run'] for r in view['runs']], ['impl-1', 'web-1'])
         self.assertEqual(view['runs'][0]['tokens'], {'input': 100, 'cached': 40, 'output': 10})
         self.assertEqual(view['edges'], [{'from': 'api', 'to': 'sessions', 'kind': 'import'}])
