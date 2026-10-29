@@ -1,0 +1,24 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "harness",
+  "version": "0.0.1",
+  "description": "Local context, memory, and explicit agent workflows.",
+  "author": {"name": "Henrique K"},
+  "repository": "https://github.com/cekrauseee/harness",
+  "license": "MIT",
+  "extensions": {
+    "com.openai": {
+      "hooks": "./hooks/codex.json",
+      "onboardingSkill": "./skills/setup/SKILL.md",
+      "interface": {
+        "displayName": "Harness",
+        "shortDescription": "Local context and explicit agent workflows",
+        "longDescription": "Keep knowledge in readable records, manage execution state locally, and guide engineering work with focused skills.",
+        "developerName": "Henrique K",
+        "category": "Productivity",
+        "capabilities": ["Read", "Write"],
+        "brandColor": "#0F766E"
+      }
+    }
+  }
+}

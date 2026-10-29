@@ -1,0 +1,17 @@
+#!/bin/sh
+set -eu
+root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+if [ -n "${HARNESS_PYTHON:-}" ]; then
+  if ! "$HARNESS_PYTHON" -c 'import sys; sys.exit(sys.version_info < (3, 11))' 2>/dev/null; then
+    printf '%s\n' 'Harness requires Python 3.11 or newer. Check HARNESS_PYTHON.' >&2
+    exit 2
+  fi
+  exec "$HARNESS_PYTHON" "$root/scripts/entry.py" "$@"
+fi
+for candidate in python3.15 python3.14 python3.13 python3.12 python3.11 python3 "$HOME/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3"; do
+  if command -v "$candidate" >/dev/null 2>&1 && "$candidate" -c 'import sys; sys.exit(sys.version_info < (3, 11))' 2>/dev/null; then
+    exec "$candidate" "$root/scripts/entry.py" "$@"
+  fi
+done
+printf '%s\n' 'Harness requires Python 3.11 or newer.' 'Install a maintained Python release or set HARNESS_PYTHON to its executable.' >&2
+exit 2

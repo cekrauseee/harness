@@ -1,0 +1,10 @@
+{
+  "name": "harness",
+  "version": "0.0.1",
+  "description": "Local context, memory, and explicit agent workflows.",
+  "author": {"name": "Henrique K"},
+  "repository": "https://github.com/cekrauseee/harness",
+  "license": "MIT",
+  "skills": "./skills/",
+  "hooks": "./hooks/claude.json"
+}
