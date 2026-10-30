@@ -19,7 +19,7 @@ codex plugin marketplace add cekrauseee/marketplace
 codex plugin add harness@marketplace
 ```
 
-Start a new session. In ChatGPT desktop, restart the app if the marketplace does not appear, open Plugins, and select Harness from `marketplace`. Use its setup skill to prepare the host integration; the agent runs the tool. Review native hook trust when the host requests it.
+Start a new session. In ChatGPT desktop, restart the app if the marketplace does not appear, open Plugins, and select Harness from `marketplace`. Use its setup skill to prepare the host integration; the agent runs the tool. Codex setup registers the two Harness hooks in `~/.codex/hooks.json`. Review those commands in `/hooks` or desktop hook settings before they can run.
 
 For **Claude Code**:
 

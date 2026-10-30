@@ -237,6 +237,86 @@ class Contracts(unittest.TestCase):
         self.assertIn("User instructions.", instructions.read_text())
         self.assertTrue(self.call("--environment", "app", "work", "show", "feature")["content"])
 
+    def test_setup_registers_hooks_and_commands_deliver_scoped_context(self):
+        host = self.base / "host"
+        hooks = host / ".codex" / "hooks.json"
+        hooks.parent.mkdir(parents=True)
+        existing = {
+            "description": "User hooks",
+            "hooks": {
+                "SessionStart": [
+                    {
+                        "matcher": "resume",
+                        "hooks": [{"type": "command", "command": "printf existing"}],
+                    }
+                ],
+                "Stop": [{"hooks": [{"type": "command", "command": "printf finished"}]}],
+            },
+        }
+        hooks.write_text(json.dumps(existing))
+        prepared = self.call("setup", "--host", "codex", "--host-home", str(host))
+        self.assertEqual(Path(prepared["hook_file"]), hooks.resolve())
+        once = hooks.read_bytes()
+        self.call("setup", "--host", "codex", "--host-home", str(host))
+        self.assertEqual(hooks.read_bytes(), once)
+        registered = json.loads(once)
+        self.assertEqual(registered["description"], existing["description"])
+        self.assertEqual(registered["hooks"]["Stop"], existing["hooks"]["Stop"])
+        self.assertEqual(
+            registered["hooks"]["SessionStart"][0], existing["hooks"]["SessionStart"][0]
+        )
+        self.assertEqual(len(registered["hooks"]["SessionStart"]), 2)
+        self.assertEqual(len(registered["hooks"]["PostToolUse"]), 1)
+
+        def invoke(event, environment=None):
+            command = registered["hooks"][event][-1]["hooks"][0]["command"]
+            result = subprocess.run(
+                ["/bin/sh", "-c", command],
+                input=json.dumps({"hook_event_name": event}),
+                env=environment or self.env,
+                text=True,
+                capture_output=True,
+                timeout=10,
+                check=True,
+            )
+            return json.loads(result.stdout)
+
+        context = invoke("SessionStart")["hookSpecificOutput"]
+        self.assertEqual(context["hookEventName"], "SessionStart")
+        self.assertIn(str(self.root.resolve() / "bin/harness"), context["additionalContext"])
+        self.assertEqual(invoke("PostToolUse"), {})
+
+        run = self.start()
+        state = self.wait(run, lambda s: s["state"] == "waiting")
+        participant = state["participants"][0]["id"]
+        tokens = json.loads((self.root / ".runtime" / run / "credentials.json").read_text())
+        managed = dict(
+            self.env,
+            HARNESS_RUN=run,
+            HARNESS_ACTOR=participant,
+            HARNESS_ACTOR_TOKEN=tokens[participant],
+        )
+        message = self.call(
+            "message", "send", run, "--to", participant, "--text", "Private task context."
+        )["message"]
+        notice = invoke("PostToolUse", managed)["hookSpecificOutput"]["additionalContext"]
+        self.assertIn(message, notice)
+        self.assertNotIn("Private task context.", notice)
+        self.call("message", "read", message, env=managed)
+        self.call("message", "ack", message, env=managed)
+        self.assertEqual(invoke("PostToolUse", managed), {})
+
+    def test_setup_does_not_replace_malformed_existing_hooks(self):
+        host = self.base / "host"
+        path = host / ".codex" / "hooks.json"
+        path.parent.mkdir(parents=True)
+        for value in ([], {"hooks": []}, {"hooks": {"SessionStart": [None]}}):
+            original = json.dumps(value)
+            path.write_text(original)
+            error = self.call("setup", "--host", "codex", "--host-home", str(host), ok=False)
+            self.assertEqual(error["code"], "invalid_integration")
+            self.assertEqual(path.read_text(), original)
+
     def test_new_install_has_no_model_defaults_and_requires_a_launch_selection(self):
         settings = self.call("config", "show")["settings"]
         self.assertEqual(set(settings), {"version", "limits"})

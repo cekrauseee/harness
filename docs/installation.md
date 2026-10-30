@@ -43,13 +43,17 @@ The setup skill resolves the installed plugin root and runs one of:
 <plugin-root>/bin/harness setup --host claude
 ```
 
-Setup creates the data root, shared launcher, and operational database; it adds or updates an owned global instruction block and disables native memory for the selected host. It preserves unrelated configuration and does not create an environment, install provider CLIs, log into accounts, or bypass native hook trust.
+Setup creates the data root, shared launcher, and operational database; it adds or updates an owned global instruction block and disables native memory for the selected host. For Codex and local ChatGPT, it also registers `SessionStart` and `PostToolUse` in `~/.codex/hooks.json`. These hooks call the shared launcher, so their command remains stable across plugin updates. Setup preserves unrelated hooks and configuration. It does not create an environment, install provider CLIs, log into accounts, or bypass native hook trust.
+
+After Codex setup, open `/hooks` in the CLI or the desktop hook settings and review the two Harness commands. Registration and approval are separate: a discovered hook can remain untrusted and will not run until approved. Claude Code uses the hooks bundled in its compatibility manifest. Harness deliberately uses one hook source per host to avoid duplicate execution.
 
 The `codex` target serves local Codex and ChatGPT runtime configuration. The `claude` target also clears automatic commit/PR attribution. Explicit `--host-home DIRECTORY` selects an alternate host installation for testing or managed setup. Data operations can prepare their own missing storage without requiring a manual initialization request.
 
 `HARNESS_ROOT` selects another data root. `HARNESS_PYTHON` selects an interpreter. Use `harness doctor` to inspect local prerequisites without creating an environment.
 
 ## Updates
+
+Version 0.0.3 makes Codex hook registration an explicit setup operation. Rerun setup from the updated plugin to repair existing installations where bundled hooks were not discovered. The tool returns `hook_file` with the native file it updated. Existing unrelated hooks retain their positions and settings; malformed hook files are reported without being replaced.
 
 Refresh the marketplace and reinstall the current plugin through the host:
 

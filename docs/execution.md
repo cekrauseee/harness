@@ -110,4 +110,6 @@ These controls cover processes managed by Harness, not an independent root agent
 
 Session-start and post-tool hooks emit brief pending-message notices for managed participants. They inject no message body or new authority. No stop hook forces continuation. A terminated participant receives pending context when explicitly resumed or when the authorized graph schedules its next turn.
 
-Local hook scripts must be installed and trusted in the host. The hooks do not provide arbitrary mid-generation interruption, and cloud-orchestrated Work does not support them. For troubleshooting, inspect `run status`, bounded results, and the private supervisor log in the data root.
+For Codex and local ChatGPT, `setup --host codex` registers the hooks in `~/.codex/hooks.json` using the shared Harness launcher. Claude Code loads its bundled hook configuration. Hooks must also be reviewed and trusted in the native host. `SessionStart` provides global context for ordinary sessions; `PostToolUse` emits notices only for managed participants and is silent outside an execution.
+
+The hooks do not provide arbitrary mid-generation interruption, and cloud-orchestrated Work does not support them. For troubleshooting, verify discovery and trust in the host's hook settings, then inspect `run status`, bounded results, and the private supervisor log in the data root. Successful plugin installation alone does not prove hook discovery or execution.

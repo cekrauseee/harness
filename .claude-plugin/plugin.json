@@ -1,6 +1,6 @@
 {
   "name": "harness",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Local context, memory, and explicit agent workflows.",
   "author": {"name": "Henrique K"},
   "repository": "https://github.com/cekrauseee/harness",

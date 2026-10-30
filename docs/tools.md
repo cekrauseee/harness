@@ -14,7 +14,7 @@ harness --json --environment storefront --work checkout memory search --query re
 
 | Family | Operations |
 | --- | --- |
-| `setup`, `doctor` | Prepare storage/optional integration; inspect prerequisites. |
+| `setup`, `doctor` | Prepare storage/optional host instructions and hooks; inspect prerequisites. |
 | `environment` | `ensure`, `list`, `show`, `archive`. |
 | `work` | `create`, `list`, `show`, `archive`. |
 | `resource` | `add`, `list`, `remove` scoped to an environment. Removing a binding does not delete its external resource. |

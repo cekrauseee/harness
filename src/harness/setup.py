@@ -85,6 +85,51 @@ def codex_memory(home, path):
         atomic_write(path, text.encode())
 
 
+def codex_hooks(home, path):
+    command = shlex.quote(str(home.path / "bin" / "harness")) + " hook"
+    with locked(home.path, str(path)):
+        config = read_json(path, {})
+        require(isinstance(config, dict), "invalid_integration", "Codex hooks must be an object.")
+        hooks = config.setdefault("hooks", {})
+        require(isinstance(hooks, dict), "invalid_integration", "Codex hooks needs an event map.")
+        for event, timeout, status in (
+            ("SessionStart", 10, "Harness: load session context"),
+            ("PostToolUse", 5, "Harness: check pending messages"),
+        ):
+            groups = hooks.setdefault(event, [])
+            require(
+                isinstance(groups, list), "invalid_integration", f"{event} hooks must be a list."
+            )
+            owned = []
+            for group in groups:
+                require(
+                    isinstance(group, dict) and isinstance(group.get("hooks"), list),
+                    "invalid_integration",
+                    f"{event} groups need a hooks list.",
+                )
+                for handler in group["hooks"]:
+                    require(
+                        isinstance(handler, dict),
+                        "invalid_integration",
+                        "Hook handlers must be objects.",
+                    )
+                    if handler.get("type") == "command" and handler.get("command") == command:
+                        owned.append(handler)
+            handler = {
+                "type": "command",
+                "command": command,
+                "timeout": timeout,
+                "statusMessage": status,
+            }
+            if owned:
+                for existing in owned:
+                    existing.update(handler)
+            else:
+                groups.append({"hooks": [handler]})
+        write_json(path, config)
+    return str(path)
+
+
 def prepare(home, host=None, host_home=None, actor=None):
     operator_only(actor)
     home.ensure()
@@ -108,9 +153,11 @@ def prepare(home, host=None, host_home=None, actor=None):
         text += "exec " + shlex.quote(str(PACKAGE_ROOT / "bin" / "harness")) + ' "$@"\n'
         atomic_write(launcher, text.encode(), 0o755)
     integrations = []
+    hook_file = None
     if host:
         base = Path(host_home).expanduser().resolve() if host_home else Path.home()
         if host == "codex":
+            hook_file = codex_hooks(home, base / ".codex" / "hooks.json")
             upsert_instructions(home, base / ".codex" / "AGENTS.md")
             codex_memory(home, base / ".codex" / "config.toml")
         elif host == "claude":
@@ -126,6 +173,7 @@ def prepare(home, host=None, host_home=None, actor=None):
         "root": str(home.path),
         "command": str(launcher),
         "integrations": integrations,
+        "hook_file": hook_file,
         "hooks": "Native trust remains controlled by the host.",
     }
 
