@@ -10,7 +10,7 @@ import time
 import uuid
 from pathlib import Path
 
-from . import workflows
+from . import selection, workflows
 from .access import digest, operator_only
 from .config import validate_limits
 from .context import environment_id, record_path, work_id
@@ -54,11 +54,12 @@ def create(
     work,
     resource,
     prompt,
-    profile_name=None,
+    choice=None,
     workflow_name=None,
     authorization=None,
     autonomous=False,
     actor=None,
+    read_only=False,
 ):
     operator_only(actor)
     home.ensure()
@@ -74,6 +75,11 @@ def create(
     config = home.config()
     if workflow_name:
         require(
+            choice is None and not read_only,
+            "invalid_selection",
+            "A workflow uses the agent's per-node selections; do not override them at launch.",
+        )
+        require(
             not autonomous and bool(authorization),
             "authorization_required",
             "A workflow requires explicit user authorization.",
@@ -84,17 +90,11 @@ def create(
         kind = definition["mode"]
         limits = definition["limits"]
     else:
-        profile_name = profile_name or config["defaults"]["scout" if autonomous else "worker"]
-        profile = home.profile(profile_name)
+        selection.validate(choice)
         require(
-            bool(authorization) or (autonomous and profile.get("autonomous")),
+            bool(authorization) or autonomous,
             "authorization_required",
-            "Use an explicitly authorized execution or an allowed autonomous profile.",
-        )
-        require(
-            not autonomous or profile.get("autonomous"),
-            "scope_denied",
-            "This profile is not allowed for autonomous delegation.",
+            "Use an explicitly authorized execution or bounded economical delegation.",
         )
         require(
             resource in resources
@@ -106,12 +106,12 @@ def create(
         limits = dict(config["limits"])
         if autonomous:
             limits.update(
-                seconds=min(profile["seconds"], 300),
-                attempt_seconds=min(profile["seconds"], 300),
+                seconds=min(limits["seconds"], 300),
+                attempt_seconds=min(limits["attempt_seconds"], 300),
                 max_attempts=1,
                 concurrency=1,
             )
-        definition = {"profile": profile_name, "resource": resource}
+        definition = {"selection": choice, "resource": resource, "read_only": read_only}
     validate_limits(limits)
     run_id = "r-" + uuid.uuid4().hex[:16]
     tokens = {}
@@ -129,11 +129,11 @@ def create(
                 now + limits["seconds"],
                 json.dumps(limits),
                 json.dumps(definition),
-                authorization or "Configured economical delegation",
+                authorization or "Agent-selected economical delegation",
             ),
         )
 
-        def participant(module, node, role, profile_key, context, resource_key, state):
+        def participant(module, node, role, chosen, context, resource_key, state, read_only=False):
             key = f"{run_id}.{module}.{node}"
             secret = secrets.token_urlsafe(32)
             tokens[key] = secret
@@ -145,7 +145,7 @@ def create(
                     run_id,
                     module,
                     role,
-                    json.dumps(home.profile(profile_key)),
+                    json.dumps(selection.settings(chosen, limits["attempt_seconds"], read_only)),
                     json.dumps(context),
                     cwd,
                     state,
@@ -166,23 +166,25 @@ def create(
                         module["id"],
                         node_name,
                         node["role"],
-                        node["profile"],
+                        node["selection"],
                         node.get("context", []),
                         module["resource"],
                         state,
+                        node.get("read_only", False),
                     )
             integration = definition["integration"]
             participant(
                 "integration",
                 "coordinator",
                 "integration",
-                integration["profile"],
+                integration["selection"],
                 integration.get("context", []),
                 integration["resource"],
                 "idle",
+                integration.get("read_only", False),
             )
         else:
-            participant("task", "worker", "worker", profile_name, [], resource, "ready")
+            participant("task", "worker", "worker", choice, [], resource, "ready", read_only)
     runtime = directory(home, run_id)
     runtime.mkdir(parents=True, mode=0o700)
     write_json(runtime / "credentials.json", tokens)
@@ -198,7 +200,7 @@ def status(home, run_id, actor=None):
         participants = [
             dict(p)
             for p in db.execute(
-                "SELECT id,module,role,state,rounds,parent_id FROM participants WHERE run_id=? ORDER BY id",
+                "SELECT id,module,role,state,rounds,parent_id,profile_json FROM participants WHERE run_id=? ORDER BY id",
                 (run_id,),
             )
         ]
@@ -216,6 +218,10 @@ def status(home, run_id, actor=None):
     for attempt in attempts:
         raw_usage = attempt.pop("usage_json")
         attempt["usage"] = json.loads(raw_usage) if raw_usage else None
+    for participant in participants:
+        settings = json.loads(participant.pop("profile_json"))
+        participant["selection"] = selection.public(settings)
+        participant["read_only"] = settings.get("read_only", False)
     return {
         "run": run_id,
         "kind": run["kind"],
@@ -612,17 +618,16 @@ def recover(home, run_id, confirm_stopped=False, actor=None):
     return {"run": run_id, "recovered": True, "relaunched": False}
 
 
-def spawn_helper(home, run_id, profile_name, prompt, actor):
+def spawn_helper(home, run_id, choice, prompt, actor, read_only=False):
     require(actor is not None, "invalid_identity", "A helper needs a managed parent participant.")
     actor.check_run(run_id)
     require(actor.participant["role"] != "helper", "scope_denied", "Helpers cannot delegate again.")
-    profile = home.profile(profile_name)
+    settings = selection.settings(choice, 300, read_only)
     require(
-        profile.get("autonomous"),
+        not json.loads(actor.participant["profile_json"]).get("read_only") or read_only,
         "scope_denied",
-        "Use a configured economical profile for a helper.",
+        "A helper cannot gain context write access its parent does not have.",
     )
-    profile["seconds"] = min(profile["seconds"], 300)
     require(0 < len(prompt.strip()) <= 16000, "invalid_prompt", "A helper needs a bounded brief.")
     key = f"{run_id}.helper.{uuid.uuid4().hex[:8]}"
     token = secrets.token_urlsafe(32)
@@ -664,7 +669,7 @@ def spawn_helper(home, run_id, profile_name, prompt, actor):
                     run_id,
                     actor.participant["module"],
                     "helper",
-                    json.dumps(profile),
+                    json.dumps(settings),
                     actor.participant["context_json"],
                     actor.participant["cwd"],
                     "ready",

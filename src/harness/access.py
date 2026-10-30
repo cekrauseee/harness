@@ -54,7 +54,7 @@ class Actor:
         require(
             not json.loads(self.participant["profile_json"]).get("read_only"),
             "scope_denied",
-            "This profile has read-only context access.",
+            "This assignment has read-only context access.",
         )
 
     def check_record(self, relative, write=False):

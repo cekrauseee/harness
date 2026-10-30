@@ -20,9 +20,8 @@ harness --json --environment storefront --work checkout memory search --query re
 | `resource` | `add`, `list`, `remove` scoped to an environment. Removing a binding does not delete its external resource. |
 | `record` | `read`, `write`, `delete`, `list`, `search`. |
 | `memory` | `capture`, `put`, `list`, `search`. Generic record tools provide reads and revision-aware deletion. |
-| `profile` | `list`, `set`, `default`. |
-| `config` | `show`, `limits`. |
-| `workflow` | `create`, `read`, `write`, `validate`. |
+| `config` | `show`, `write`, `limits`. |
+| `workflow` | `template`, `create`, `read`, `write`, `validate`. |
 | `run` | `start`, `list`, `status`, `wait`, `result`, `decide`, `stop`, `resume`, `recover`, `spawn`, `retry`. |
 | `message` | `send`, `inbox`, `read`, `ack`. |
 
@@ -47,7 +46,9 @@ harness record search --prefix environments/storefront/work/checkout --query acc
 
 Keep authoring files outside product repositories when they are internal work artifacts. The file argument is an input to the tool; the tool owns the persisted Harness record.
 
-Profile updates consume a JSON object with `provider`, `model`, `effort`, `seconds`, `autonomous`, and `read_only`. `profile default ROLE PROFILE` selects a default for `scout`, `worker`, or `coordinator`. Configuration preserves unrelated fields. Existing participants keep their resolved profile snapshot.
+`config show` returns `settings` and a `revision`. To replace settings, preserve unrelated fields in a local input copy and use `config write --file FILE --revision HASH`. A stale revision is rejected. Global settings contain operational limits, without model preferences or role mappings.
+
+For direct tasks and helpers, `run start` and `run spawn` require `--provider`, `--model`, `--effort`, and `--reason`. `--read-only` independently restricts Harness context writes. Workflow nodes carry the same choices in their `selection` objects. `workflow template` returns an unassigned definition; `workflow create ID --file FILE` persists it only after all selections are complete. Existing runs retain their selections when definitions or global settings change.
 
 `config limits --file FILE` changes defaults for new definitions/executions. It does not renew an existing run's budget. See [execution](execution.md) before changing workflow limits.
 

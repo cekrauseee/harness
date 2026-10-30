@@ -58,7 +58,11 @@ codex plugin marketplace upgrade marketplace
 codex plugin add harness@marketplace
 ```
 
-For Claude Code, use `claude plugin marketplace update marketplace` followed by `claude plugin update harness@marketplace`. Restart the session and rerun setup to refresh the launcher to the installed version. Harness data stays in its own root. Stop managed runs before removing a plugin version they are executing.
+For Claude Code, use `claude plugin marketplace update marketplace` followed by `claude plugin update harness@marketplace`. Restart the session and rerun setup to refresh the launcher and owned global instructions to the installed version. Harness data stays in its own root. Stop managed runs before removing a plugin version they are executing.
+
+Version 0.0.2 replaces named model profiles with explicit choices for each assignment. During an upgrade from 0.0.1, use `config show` and `config write --file FILE --revision HASH` to remove the obsolete `profiles` and `defaults` fields while preserving operational limits and unrelated settings. They remain readable but are never used to select models. No database conversion is required; existing executions retain their frozen choices.
+
+Saved workflows using `profile` must be updated with a `selection` containing `provider`, `model`, `effort`, and `reason` for every node and integration coordinator before a new launch. New workflows start with `workflow template`; complete the choices and persist the definition with `workflow create ID --file FILE`. Direct `run start` and `run spawn` use the equivalent flags. See [execution](execution.md).
 
 ## Sources
 

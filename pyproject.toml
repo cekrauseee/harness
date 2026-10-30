@@ -1,6 +1,6 @@
 [project]
 name = "cognitive-harness"
-version = "0.0.1"
+version = "0.0.2"
 description = "A local cognitive environment for agents."
 requires-python = ">=3.11"
 license = {text = "MIT"}

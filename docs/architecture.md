@@ -5,7 +5,8 @@ Harness separates cognitive guidance, persistent human context, and mechanical e
 | Module | Ownership |
 | --- | --- |
 | `cli`, `presentation` | Argument and result contracts, concise human output, structured agent output. |
-| `config`, `setup` | Defaults, profiles, idempotent storage preparation, owned host integration. |
+| `config`, `setup` | Operational settings, idempotent storage preparation, owned host integration. |
+| `selection` | Validate and expose an agent's explicit model choice without choosing or ranking models. |
 | `files`, `context`, `memory` | Scoped resources and Markdown, optimistic revisions, textual retrieval. |
 | `database`, `access` | Operational transactions and managed participant identity/scope checks. |
 | `workflows`, `runs` | Graph definitions, explicit decisions, run/participant lifecycle, shared limits. |

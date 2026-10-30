@@ -295,11 +295,11 @@ def reserve(home, run_id):
             )
             return None
         key = "a-" + uuid.uuid4().hex[:16]
-        profile = json.loads(participant["profile_json"])
+        settings = json.loads(participant["profile_json"])
         deadline = min(
             run["deadline"],
             time.time() + limits["attempt_seconds"],
-            time.time() + profile["seconds"],
+            time.time() + settings["seconds"],
         )
         output = str((directory(home, run_id) / f"{key}.log").relative_to(home.path))
         db.execute(

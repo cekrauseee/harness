@@ -5,6 +5,8 @@ from __future__ import annotations
 import contextlib
 import sqlite3
 
+# profile_json retains its storage name for existing executions; it now holds
+# the agent's frozen launch settings, without a named-profile lookup.
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS runs (
  id TEXT PRIMARY KEY, environment TEXT NOT NULL, work TEXT, kind TEXT NOT NULL,

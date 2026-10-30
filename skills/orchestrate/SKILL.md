@@ -5,11 +5,13 @@ description: Run explicitly requested agent workflows or bounded economical dele
 
 # Orchestrate
 
-Use orchestration to improve the accepted result enough to justify context and coordination cost. A full tree or workflow requires the user's request. For autonomous reconnaissance or bounded assistance, use a configured economical profile only when its benefit is clear. Respect explicit model and reasoning-effort choices; do not silently substitute or escalate them.
+Use orchestration to improve the accepted result enough to justify context and coordination cost. A full tree or workflow requires the user's request. Autonomous delegation is limited to economical reconnaissance or bounded assistance with a clear benefit. Respect explicit model and reasoning-effort choices; do not silently substitute or escalate them.
 
-Start with the task's coherent boundaries and available context. A module graph has a coordinator and configured workers. Assign each participant the context it needs, interfaces it owns, acceptance responsibility, and limits. A child requests context outside its assignment from the parent. Parallelism alone is not token efficiency.
+Before choosing a model for a delegated task, read [model selection](references/models.md). The delegating agent chooses the provider, model, and effort according to the assignment. Scout, worker, and coordinator describe responsibilities, without a preferred provider or fixed model mapping. The tools execute and record the choice; they do not make it.
 
-Use `profile list`, `workflow create/read/write/validate`, and `run start`. Configure graph nodes, edges, resources, profiles, dependencies, and limits explicitly. Use [develop](references/develop.md) or [review](references/review.md) for the requested workflow; load only the current role's relevant guidance. See [execution](../../docs/execution.md) for the graph contract and commands.
+Start with the task's coherent boundaries and available context. A module graph has a coordinator and configured workers. Assign each participant the context it needs, interfaces it owns, acceptance responsibility, and limits. Preserve the user's conversation language in the brief when the English work records would otherwise hide it. A child requests context outside its assignment from the parent. Parallelism alone is not token efficiency.
+
+Use `workflow template` for an unassigned graph, then select models for its assignments and save it with `workflow create --file FILE`. `workflow read/write/validate` maintain the graph; `run start` launches it. For direct tasks and helpers, pass `--provider`, `--model`, `--effort`, and a short `--reason` to `run start` or `run spawn`. Use [develop](references/develop.md) or [review](references/review.md) for the requested workflow; load only the relevant reference. See [execution](../../docs/execution.md) for contracts and examples.
 
 Launch provider processes through Harness, not raw `codex` or `claude` commands. `run status/wait/result` inspect progress; `run decide` records an authorized transition using the current revision. Output prose remains free-form. A successful process exit is not acceptance.
 

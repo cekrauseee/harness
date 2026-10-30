@@ -12,4 +12,4 @@ Accept the module only when its criteria hold. The integration coordinator exami
 
 Use `request_changes --to MODULE_COORDINATOR_ID` to reopen an accepted module for an integration defect, then yield. Keep the correction within the original scope and remaining limits; do not reset the review or its accumulated worker rounds. Final acceptance requires all module and helper work to be resolved.
 
-Respect the configured profiles, context grants, rounds, deadline, and shared attempt allowance. If those limits prevent resolution, preserve the actionable remainder and stop rather than silently escalating cost.
+Respect the selected models and effort, context grants, rounds, deadline, and shared attempt allowance. If those limits prevent resolution, preserve the actionable remainder and stop rather than silently escalating cost.

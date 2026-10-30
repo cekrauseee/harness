@@ -8,7 +8,7 @@ Global instructions → Focused skills → One local CLI
                                       └── SQLite: execution and communication
 ```
 
-Harness keeps durable knowledge outside application repositories. Environments group resources; work records preserve continuity without requiring a plan or lifecycle. Memory separates permissive capture from agent-led synthesis. Development and review workflows use configured module graphs, model profiles, bounded context, and finite execution limits.
+Harness keeps durable knowledge outside application repositories. Environments group resources; work records preserve continuity without requiring a plan or lifecycle. Memory separates permissive capture from agent-led synthesis. Development and review workflows use configured module graphs, agent-selected models, bounded context, and finite execution limits.
 
 ## Install
 
@@ -49,7 +49,7 @@ Use `--json` before a command for compact agent-readable output. Tools prepare m
 | --- | --- |
 | Context | Environments, scoped resources, small or continuous work, revision-aware Markdown records. |
 | Memory | Global/environment capture, selective textual retrieval, agent-led consolidation. |
-| Execution | Explicit development/review graphs, provider CLI profiles, shared limits, cancellation, recovery. |
+| Execution | Explicit development/review graphs, model choices per assignment, shared limits, cancellation, recovery. |
 | Communication | Persistent messages, lifecycle notifications, explicit reading and acknowledgment. |
 | Guidance | Setup, context, planning, implementation, review, testing, Git, documentation, cleanup, orchestration, deliberation, handoff. |
 

@@ -11,4 +11,6 @@ Run the plugin's `bin/harness setup --host codex` for Codex or local ChatGPT, or
 
 Use `harness doctor` to inspect prerequisites. Provider login and native hook trust remain host-controlled; report a concrete missing prerequisite instead of claiming setup completed it. Existing authorization covers routine idempotent preparation; do not ask again for each directory or owned configuration update.
 
+When upgrading an existing installation, refresh the owned global instructions through setup. Inspect `config show`; if it contains obsolete `profiles` or `defaults`, remove only those fields from an input copy and apply it with `config write --file FILE --revision HASH`. Preserve limits and unrelated settings. Model choices belong to individual assignments; do not recreate global role mappings. Adapt saved workflows only when needed for a new execution, using the [upgrade guidance](../../docs/installation.md#updates).
+
 Ordinary record mutations prepare missing data automatically. Use this setup flow when installation, integration, or repair is the task. See [installation](../../docs/installation.md) for supported surfaces and marketplace commands.

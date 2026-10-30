@@ -9,6 +9,7 @@ from .config import validate_limits
 from .context import environment_id, record_path, work_id
 from .errors import require
 from .files import identifier, locked, read_json, revision, write_json
+from .selection import validate as validate_selection
 
 
 def template(home, mode, module, resource, context):
@@ -20,7 +21,7 @@ def template(home, mode, module, resource, context):
         "mode": mode,
         "limits": copy.deepcopy(config["limits"]),
         "integration": {
-            "profile": config["defaults"]["coordinator"],
+            "selection": None,
             "resource": resource,
             "context": context,
         },
@@ -33,12 +34,12 @@ def template(home, mode, module, resource, context):
                 "nodes": {
                     "coordinator": {
                         "role": "coordinator",
-                        "profile": config["defaults"]["coordinator"],
+                        "selection": None,
                         "context": context,
                     },
                     "worker": {
                         "role": "worker",
-                        "profile": config["defaults"]["worker"],
+                        "selection": None,
                         "context": context,
                     },
                 },
@@ -88,7 +89,17 @@ def validate(home, definition, environment):
         require(
             isinstance(node, dict), "invalid_workflow", "Nodes and integration must be objects."
         )
-        home.profile(node.get("profile", ""))
+        require(
+            "profile" not in node,
+            "obsolete_workflow",
+            "Replace named profiles with the agent's selection for each assignment.",
+        )
+        validate_selection(node.get("selection"))
+        require(
+            type(node.get("read_only", False)) is bool,
+            "invalid_workflow",
+            "read_only must be a boolean.",
+        )
         refs = node.get("context", [])
         require(
             isinstance(refs, list) and len(refs) <= 24,

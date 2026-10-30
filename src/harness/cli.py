@@ -47,6 +47,23 @@ def pagination(parser):
     parser.add_argument("--offset", type=int, default=0)
 
 
+def selection_options(parser):
+    parser.add_argument("--provider", choices=("codex", "claude"))
+    parser.add_argument("--model", help="Model selected by the delegating agent")
+    parser.add_argument("--effort", help="Reasoning effort supported by the selected model")
+    parser.add_argument("--reason", help="Short capability and cost rationale for this choice")
+    parser.add_argument(
+        "--read-only",
+        action="store_true",
+        help="Restrict Harness context mutation for this assignment",
+    )
+
+
+def selected_model(args):
+    value = {key: getattr(args, key) for key in ("provider", "model", "effort", "reason")}
+    return value if any(item is not None for item in value.values()) else None
+
+
 def parser():
     root = Parser(
         prog="harness",
@@ -146,32 +163,29 @@ def parser():
         p.add_argument("--global", dest="global_scope", action="store_true")
         pagination(p)
 
-    profile = groups.add_parser("profile", help="Configure explicit model profiles").add_subparsers(
-        dest="op", required=True
-    )
-    profile.add_parser("list")
-    p = profile.add_parser("set")
-    p.add_argument("id")
-    p.add_argument("--file", required=True)
-    p = profile.add_parser("default")
-    p.add_argument("role", choices=("scout", "worker", "coordinator"))
-    p.add_argument("profile")
     conf = groups.add_parser(
-        "config", help="Inspect configuration and set execution defaults"
+        "config", help="Inspect configuration and maintain operational limits"
     ).add_subparsers(dest="op", required=True)
     conf.add_parser("show")
     p = conf.add_parser("limits")
     p.add_argument("--file", required=True)
+    p = conf.add_parser("write")
+    p.add_argument("--file", required=True)
+    p.add_argument("--revision", required=True)
 
     workflow = groups.add_parser(
         "workflow", help="Define explicit development and review graphs"
     ).add_subparsers(dest="op", required=True)
-    p = workflow.add_parser("create")
-    p.add_argument("id")
+    p = workflow.add_parser(
+        "template", help="Return a graph template with model choices left to the agent"
+    )
     p.add_argument("--mode", choices=("develop", "review"), required=True)
     p.add_argument("--module", required=True)
     p.add_argument("--resource", required=True)
     p.add_argument("--context", action="append", default=[])
+    p = workflow.add_parser("create")
+    p.add_argument("id")
+    p.add_argument("--file", required=True)
     p = workflow.add_parser("write")
     p.add_argument("id")
     p.add_argument("--file", required=True)
@@ -187,13 +201,13 @@ def parser():
     p = run.add_parser("start")
     input_options(p)
     p.add_argument("--resource")
-    p.add_argument("--profile")
+    selection_options(p)
     p.add_argument("--workflow")
     p.add_argument("--authorization", help="Record the user's authorization for this execution")
     p.add_argument(
         "--autonomous",
         action="store_true",
-        help="Use a configured economical profile within its bounded allowance",
+        help="Request bounded economical delegation using the agent's model choice",
     )
     p = run.add_parser("list")
     p.add_argument("--limit", type=int, default=20)
@@ -229,7 +243,7 @@ def parser():
     p.add_argument("--confirm-stopped", action="store_true")
     p = run.add_parser("spawn")
     p.add_argument("id")
-    p.add_argument("--profile", required=True)
+    selection_options(p)
     input_options(p)
     p = run.add_parser("retry", help="Retry a failed helper within the original execution budget")
     p.add_argument("id")
@@ -329,22 +343,12 @@ def execute(args, home, actor):
         return memory.search(
             home, args.query, env, args.global_scope, args.captures, actor, args.limit, args.offset
         )
-    if group == "profile":
-        if op == "list":
-            return {"profiles": home.config()["profiles"], "defaults": home.config()["defaults"]}
-        operator_only(actor)
-        if op == "set":
-            return home.set_profile(args.id, json.loads(content(args.file)))
-        home.profile(args.profile)
-        with locked(home.path, "config.json"):
-            config = home.config()
-            config["defaults"][args.role] = args.profile
-            write_json(home.path / "config.json", config)
-        return {"role": args.role, "profile": args.profile}
     if group == "config":
         if op == "show":
-            return home.config()
+            return home.config_record()
         operator_only(actor)
+        if op == "write":
+            return home.write_config(json.loads(content(args.file)), args.revision)
         limits = validate_limits(json.loads(content(args.file)))
         home.ensure()
         with locked(home.path, "config.json"):
@@ -353,14 +357,21 @@ def execute(args, home, actor):
             write_json(home.path / "config.json", config)
         return {"limits": limits}
     if group == "workflow":
-        if op == "create":
+        if op == "template":
+            operator_only(actor)
             definition = workflows.template(
                 home, args.mode, args.module, args.resource, args.context
             )
-            return workflows.put(home, env, work, args.id, definition, actor=actor)
-        if op == "write":
+            return {"definition": definition}
+        if op in ("create", "write"):
             return workflows.put(
-                home, env, work, args.id, json.loads(content(args.file)), args.revision, actor
+                home,
+                env,
+                work,
+                args.id,
+                json.loads(content(args.file)),
+                getattr(args, "revision", None),
+                actor,
             )
         if op == "validate":
             operator_only(actor)
@@ -377,11 +388,12 @@ def execute(args, home, actor):
                 work,
                 args.resource,
                 content(args.file, args.text),
-                args.profile,
+                selected_model(args),
                 args.workflow,
                 args.authorization,
                 args.autonomous,
                 actor,
+                args.read_only,
             )
         if op == "list":
             return runs.list_runs(home, env, args.limit, actor)
@@ -409,7 +421,12 @@ def execute(args, home, actor):
             return runs.recover(home, args.id, args.confirm_stopped, actor)
         if op == "spawn":
             return runs.spawn_helper(
-                home, args.id, args.profile, content(args.file, args.text), actor
+                home,
+                args.id,
+                selected_model(args),
+                content(args.file, args.text),
+                actor,
+                args.read_only,
             )
         if op == "retry":
             return runs.retry_helper(home, args.id, args.participant, args.reason, actor)

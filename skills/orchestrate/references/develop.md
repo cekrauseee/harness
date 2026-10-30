@@ -1,6 +1,6 @@
 # Develop a modular workflow
 
-The main coordinator starts from a detailed macro plan with coherent module responsibilities, dependencies, interfaces, and observable acceptance criteria. Configure the workflow graph and profiles for that plan; do not infer an unlimited team.
+The main coordinator starts from a detailed macro plan with coherent module responsibilities, dependencies, interfaces, and observable acceptance criteria. Define the graph and choose the provider, model, and effort for each assignment using the model-selection guidance; do not infer an unlimited team.
 
 The module coordinator understands the assigned module and prepares the technical micro plan. Inspect the relevant code and constraints, identify meaningful implementation steps and tests, and record only the context needed for execution. Preserve valid planning across iterations.
 

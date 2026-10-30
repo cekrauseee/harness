@@ -85,8 +85,15 @@ elif mode.startswith("graph"):
                     "run",
                     "spawn",
                     run,
-                    "--profile",
-                    "codex-scout",
+                    "--provider",
+                    "claude",
+                    "--model",
+                    "fixture-helper",
+                    "--effort",
+                    "low",
+                    "--reason",
+                    "A bounded economical check with a clear fixture result.",
+                    "--read-only",
                     "--text",
                     "Check the integrated result.",
                 )
@@ -163,12 +170,26 @@ elif mode.startswith("graph"):
     else:
         raise RuntimeError("Fixture decision conflict did not resolve")
 
+result_text = "Fixture result verified."
+if mode == "selection":
+    provider = os.path.basename(sys.argv[0])
+    model = sys.argv[sys.argv.index("-m" if provider == "codex" else "--model") + 1]
+    effort = (
+        next(
+            arg.split("=", 1)[1].strip('"')
+            for arg in sys.argv
+            if arg.startswith("model_reasoning_effort=")
+        )
+        if provider == "codex"
+        else sys.argv[sys.argv.index("--effort") + 1]
+    )
+    result_text = json.dumps({"provider": provider, "model": model, "effort": effort})
 if "claude" in os.path.basename(sys.argv[0]):
     print(
         json.dumps(
             {
                 "type": "result",
-                "result": "Fixture result verified.",
+                "result": result_text,
                 "usage": {"input_tokens": 10, "output_tokens": 5},
             }
         ),
@@ -179,7 +200,7 @@ else:
         json.dumps(
             {
                 "type": "item.completed",
-                "item": {"type": "agent_message", "text": "Fixture result verified."},
+                "item": {"type": "agent_message", "text": result_text},
             }
         ),
         flush=True,
