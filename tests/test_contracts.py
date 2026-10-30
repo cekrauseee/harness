@@ -159,8 +159,14 @@ class Contracts(unittest.TestCase):
                 return state
             time.sleep(0.08)
         log = self.root / ".runtime" / key / "supervisor.log"
+        failures = [
+            self.call("run", "result", key, p["id"], ok=None)
+            for p in state["participants"]
+            if p["state"] == "failed"
+        ]
         self.fail(
-            f"Execution did not reach the expected state: {state}\n{log.read_text() if log.exists() else ''}"
+            f"Execution did not reach the expected state: {state}\n"
+            f"Failed results: {failures}\n{log.read_text() if log.exists() else ''}"
         )
 
     def workflow(self, mode="develop"):

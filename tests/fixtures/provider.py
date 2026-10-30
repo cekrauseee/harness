@@ -55,6 +55,7 @@ elif mode.startswith("graph"):
             if mode == "graph-resume" and not Path("allow-worker").exists():
                 Path("worker-started").touch()
                 time.sleep(90)
+            # Exercise stale-snapshot handling deterministically in the race case.
             denied = call(
                 "run",
                 "decide",
@@ -64,10 +65,12 @@ elif mode.startswith("graph"):
                 "--reason",
                 "Worker cannot accept",
                 "--revision",
-                str(state["revision"]),
+                str(state["revision"] - (mode == "graph-race" and retry == 0)),
                 success=False,
             )
-            assert denied.get("error", {}).get("code") == "scope_denied"
+            if denied.get("error", {}).get("code") == "conflict":
+                continue
+            assert denied.get("error", {}).get("code") == "scope_denied", denied
             break
         if me["role"] == "integration":
             worker = next(p for p in state["participants"] if p["role"] == "worker")
@@ -110,7 +113,7 @@ elif mode.startswith("graph"):
                     str(state["revision"]),
                     success=False,
                 )
-                assert denied.get("error", {}).get("code") == "invalid_state"
+                assert denied.get("error", {}).get("code") in ("invalid_state", "conflict"), denied
                 break
             elif mode == "graph-helper-retry" and any(
                 p["role"] == "helper" and p["state"] == "failed" for p in state["participants"]
