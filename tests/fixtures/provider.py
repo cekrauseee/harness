@@ -8,6 +8,17 @@ import sys
 import time
 from pathlib import Path
 
+# Validate the launch contract for every attempt, including graph participants,
+# read-only helpers, retries, and resumed executions.
+if os.path.basename(sys.argv[0]) == "codex":
+    assert sys.argv[sys.argv.index("--sandbox") + 1] == "danger-full-access", sys.argv
+    assert sys.argv[sys.argv.index("-a") + 1] == "never", sys.argv
+else:
+    assert "--dangerously-skip-permissions" in sys.argv, sys.argv
+    assert "--permission-mode" not in sys.argv, sys.argv
+    assert "--allowedTools" not in sys.argv, sys.argv
+    assert sys.argv[sys.argv.index("--permission-prompts") + 1] == "none", sys.argv
+
 mode = os.environ.get("HARNESS_FIXTURE_MODE", "graph")
 if mode == "no-stdin":
     time.sleep(90)
