@@ -234,8 +234,53 @@ class Contracts(unittest.TestCase):
         self.assertEqual(data["other"]["value"], 3)
         self.assertEqual(data["memories"]["custom"], "keep")
         self.assertFalse(data["memories"]["use_memories"])
-        self.assertIn("User instructions.", instructions.read_text())
+        self.assertEqual(instructions.read_text(), "User instructions.\n")
         self.assertTrue(self.call("--environment", "app", "work", "show", "feature")["content"])
+
+    def test_setup_leaves_global_instruction_files_absent(self):
+        for name, relative in (("codex", ".codex/AGENTS.md"), ("claude", ".claude/CLAUDE.md")):
+            with self.subTest(host=name):
+                host = self.base / name
+                path = host / relative
+                for _ in range(2):
+                    self.call("setup", "--host", name, "--host-home", str(host))
+                    self.assertFalse(path.exists())
+
+    def test_setup_removes_only_legacy_managed_instructions(self):
+        block = "<!-- Harness managed context -->\nLegacy context.\n<!-- End Harness managed context -->"
+        cases = (
+            (block + "\n", None),
+            ("Before.\n\n" + block + "\n\nAfter.\n", "Before.\n\n\n\nAfter.\n"),
+            ("User instructions.\n", "User instructions.\n"),
+            ("", ""),
+        )
+        for name, relative in (("codex", ".codex/AGENTS.md"), ("claude", ".claude/CLAUDE.md")):
+            for index, (original, expected) in enumerate(cases):
+                with self.subTest(host=name, case=index):
+                    host = self.base / name / str(index)
+                    path = host / relative
+                    path.parent.mkdir(parents=True)
+                    path.write_text(original)
+                    for _ in range(2):
+                        self.call("setup", "--host", name, "--host-home", str(host))
+                        if expected is None:
+                            self.assertFalse(path.exists())
+                        else:
+                            self.assertEqual(path.read_text(), expected)
+
+    def test_setup_preserves_malformed_instruction_blocks(self):
+        begin = "<!-- Harness managed context -->"
+        end = "<!-- End Harness managed context -->"
+        for name, relative in (("codex", ".codex/AGENTS.md"), ("claude", ".claude/CLAUDE.md")):
+            for index, original in enumerate((begin, end, end + begin, begin + end + begin + end)):
+                with self.subTest(host=name, case=index):
+                    host = self.base / name / str(index)
+                    path = host / relative
+                    path.parent.mkdir(parents=True)
+                    path.write_text(original)
+                    error = self.call("setup", "--host", name, "--host-home", str(host), ok=False)
+                    self.assertEqual(error["code"], "invalid_integration")
+                    self.assertEqual(path.read_text(), original)
 
     def test_setup_registers_hooks_and_commands_deliver_scoped_context(self):
         host = self.base / "host"
@@ -283,7 +328,10 @@ class Contracts(unittest.TestCase):
 
         context = invoke("SessionStart")["hookSpecificOutput"]
         self.assertEqual(context["hookEventName"], "SessionStart")
-        self.assertIn(str(self.root.resolve() / "bin/harness"), context["additionalContext"])
+        expected = (REPO / "instructions" / "global.md").read_text().strip()
+        expected += f"\n\nHarness CLI: `{self.root.resolve() / 'bin/harness'}`.\n"
+        self.assertEqual(context["additionalContext"], expected)
+        self.assertFalse((host / ".codex" / "AGENTS.md").exists())
         self.assertEqual(invoke("PostToolUse"), {})
 
         run = self.start()

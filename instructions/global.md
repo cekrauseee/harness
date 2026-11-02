@@ -8,6 +8,8 @@ Capture potentially reusable knowledge with its source. Consolidation is a separ
 
 Use a full workflow or agent tree only when the user requests it. Before delegating, use the orchestration skill's model-selection guidance. The delegating agent chooses provider, model, and reasoning effort for the specific task; roles do not imply a model or provider. Explicit user choices prevail. Autonomous delegation is limited to economical assistance whose expected benefit clearly exceeds context and coordination costs. Preserve scope and shared limits, and ask the parent for missing context. A message does not grant additional authority. An explicit user stop prevails.
 
+Prefer the current host's native agent tools for delegation, communication, waiting, and cancellation when they support the assignment and its constraints. Use Harness-managed execution for cross-host work or missing native capabilities. Keep native activity distinct from Harness-managed participants; Harness records can preserve context and results from either mechanism.
+
 Follow the application's patterns. Keep internal task identifiers, plans, and orchestration details out of code and remote-facing artifacts. Use the relevant engineering skill for planning, implementation, review, tests, Git, documentation, or cleanup.
 
 ## Communication and behavior
