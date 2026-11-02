@@ -1,6 +1,14 @@
-# Managed execution
+# Execution
 
-Work can be continuous. Each execution has finite limits and may contain multiple attempts and resumptions. Harness invokes authenticated provider CLIs, keeps operational state in SQLite, and starts local supervisory processes only for that execution.
+Work can be continuous across sessions and execution mechanisms. Prefer the current host's native agent tools for delegation, communication, waiting, resumption, and cancellation when they support the assignment's model, context, permission, and execution constraints. Use Harness-managed execution for cross-host work or missing native capabilities. Choose from the tools available in the current session rather than inferring capabilities from a host name.
+
+Native agents use the host's identifiers and lifecycle. Harness records can retain their context, decisions, and results, but native agents are not registered managed participants. Harness run status, messages, budgets, recovery, and cancellation cover only the participants and processes it manages. The delegating agent remains responsible for native work's scope, completion, and stopping; do not present native activity as supervised by Harness.
+
+Within an existing managed run, preserve its configured graph, identity, decisions, and shared limits. A native helper remains part of its parent's assignment and must finish or be stopped before the parent returns. Native delegation is appropriate only when those constraints can be honored; it does not replace configured graph participants. Managed helper assignments cannot delegate further through either mechanism.
+
+## Managed runtime
+
+The remaining contracts describe Harness-managed execution. Each execution has finite limits and may contain multiple attempts and resumptions. Harness invokes authenticated provider CLIs, keeps operational state in SQLite, and starts local supervisory processes only for that execution.
 
 ## Model selection
 

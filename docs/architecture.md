@@ -2,6 +2,8 @@
 
 Harness separates cognitive guidance, persistent human context, and mechanical execution. The public CLI is the stable boundary agents use; internal modules can evolve without spreading storage knowledge into every skill.
 
+Native agent coordination stays with the current host when its capabilities meet the assignment. Harness supplies managed execution for cross-host work or missing native capabilities. Persistent work records are independent of that choice; runtime supervision and operational state cover only Harness-managed participants and processes.
+
 | Module | Ownership |
 | --- | --- |
 | `cli`, `presentation` | Argument and result contracts, concise human output, structured agent output. |
@@ -18,5 +20,7 @@ The runtime uses Python 3.11+ and its standard library. `bin/harness` locates an
 Markdown is canonical for human records. Locks protect compare-and-replace updates; atomic filesystem replacement prevents partial documents. SQLite transactions protect operational reservations and decisions. Database transactions do not make external process creation atomic; launch intent, process identity, stdin release, and recovery handle that boundary explicitly.
 
 Skills are grouped conceptually into context, engineering, and coordination. Each lives in a standard discoverable folder. References contain substantial conditional procedures; shared CLI documentation avoids duplicated scripts and schema descriptions. Global instructions establish the environment and general behavior rather than loading every process.
+
+Session-start hooks inject the global instructions for ordinary sessions; managed participant prompts include them directly. Setup removes legacy owned blocks from host instruction files and does not install new ones. The plugin remains the source of this context.
 
 Future changes should preserve observable tool contracts or version them intentionally. Add a provider adapter when its CLI can meet the declared process and permission contracts. Add workflow events only when their authority, state transitions, and recovery semantics are defined. Add retrieval complexity when actual memory usage demonstrates a need. Do not add a generic storage or workflow abstraction speculatively.

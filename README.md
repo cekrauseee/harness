@@ -3,12 +3,12 @@
 A local cognitive environment for agents: readable context, deliberate memory, and explicit workflows.
 
 ```text
-Global instructions → Focused skills → One local CLI
-                                      ├── Markdown: context and knowledge
-                                      └── SQLite: execution and communication
+Session context → Focused skills → One local CLI
+                                  ├── Markdown: context and knowledge
+                                  └── SQLite: managed execution and communication
 ```
 
-Harness keeps durable knowledge outside application repositories. Environments group resources; work records preserve continuity without requiring a plan or lifecycle. Memory separates permissive capture from agent-led synthesis. Development and review workflows use configured module graphs, agent-selected models, bounded context, and finite execution limits.
+Harness keeps durable knowledge outside application repositories. Environments group resources; work records preserve continuity without requiring a plan or lifecycle. Memory separates permissive capture from agent-led synthesis. Agent coordination prefers the current host's native tools; Harness-managed execution covers cross-host work and missing native capabilities with explicit model choices and finite limits. Session hooks supply context without adding instructions to the host's global files.
 
 ## Install
 

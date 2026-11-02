@@ -24,21 +24,29 @@ def instructions(home):
     return source + f"\n\nHarness CLI: `{home.path / 'bin' / 'harness'}`.\n"
 
 
-def upsert_instructions(home, path):
+def remove_legacy_instructions(home, path):
     with locked(home.path, str(path)):
-        text = path.read_text() if path.exists() else ""
+        if not path.exists():
+            return
+        text = path.read_text()
         require(
             text.count(BEGIN) == text.count(END) and text.count(BEGIN) <= 1,
             "invalid_integration",
             "The existing Harness instruction block is malformed.",
         )
-        block = BEGIN + "\n" + instructions(home) + END
-        if BEGIN in text:
-            start, end = text.index(BEGIN), text.index(END) + len(END)
-            updated = text[:start] + block + text[end:]
+        if BEGIN not in text:
+            return
+        start, end = text.index(BEGIN), text.index(END)
+        require(
+            start < end,
+            "invalid_integration",
+            "The existing Harness instruction block is malformed.",
+        )
+        updated = text[:start] + text[end + len(END) :]
+        if updated.strip():
+            atomic_write(path, updated.encode())
         else:
-            updated = text.rstrip() + ("\n\n" if text.strip() else "") + block + "\n"
-        atomic_write(path, updated.encode())
+            path.unlink()
 
 
 def codex_memory(home, path):
@@ -158,10 +166,10 @@ def prepare(home, host=None, host_home=None, actor=None):
         base = Path(host_home).expanduser().resolve() if host_home else Path.home()
         if host == "codex":
             hook_file = codex_hooks(home, base / ".codex" / "hooks.json")
-            upsert_instructions(home, base / ".codex" / "AGENTS.md")
+            remove_legacy_instructions(home, base / ".codex" / "AGENTS.md")
             codex_memory(home, base / ".codex" / "config.toml")
         elif host == "claude":
-            upsert_instructions(home, base / ".claude" / "CLAUDE.md")
+            remove_legacy_instructions(home, base / ".claude" / "CLAUDE.md")
             path = base / ".claude" / "settings.json"
             with locked(home.path, str(path)):
                 config = read_json(path, {})
