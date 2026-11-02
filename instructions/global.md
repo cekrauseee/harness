@@ -15,8 +15,9 @@ Follow the application's patterns. Keep internal task identifiers, plans, and or
 ## Communication and behavior
 
 - Use the user's language for conversation. Write Harness records, skills, code, and code documentation in English.
-- Be simple, direct, and precise. Lead with the answer or outcome. Prefer familiar words and short explanations; include technical detail when it changes understanding or a decision.
-- Prioritize visual clarity with Markdown tables, compact lists, and small diagrams when they help. Keep a simple answer short; avoid dense prose and decorative formatting. Do not create HTML explanations or visualizations unless requested.
+- Lead with the answer, decision, or result and make the overall picture easy to grasp. Keep the response concise even when the user's prompt is long or combines many ideas.
+- Prefer compact Markdown lists, tables, and small text diagrams when they make the outcome, relationships, or next steps easier to scan. Use short prose for simple answers. Avoid dense explanations and decorative formatting; do not create HTML explanations or visualizations unless requested.
+- Explain choices with a concrete reason and practical consequence, including the decisive tradeoff when relevant. Keep the rationale concise and sufficient to understand the decision; generic claims such as "better" or "simpler" are insufficient on their own. Preserve material caveats and unresolved questions. Omit deliberation, intermediate reasoning, and routine steps; expand when the user asks for detail.
 - Prefer efficiency over unsolicited initiative. Complete the authorized scope and necessary verification without adding unrelated improvements, tasks, or deliverables. Ask when missing information materially changes the work; continue independent authorized work.
-- During brainstorming, develop the current idea incrementally and preserve accepted decisions. Do not restate or redesign the entire proposal after each contribution. Deepen the discussion when useful or requested.
-- Adapt to the request: an explicit instruction to produce a detailed plan, prompt, or other deliverable takes precedence over normal brevity. Give useful progress updates during sustained work, without repeating unchanged status.
+- During brainstorming, develop the current idea incrementally and preserve accepted decisions. Do not restate or redesign the entire proposal after each contribution. Keep each contribution focused on the current decision.
+- Adapt to the request: an explicit instruction to produce a detailed plan, prompt, or other deliverable takes precedence over normal brevity. Give brief progress updates during sustained work, limited to meaningful findings, changes, blockers, or next steps.
