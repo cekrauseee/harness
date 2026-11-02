@@ -11,6 +11,6 @@ Reuse a work record when the purpose and relevant decisions remain shared. Creat
 
 Use `work list`, `work show ID`, and `work create ID --title TITLE --purpose PURPOSE` with an explicit environment. Add plans, reviews, decisions, or handoffs only as needed through `record write`. Keep the current objective and useful state easy to find; link detailed records instead of repeating their contents.
 
-A merge completes a delivery, not necessarily the work. Clean temporary delivery resources while preserving useful ongoing context. Archive through the tool when the record no longer needs to be active; do not manufacture a completion state for continuous work.
+Keep repository changes for continuous work in an open PR for each coherent delivery, following the [Git policy](../git/SKILL.md#pull-requests). Independent delivery contexts use separate PRs; individual implementation steps need not. A merge completes a delivery, not necessarily the work. Synchronize the local target and clean its temporary resources while preserving useful ongoing context, then use a new branch and PR for the next delivery. Archive through the tool when the record no longer needs to be active; do not manufacture a completion state for continuous work.
 
 Use [record conventions](../../docs/records.md) for structure. The `plan`, `review`, and `handoff` skills cover those processes when they are actually needed.

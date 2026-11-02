@@ -16,11 +16,20 @@
 │       ├── work.md
 │       ├── workflows/*.json
 │       └── optional context records
+├── worktrees/<environment>/<repository-resource>/<checkout>/
 ├── archive/
 └── .runtime/<run>/
 ```
 
 Directories appear when used. The environment and work IDs are supplied by their paths, not repeated in Markdown frontmatter. Global memory is explicitly selected; there is no global active environment. Resource bindings carry kind, location, ownership, and optional work association.
+
+## Temporary worktrees
+
+Additional Git worktrees use `<root>/worktrees/<environment>/<repository-resource>/<checkout>`. Resolve the effective root from `--root` or `HARNESS_ROOT` (default `~/.harness`), select the existing environment, and use its repository resource ID and a unique checkout identifier. The [Git skill](../skills/git/SKILL.md#worktrees) permits creation when requested or when concrete parallel work requires isolation; ordinary sequential work uses the primary checkout.
+
+Git creates and removes the linked checkout. Harness records its actual path as an owned `worktree` resource, with a work association when applicable. Worktree files remain application files, outside the Markdown record and memory scopes, so context searches and archival do not traverse or move source checkouts. The primary repository can remain outside the Harness root.
+
+The location is an agent delivery convention; resource tools register existing paths and do not create worktrees or enforce their placement. After a confirmed merge, the [cleanup skill](../skills/clean/SKILL.md) synchronizes the local target, removes integrated temporary resources, and updates their bindings. Environment or work archival does not replace Git cleanup.
 
 ## Human content
 
