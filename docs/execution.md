@@ -26,7 +26,9 @@ Every selection contains `provider` (`codex` or `claude`), `model`, `effort`, an
 
 Autonomous execution is limited by the skill to economical assistance with a clear expected benefit; the runtime bounds it to at most five minutes, one attempt, and one concurrent participant. A full workflow requires recorded user authorization. The CLI cannot infer consent from a selection reason or a peer's message. Managed participants cannot create a new root execution or edit global settings.
 
-Provider permissions remain active. Codex uses a writable workspace sandbox plus the Harness data root; Claude preserves native policy with edit permissions and no interactive permission wait. The independent `read_only` assignment flag restricts Harness context mutations and instructs reconnaissance; it is not a separate OS sandbox for application code. Helpers cannot gain context write access their parent lacks. Authentication or permission failures are visible results, not reasons to bypass the host.
+Harness-managed provider processes always launch with full access (YOLO): Codex uses `--sandbox danger-full-access` with `--ask-for-approval never`, and Claude uses `--dangerously-skip-permissions` with no interactive permission wait. This is an explicit launch policy, not permission inheritance from the supervising session, and applies to each new attempt, including helpers, retries, and resumed participants. Native agents remain subject to their host's permission configuration. Operating-system permissions, authentication, and enforced provider or organization policies can still prevent an operation.
+
+The independent `read_only` assignment flag restricts Harness context mutations and instructs reconnaissance; it is not an OS sandbox for application code. Helpers cannot gain context write access their parent lacks. Harness identity, record scope, role checks, acceptance, cancellation, and execution limits remain enforced by the runtime.
 
 ## Define a workflow
 

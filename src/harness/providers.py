@@ -35,7 +35,7 @@ def command(home, participant):
             "--color",
             "never",
             "--sandbox",
-            "workspace-write",
+            "danger-full-access",
             "--add-dir",
             str(home.path),
             "-C",
@@ -68,12 +68,9 @@ def command(home, participant):
         str(PACKAGE_ROOT),
         "--settings",
         json.dumps(host_settings),
-        "--permission-mode",
-        "acceptEdits",
+        "--dangerously-skip-permissions",
         "--permission-prompts",
         "none",
-        "--allowedTools",
-        f"Bash({PACKAGE_ROOT / 'bin' / 'harness'} *)",
     ]
 
 
