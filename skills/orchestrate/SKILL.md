@@ -9,11 +9,21 @@ Use orchestration to improve the accepted result enough to justify context and c
 
 Before choosing a model for a delegated task, read [model selection](references/models.md). The delegating agent chooses the provider, model, and effort according to the assignment. Scout, worker, and coordinator describe responsibilities, without a preferred provider or fixed model mapping. The tools execute and record the choice; they do not make it.
 
+## Scope ownership
+
+Make the owner, outcome, boundaries, acceptance responsibility, and limits clear in each assignment. The primary agent owns work until a separate owner is assigned. An assigned owner conducts execution through completion or explicit reassignment: it plans, coordinates authorized participants, makes local decisions, follows up on results, and resolves corrections within its mandate. Apply this policy to individual tasks and any graph shape.
+
+Ancestors receive progress and results, supply context, and coordinate their own boundaries. Route requests and corrections through the assigned owner. Do not direct its participants, implement its corrections, or require routine local decisions to return upward. Respect separately assigned review and integration authority: assess the agreed deliverable and return defects to its owner without taking over execution.
+
+Resolve issues locally while the assignment permits it. Escalate a concrete blocker only when it requires scope, authority, context, resources, or capabilities the owner lacks. State the specific decision or assistance needed and retain responsibility for the remaining work. Questions spanning scopes go to the owner of the shared boundary. Reports, requests for help, failed attempts, and waiting do not transfer ownership or turn remaining work into instructions for an ancestor to execute.
+
+Reassignment requires explicit authorization and a clear handoff to the affected agents; being an ancestor alone does not grant that authority. Preserve context and reconcile active work before a replacement proceeds. The user's stop and execution limits still apply. Ownership does not grant new permissions or bypass configured acceptance roles.
+
 ## Choose the execution mechanism
 
 Inspect the native agent tools available in the current session. Prefer them for delegation, communication, waiting, resumption, and cancellation when they can honor the assignment's model, context, permission, and execution constraints. Use Harness-managed execution when the task crosses hosts or requires capabilities the native tools do not offer. A host name alone does not establish what a session supports. Failure or denied permission is not a reason to bypass the host's controls.
 
-For native agents, use the host's lifecycle and identifiers. Keep durable context, decisions, and results in Harness records when useful. Native agents are not Harness-managed participants: the runtime does not track or enforce their individual limits, messages, or cancellation. The delegating agent remains responsible for their scope, completion, and stopping within the agreed limits.
+For native agents, use the host's lifecycle and identifiers. Keep durable context, decisions, and results in Harness records when useful. Native agents are not Harness-managed participants: the runtime does not track or enforce their individual limits, messages, or cancellation. Each delegating agent must account for completion and stopping of the native agents it starts within the agreed limits. These lifecycle obligations do not authorize bypassing a designated scope owner.
 
 When already participating in a managed run, preserve its configured graph, identity, decisions, and shared limits. A native helper remains part of the parent's assignment; collect its result and finish or stop it before returning. Use native help only when these constraints can be honored. Do not replace configured participants or leave native work running after the managed assignment ends.
 

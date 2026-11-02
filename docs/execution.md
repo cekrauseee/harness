@@ -2,9 +2,17 @@
 
 Work can be continuous across sessions and execution mechanisms. Prefer the current host's native agent tools for delegation, communication, waiting, resumption, and cancellation when they support the assignment's model, context, permission, and execution constraints. Use Harness-managed execution for cross-host work or missing native capabilities. Choose from the tools available in the current session rather than inferring capabilities from a host name.
 
-Native agents use the host's identifiers and lifecycle. Harness records can retain their context, decisions, and results, but native agents are not registered managed participants. Harness run status, messages, budgets, recovery, and cancellation cover only the participants and processes it manages. The delegating agent remains responsible for native work's scope, completion, and stopping; do not present native activity as supervised by Harness.
+Native agents use the host's identifiers and lifecycle. Harness records can retain their context, decisions, and results, but native agents are not registered managed participants. Harness run status, messages, budgets, recovery, and cancellation cover only the participants and processes it manages. Each delegating agent must account for completion and stopping of the native agents it starts, while respecting assigned scope ownership. Do not present native activity as supervised by Harness.
 
 Within an existing managed run, preserve its configured graph, identity, decisions, and shared limits. A native helper remains part of its parent's assignment and must finish or be stopped before the parent returns. Native delegation is appropriate only when those constraints can be honored; it does not replace configured graph participants. Managed helper assignments cannot delegate further through either mechanism.
+
+## Scope ownership
+
+An assigned owner conducts execution and decides within the agreed scope, permissions, limits, and acceptance responsibilities. The primary agent owns work with no separately assigned owner. Ancestors route requests and corrections through the owner instead of taking over the work or directing its participants. Integration review evaluates shared contracts and returns local defects to the relevant owner.
+
+Escalation carries the specific issue that exceeds the assignment's scope, authority, or capabilities. The owner retains responsibility for the rest. Progress reports, help requests, failures, and waiting do not transfer ownership. Reassignment requires explicit authorization and a handoff that reconciles active work. The user's stop and execution limits take precedence.
+
+This agent behavior policy applies to individual tasks and any graph shape. The [orchestration guidance](../skills/orchestrate/SKILL.md#scope-ownership) describes the responsibilities in detail. Managed operations still enforce their configured roles and transitions; native lifecycle controls remain with the host.
 
 ## Managed runtime
 

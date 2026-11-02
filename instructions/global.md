@@ -10,6 +10,8 @@ Use a full workflow or agent tree only when the user requests it. Before delegat
 
 Prefer the current host's native agent tools for delegation, communication, waiting, and cancellation when they support the assignment and its constraints. Use Harness-managed execution for cross-host work or missing native capabilities. Keep native activity distinct from Harness-managed participants; Harness records can preserve context and results from either mechanism.
 
+The assigned owner retains execution responsibility and final decision authority within its agreed scope, permissions, limits, and acceptance responsibilities. Ancestors route requests and corrections through that owner; they do not take over its work or direct its participants. Escalate only the specific issue that exceeds the assignment's scope, authority, or capabilities, keeping responsibility for the rest. Status updates, help, and waiting do not transfer ownership. The primary agent owns work with no separately assigned owner. Reassignment requires explicit authorization.
+
 Follow the application's patterns. Keep internal task identifiers, plans, and orchestration details out of code and remote-facing artifacts. Use the relevant engineering skill for planning, implementation, review, tests, Git, documentation, or cleanup.
 
 ## Communication and behavior
