@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import concurrent.futures
 import copy
+import hashlib
 import json
 import os
 import signal
@@ -615,6 +616,84 @@ class Contracts(unittest.TestCase):
                 "invalid_path",
             )
         self.assertEqual(self.call("record", "read", canonical)["revision"], current["revision"])
+
+    def test_worktree_files_are_outside_record_operations(self):
+        area = "environments/app/code/repositories/source/worktrees"
+        checkout = self.root / area / "delivery"
+        checkout.mkdir(parents=True)
+        content = b"# Application\n\nCheckout boundary evidence.\n"
+        application = checkout / "README.md"
+        application.write_bytes(content)
+        (checkout / "binary.md").write_bytes(b"\xff")
+        record = self.call(
+            "record",
+            "write",
+            "environments/app/code/repositories/source/notes.md",
+            "--text",
+            "# Repository context\n\nCheckout boundary evidence.",
+        )
+        relative = str(application.relative_to(self.root))
+        operations = (
+            ("read", relative),
+            ("write", f"{area}/delivery/new.md", "--text", "# Application change"),
+            ("delete", relative, "--revision", hashlib.sha256(content).hexdigest()),
+        )
+        for operation in operations:
+            with self.subTest(operation=operation[0]):
+                self.assertEqual(self.call("record", *operation, ok=False)["code"], "invalid_path")
+        self.assertEqual(application.read_bytes(), content)
+        self.assertFalse((checkout / "new.md").exists())
+        found = self.call(
+            "record", "search", "--prefix", "environments/app", "--query", "boundary evidence"
+        )
+        self.assertEqual([item["path"] for item in found["items"]], [record["path"]])
+        for operation in ("list", "search"):
+            self.assertEqual(
+                self.call("record", operation, "--prefix", area, ok=False)["code"],
+                "invalid_path",
+            )
+        alias = relative.replace("/code/", "/Code/").replace("/worktrees/", "/Worktrees/")
+        if (self.root / alias).exists():
+            self.assertEqual(self.call("record", "read", alias, ok=False)["code"], "invalid_path")
+
+    def test_environment_archive_preserves_embedded_git_worktrees(self):
+        def git(*args):
+            result = subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(self.project),
+                    "-c",
+                    "core.hooksPath=/dev/null",
+                    "-c",
+                    "commit.gpgsign=false",
+                    "-c",
+                    "user.name=Harness test",
+                    "-c",
+                    "user.email=harness-test@example.invalid",
+                    *args,
+                ],
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            return result.stdout
+
+        git("init", "-q")
+        git("commit", "--allow-empty", "-qm", "Initial fixture")
+        checkout = self.root / "environments/app/code/repositories/source/worktrees/delivery"
+        git("worktree", "add", "-qb", "delivery", str(checkout))
+        self.assertEqual(self.call("environment", "archive", "app", ok=False)["code"], "in_use")
+        self.assertTrue((checkout / ".git").is_file())
+        self.assertTrue((self.root / "environments/app/environment.md").is_file())
+        self.assertIn(str(checkout), git("worktree", "list", "--porcelain"))
+
+        git("worktree", "remove", str(checkout))
+        archived = self.call("environment", "archive", "app")["archived"]
+        self.assertFalse((self.root / "environments/app").exists())
+        self.assertTrue((self.root / archived / "work/feature/work.md").is_file())
+        self.assertNotIn(str(checkout), git("worktree", "list", "--porcelain"))
 
     def test_invalid_json_shapes_return_structured_errors_without_partial_writes(self):
         before = (self.root / "config.json").read_bytes()

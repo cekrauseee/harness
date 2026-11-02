@@ -17,9 +17,11 @@ Group changes that deliver one coherent outcome in the same PR. Separate indepen
 
 Prefer the repository's existing primary worktree, using the branch for the current PR. The primary worktree is a checkout location, not an instruction to work on `main`. Switch branches there for sequential work when it is clean and available. Create an additional worktree only when the user requests one or concrete concurrent work would conflict in the primary checkout. An open PR or an inactive branch alone is not evidence of parallel execution.
 
-Before creating a worktree, resolve the selected Harness environment, its source repository binding, and the effective Harness data root. Use the root reported by `doctor` under the current `--root` or `HARNESS_ROOT` configuration; do not infer a new environment from the checkout directory. Create linked worktrees only at `<root>/worktrees/<environment>/<repository-resource>/<checkout>`, with a unique checkout identifier, following the [record layout](../../docs/records.md#temporary-worktrees). Keep the primary checkout at its existing location.
+Before creating a worktree, resolve the selected Harness environment, its source repository binding, and the effective Harness data root. Use the root reported by `doctor` under the current `--root` or `HARNESS_ROOT` configuration; do not infer a new environment from the checkout directory. Create linked worktrees only at `<root>/environments/<environment>/code/repositories/<repository-resource>/worktrees/<checkout>`, with a unique checkout identifier, following the [record layout](../../docs/records.md#temporary-worktrees). Keep the primary checkout at its existing location.
 
 Use Git to create the linked worktree, then register its actual path with `resource add --kind worktree --owned` in the selected environment, associating it with the work when applicable. Record the repository, branch, and PR relationship in that work's context. Keep those bindings available to cleanup; removing a binding alone does not remove a Git worktree.
+
+Keep durable context outside checkout directories. Harness record operations exclude the worktree area, and environment archival waits until that area is empty. Existing worktrees at other registered locations can remain there until normal Git cleanup; do not relocate active checkouts to follow a new convention.
 
 ## Commits and review
 

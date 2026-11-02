@@ -11,8 +11,8 @@ Use existing task context and `environment list` to select the environment. Insp
 
 Use `environment ensure ID --title TITLE` when a new boundary is justified. Describe its purpose in `environment.md` through `record write`, retaining the revision returned by `record read`. Bind local directories, repositories, worktrees, URLs, branches, or PRs with `resource add`; identify owned temporary resources and their work when applicable.
 
-Temporary worktrees stay associated with this environment. When the [Git policy](../git/SKILL.md#worktrees) warrants a new worktree, place it in the effective Harness root at `worktrees/<environment>/<repository-resource>/<checkout>` and register its actual path as an owned resource. The source repository's primary checkout can remain elsewhere. A worktree path does not create or select another environment.
+Temporary worktrees stay associated with this environment. When the [Git policy](../git/SKILL.md#worktrees) warrants a new worktree, place it under the environment at `code/repositories/<repository-resource>/worktrees/<checkout>` and register its actual path as an owned resource. The source repository's primary checkout can remain elsewhere. A worktree path does not create or select another environment.
 
-Pass `--environment ID` before the command or inherit the managed execution context. There is no global active environment. Archive through `environment archive` only when appropriate; active execution references prevent archival.
+Pass `--environment ID` before the command or inherit the managed execution context. There is no global active environment. Archive through `environment archive` only when appropriate; active execution references and nonempty worktree areas prevent archival. Resolve temporary checkouts through the Git cleanup process before archiving, preserving active or unfinished work.
 
 See [tools](../../docs/tools.md) for command syntax and [records](../../docs/records.md) for formatting and revisions.

@@ -12,11 +12,11 @@
 │   ├── environment.md
 │   ├── resources.json
 │   ├── memory/{captures,knowledge}/
+│   ├── code/repositories/<repository-resource>/worktrees/<checkout>/
 │   └── work/<work>/
 │       ├── work.md
 │       ├── workflows/*.json
 │       └── optional context records
-├── worktrees/<environment>/<repository-resource>/<checkout>/
 ├── archive/
 └── .runtime/<run>/
 ```
@@ -25,11 +25,13 @@ Directories appear when used. The environment and work IDs are supplied by their
 
 ## Temporary worktrees
 
-Additional Git worktrees use `<root>/worktrees/<environment>/<repository-resource>/<checkout>`. Resolve the effective root from `--root` or `HARNESS_ROOT` (default `~/.harness`), select the existing environment, and use its repository resource ID and a unique checkout identifier. The [Git skill](../skills/git/SKILL.md#worktrees) permits creation when requested or when concrete parallel work requires isolation; ordinary sequential work uses the primary checkout.
+Additional Git worktrees use `<root>/environments/<environment>/code/repositories/<repository-resource>/worktrees/<checkout>`. Resolve the effective root from `--root` or `HARNESS_ROOT` (default `~/.harness`), select the existing environment, and use its repository resource ID and a unique checkout identifier. The [Git skill](../skills/git/SKILL.md#worktrees) permits creation when requested or when concrete parallel work requires isolation; ordinary sequential work uses the primary checkout.
 
-Git creates and removes the linked checkout. Harness records its actual path as an owned `worktree` resource, with a work association when applicable. Worktree files remain application files, outside the Markdown record and memory scopes, so context searches and archival do not traverse or move source checkouts. The primary repository can remain outside the Harness root.
+The repository directory is its resource area in Harness. The primary checkout can remain elsewhere, referenced by its resource binding. Git creates and removes additional linked checkouts. Harness records their actual paths as owned `worktree` resources, with work associations when applicable. Existing bindings remain in `resources.json`; this layout does not migrate that registry or work records.
 
-The location is an agent delivery convention; resource tools register existing paths and do not create worktrees or enforce their placement. After a confirmed merge, the [cleanup skill](../skills/clean/SKILL.md) synchronizes the local target, removes integrated temporary resources, and updates their bindings. Environment or work archival does not replace Git cleanup.
+The `worktrees` directory is reserved for application files. Record reads, writes, and deletion reject paths within it, and context searches skip it entirely. Keep durable context outside checkouts. Environment archival refuses to move a nonempty worktree area, including an unregistered checkout, so Git registrations remain valid. After Git cleanup leaves the area empty, normal archival can proceed.
+
+The location is an agent delivery convention; resource tools register existing paths and do not create worktrees or enforce their placement. Existing checkouts at other registered locations can remain until normal cleanup. After a confirmed merge, the [cleanup skill](../skills/clean/SKILL.md) synchronizes the local target, removes integrated temporary resources, and updates their bindings. Environment or work archival does not replace Git cleanup.
 
 ## Human content
 
@@ -63,4 +65,4 @@ Search returns titles and short excerpts with pagination. Memory search defaults
 
 SQLite stores runs, participants, attempts, decisions, messages, and receipts. Runtime files contain credentials and bounded provider transport logs. These are not canonical knowledge, and they are not automatically injected into future tasks. Tokens are local participant capabilities, never part of public tool output.
 
-Do not version the data root. Archive environments or work through their tools; active or unresolved executions prevent archival. Archival preserves knowledge and history rather than deleting it.
+Do not version the data root. Archive environments or work through their tools; active or unresolved executions prevent archival, and environment archival requires empty worktree areas. Archival preserves knowledge and history rather than deleting it.
