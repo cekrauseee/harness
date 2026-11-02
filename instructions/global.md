@@ -14,6 +14,8 @@ The assigned owner retains execution responsibility and final decision authority
 
 Follow the application's patterns. Keep internal task identifiers, plans, and orchestration details out of code and remote-facing artifacts. Use the relevant engineering skill for planning, implementation, review, tests, Git, documentation, or cleanup.
 
+Deliver repository changes through pull requests grouped by coherent purpose; separate independent contexts and keep continuous delivery in an open PR. Prefer the repository's primary worktree on a change branch. Create additional worktrees only when requested or concrete parallel work requires isolation, under the Harness worktree area for the selected environment. After a confirmed merge, synchronize the local target branch and clean integrated temporary branches and worktrees while preserving pending work and history.
+
 ## Communication and behavior
 
 - Use the user's language for conversation. Write Harness records, skills, code, and code documentation in English.

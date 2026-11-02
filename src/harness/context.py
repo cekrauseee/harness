@@ -125,6 +125,14 @@ def archive_context(home, kind, name, env=None, actor=None):
         )
     destination = home.path / "archive" / kind / f"{env}-{name}-{time.time_ns()}"
     with locked(home.path, "archive:" + str(source)):
+        if kind == "environment":
+            for area in (source / "code" / "repositories").glob("*/worktrees"):
+                require(
+                    area.is_dir() and not area.is_symlink() and not any(area.iterdir()),
+                    "in_use",
+                    "The environment still contains worktree files.",
+                    "Clean unused worktrees through Git and preserve active checkouts before archiving.",
+                )
         destination.parent.mkdir(parents=True, exist_ok=True)
         source.rename(destination)
     return {"archived": str(destination.relative_to(home.path))}
@@ -180,12 +188,24 @@ def resources(
     return {"resource": name, "operation": operation}
 
 
+def _is_worktree_path(relative):
+    parts = Path(relative).parts
+    return (
+        len(parts) >= 6
+        and parts[0] == "environments"
+        and tuple(part.casefold() for part in parts[2:4]) == ("code", "repositories")
+        and parts[5].casefold() == "worktrees"
+    )
+
+
 def record_path(home, relative, actor=None, write=False):
     path = inside(home.path, relative)
     require(
-        path.suffix == ".md" and Path(relative).parts[0] in ("environments", "memory", "archive"),
+        path.suffix == ".md"
+        and Path(relative).parts[0] in ("environments", "memory", "archive")
+        and not _is_worktree_path(relative),
         "invalid_path",
-        "Document operations address Markdown context or memory records.",
+        "Document operations address Markdown context or memory records, not worktree files.",
     )
     if actor:
         actor.check_record(relative, write)
@@ -242,12 +262,23 @@ def search_records(home, prefix, query="", actor=None, limit=20, offset=0):
     )
     base = inside(home.path, prefix)
     require(
-        Path(prefix).parts[0] in ("environments", "memory", "archive"),
+        Path(prefix).parts[0] in ("environments", "memory", "archive")
+        and not _is_worktree_path(prefix),
         "invalid_path",
-        "Search a context or memory scope.",
+        "Search a context or memory scope outside worktree files.",
     )
+    paths = []
+    for directory, directories, filenames in os.walk(base):
+        directory = Path(directory)
+        directories[:] = [
+            name
+            for name in directories
+            if not (directory / name).is_symlink()
+            and not _is_worktree_path((directory / name).relative_to(home.path))
+        ]
+        paths.extend(directory / name for name in filenames if name.endswith(".md"))
     matches = []
-    for path in sorted(base.rglob("*.md")):
+    for path in sorted(paths):
         relative = str(path.relative_to(home.path))
         try:
             record_path(home, relative, actor)
