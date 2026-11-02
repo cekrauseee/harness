@@ -55,6 +55,8 @@ The `codex` target serves local Codex and ChatGPT runtime configuration. The `cl
 
 ## Updates
 
+Version 0.0.5 adds scoped orchestration ownership, concise visual communication with concrete justification, and PR-based delivery and cleanup guidance. New linked worktrees use the environment's `code/repositories/<repository-resource>/worktrees/<checkout>` area. Record operations exclude checkout files, and environment archival requires that area to be empty after Git cleanup. Existing resource and work record formats remain compatible; existing checkouts can remain at their registered locations. See the [record layout](records.md#temporary-worktrees). Refresh the plugin and rerun setup for each installed host, then start a new session to load the updated instructions.
+
 Version 0.0.4 prefers native agent coordination when the host can honor the assignment. Managed execution remains available for cross-host work and missing capabilities. Setup removes legacy Harness blocks from global instruction files; session hooks and managed prompts supply the context. Rerun setup for each installed host after upgrading, then start a new session to load the updated guidance.
 
 Version 0.0.3 makes Codex hook registration an explicit setup operation. Rerun setup from the updated plugin to repair existing installations where bundled hooks were not discovered. The tool returns `hook_file` with the native file it updated. Existing unrelated hooks retain their positions and settings; malformed hook files are reported without being replaced.
