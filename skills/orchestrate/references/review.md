@@ -4,7 +4,7 @@ Choose native or managed execution using the orchestration skill. These responsi
 
 Partition the implemented feature into important, clearly identifiable responsibilities. Avoid fragmentation created only to increase the number of agents. The review partition may differ from the development modules.
 
-The module coordinator defines the review focus, relevant contracts, code boundaries, and evidence required for acceptance. Give the worker enough context for a detailed investigation without loading unrelated history.
+The module coordinator owns review execution, local decisions, correction follow-up, and module acceptance. It defines the review focus, relevant contracts, code boundaries, and evidence required for acceptance. Give the worker enough context for a detailed investigation without loading unrelated history. Escalate only the specific issue outside the assignment's scope, authority, or capabilities; retain responsibility for the review.
 
 The worker reviews the assigned part deeply, identifies supported defects, and applies authorized patches. It verifies affected behavior and returns findings, corrections, evidence, and unresolved concerns in useful prose. Tests are a review stage, selected by criticality and observable behavior.
 
@@ -12,6 +12,6 @@ In a managed graph, use `delegate` for the initial assignment and `request_chang
 
 Accept the module only when its criteria hold. The integration coordinator examines effects across reviewed boundaries and owns the final decision. A clean local review does not automatically settle shared interfaces or combined behavior.
 
-Return integration defects to the responsible module. In a managed graph, use `request_changes --to MODULE_COORDINATOR_ID` to reopen an accepted module, then yield. Keep the correction within the original scope and remaining limits; do not reset the review or its accumulated worker rounds. Final acceptance requires all module and helper work to be resolved.
+Return integration defects to the responsible module coordinator. Ancestors and integration reviewers must not bypass it to direct workers or implement the module's correction themselves. In a managed graph, use `request_changes --to MODULE_COORDINATOR_ID` to reopen an accepted module, then yield. Keep the correction within the original scope and remaining limits; do not reset the review or its accumulated worker rounds. Final acceptance requires all module and helper work to be resolved.
 
 Respect the selected models and effort, context grants, rounds, deadline, and shared attempt allowance. If those limits prevent resolution, preserve the actionable remainder and stop rather than silently escalating cost.

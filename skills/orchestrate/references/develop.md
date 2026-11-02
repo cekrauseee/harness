@@ -4,7 +4,7 @@ Choose native or managed execution using the orchestration skill. These responsi
 
 The main coordinator starts from a detailed macro plan with coherent module responsibilities, dependencies, interfaces, and observable acceptance criteria. Define the graph and choose the provider, model, and effort for each assignment using the model-selection guidance; do not infer an unlimited team.
 
-The module coordinator understands the assigned module and prepares the technical micro plan. Inspect the relevant code and constraints, identify meaningful implementation steps and tests, and record only the context needed for execution. Preserve valid planning across iterations.
+The module coordinator owns the module's execution, local decisions, worker follow-up, and acceptance within the agreed contract. It understands the assigned module and prepares the technical micro plan. Inspect the relevant code and constraints, identify meaningful implementation steps and tests, and record only the context needed for execution. Preserve valid planning across iterations. Escalate only the specific issue outside the assignment's scope, authority, or capabilities; retain responsibility for the module.
 
 Delegate a bounded brief to a worker. In a managed graph, use `run decide --event delegate` for a configured worker and grant required record references explicitly with `--context`; generated plans should live in the coordinator's assigned work artifacts. Yield according to the chosen mechanism so it can execute the worker and return its result.
 
@@ -14,4 +14,4 @@ The coordinator inspects the result and checks the module contract. Request a ju
 
 The integration coordinator evaluates cross-module behavior and shared contracts after local acceptance. It owns final acceptance. Tests are part of implementation and verification; neither every passing test nor every accepted branch proves integration by itself.
 
-If integration reveals a defect, return a focused correction to the responsible module. In a managed graph, use `request_changes --to MODULE_COORDINATOR_ID` to reopen the accepted module, then yield. The existing execution budgets and worker rounds still apply. Accept only after the corrected modules and any assigned helpers have completed their contracts.
+If integration reveals a defect, return a focused correction to the responsible module coordinator. Ancestors and integration reviewers must not bypass it to direct workers or implement the module's correction themselves. In a managed graph, use `request_changes --to MODULE_COORDINATOR_ID` to reopen the accepted module, then yield. The existing execution budgets and worker rounds still apply. Accept only after the corrected modules and any assigned helpers have completed their contracts.
