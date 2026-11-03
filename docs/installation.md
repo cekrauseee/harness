@@ -55,6 +55,8 @@ The `codex` target serves local Codex and ChatGPT runtime configuration. The `cl
 
 ## Updates
 
+Version 0.0.6 clarifies simple complete implementation, development readiness, shared local/remote CI checks, and testing with real isolated dependencies. Delivery guidance keeps PR metadata aligned with evolving scope and carries authorized work through the intended usable outcome. It also includes the [full-access launch policy](execution.md#model-selection) for managed providers. Refresh the plugin and rerun setup for each installed host, then start a new session to load the updated guidance. Existing records and configuration remain compatible.
+
 Version 0.0.5 adds scoped orchestration ownership, concise visual communication with concrete justification, and PR-based delivery and cleanup guidance. New linked worktrees use the environment's `code/repositories/<repository-resource>/worktrees/<checkout>` area. Record operations exclude checkout files, and environment archival requires that area to be empty after Git cleanup. Existing resource and work record formats remain compatible; existing checkouts can remain at their registered locations. See the [record layout](records.md#temporary-worktrees). Refresh the plugin and rerun setup for each installed host, then start a new session to load the updated instructions.
 
 Version 0.0.4 prefers native agent coordination when the host can honor the assignment. Managed execution remains available for cross-host work and missing capabilities. Setup removes legacy Harness blocks from global instruction files; session hooks and managed prompts supply the context. Rerun setup for each installed host after upgrading, then start a new session to load the updated guidance.
