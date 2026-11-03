@@ -1,6 +1,6 @@
 # Develop a modular workflow
 
-Choose native or managed execution using the orchestration skill. These responsibilities apply to either mechanism. Use native agent tools for a native workflow; the `run decide` commands and transitions below apply only to a Harness-managed graph.
+Use native agent tools whenever they can meet the assignment, following the orchestration skill's mechanism decision. A modular graph does not itself require managed execution. These responsibilities apply to either mechanism; the `run decide` commands and transitions below apply only to an eligible Harness-managed graph.
 
 The main coordinator starts from a detailed macro plan with coherent module responsibilities, dependencies, interfaces, and observable acceptance criteria. Define the graph and choose the provider, model, and effort for each assignment using the model-selection guidance; do not infer an unlimited team.
 
@@ -10,7 +10,7 @@ Delegate a bounded brief to a worker. In a managed graph, use `run decide --even
 
 The worker implements the assigned behavior according to the application's conventions and runs proportionate checks. It returns useful evidence and remaining issues; it does not accept its own work.
 
-The coordinator inspects the result and checks the module contract. Request a justified correction with `request_changes`, carrying forward valid work and only the changed requirements. Accept with a concise evidence-based reason when the contract holds. Stop with an honest unresolved result if the configured limits are exhausted.
+The coordinator inspects the result and checks the module contract. Request a justified correction through the chosen mechanism's follow-up tools, carrying forward valid work and only the changed requirements; managed graphs use `request_changes`. Accept with a concise evidence-based reason when the contract holds. Stop with an honest unresolved result if the configured limits are exhausted.
 
 The integration coordinator evaluates cross-module behavior and shared contracts after local acceptance. It owns final acceptance. Tests are part of implementation and verification; neither every passing test nor every accepted branch proves integration by itself.
 
