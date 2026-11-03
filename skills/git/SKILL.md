@@ -13,6 +13,8 @@ Deliver every repository change through a pull request, including small fixes, d
 
 Group changes that deliver one coherent outcome in the same PR. Separate independent contexts even when they arrive in the same conversation; do not create a PR for each small step of one change. Reuse an open PR while its purpose remains coherent. After it merges, synchronize and clean that delivery, then start the next change from the updated target branch in a new PR. The work record can continue across those deliveries.
 
+Whenever the scope changes, reassess whether the work still belongs in the same PR. Keep its title and description aligned with the current deliverable, including verification and material limitations; replace outdated framing instead of appending a history of requests. Splitting or retaining a PR is a routine delivery decision within the authorized scope.
+
 ## Worktrees
 
 Prefer the repository's existing primary worktree, using the branch for the current PR. The primary worktree is a checkout location, not an instruction to work on `main`. Switch branches there for sequential work when it is clean and available. Create an additional worktree only when the user requests one or concrete concurrent work would conflict in the primary checkout. An open PR or an inactive branch alone is not evidence of parallel execution.
