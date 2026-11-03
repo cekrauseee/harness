@@ -1,6 +1,6 @@
 # Review a modular workflow
 
-Choose native or managed execution using the orchestration skill. These responsibilities apply to either mechanism. Use native agent tools for a native review; the named runtime transitions below apply only to a Harness-managed graph.
+Use native agent tools whenever they can meet the assignment, following the orchestration skill's mechanism decision. A review graph does not itself require managed execution. These responsibilities apply to either mechanism; the named runtime transitions below apply only to an eligible Harness-managed graph.
 
 Partition the implemented feature into important, clearly identifiable responsibilities. Avoid fragmentation created only to increase the number of agents. The review partition may differ from the development modules.
 

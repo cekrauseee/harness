@@ -22,7 +22,7 @@ Choose effort separately from the model. Use the lightest setting that meets the
 
 ## Record and respect the choice
 
-For native delegation, use the selection controls the host actually exposes. Some tools inherit the current model or effort; account for that inheritance instead of inventing parameters or claiming an unavailable override. Use managed execution when a required choice cannot be expressed natively and the external mechanism can honor it. Do not choose external execution merely to duplicate controls or telemetry already sufficient for the task.
+For native delegation, use the selection controls the host actually exposes. Check supported per-invocation overrides, native subagent configuration, and inheritance before declaring a required choice unavailable. Some tools inherit the current model or effort; account for that inheritance instead of inventing parameters or claiming an unavailable override. If the required choice is supported natively, use native execution. A different child model does not require a different runtime. When a required choice cannot be honored natively, apply the orchestration skill's managed-execution exception and state the concrete limitation before launch.
 
 For Harness-managed execution, pass the provider, model, effort, and one concise reason to the tool. Explain why the choice fits this assignment; do not produce a ranking report for an obvious small task. Set read-only access according to the assignment, independently of model choice.
 
