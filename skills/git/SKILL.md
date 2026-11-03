@@ -1,6 +1,6 @@
 ---
 name: git
-description: Prepare branches, worktrees, commits, and pull requests with the user's delivery conventions.
+description: Prepare branches, worktrees, commits, pull requests, and versioned releases with the user's delivery conventions.
 ---
 
 # Git
@@ -14,6 +14,12 @@ Deliver every repository change through a pull request, including small fixes, d
 Group changes that deliver one coherent outcome in the same PR. Separate independent contexts even when they arrive in the same conversation; do not create a PR for each small step of one change. Reuse an open PR while its purpose remains coherent. After it merges, synchronize and clean that delivery, then start the next change from the updated target branch in a new PR. The work record can continue across those deliveries.
 
 Whenever the scope changes, reassess whether the work still belongs in the same PR. Keep its title and description aligned with the current deliverable, including verification and material limitations; replace outdated framing instead of appending a history of requests. Splitting or retaining a PR is a routine delivery decision within the authorized scope.
+
+## Versions and releases
+
+Every version made available for use needs an identifiable release tied to its validated source, relevant changes, and distributed artifact or deployment. In Git repositories, publish a version tag and the corresponding release record and notes through the project's publication channel. Multiple PRs may compose one release; follow the project's cadence and existing authorization.
+
+Use [versioning and releases](references/releases.md) when choosing versions, preparing publication, or finalizing a delivery that includes distribution or activation. Use `document` for release notes, compatibility, and upgrade guidance. Verify the required publication and activation before reporting the delivery complete.
 
 ## Worktrees
 
