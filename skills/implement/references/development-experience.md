@@ -1,6 +1,6 @@
 # Development experience
 
-Treat development experience as part of application and feature delivery when the change introduces or alters development prerequisites. Aim for a development entry command that prepares the environment and starts the application predictably. Check the dependencies, configuration, generated assets, and services actually required by this application.
+Treat development experience and local/remote CI as acceptance criteria for application and feature delivery. Assess existing setup as well as prerequisites affected by the change; preserve what already meets the requirements and address gaps. Aim for a development entry command that prepares the environment and starts the application predictably. Check the dependencies, configuration, generated assets, and services actually required by this application.
 
 Preparation should be idempotent and preserve existing user configuration and data. Diagnose what is missing before changing it. Make failure actionable: identify the failed prerequisite or operation and the next useful action.
 

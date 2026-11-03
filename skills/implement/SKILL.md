@@ -15,6 +15,6 @@ Use the current plan when it helps. Make targeted changes, preserve unrelated us
 
 Validate observable behavior according to the `test` skill and the risk of the change. Resolve failures caused by the requested work and rerun affected checks. Preserve useful execution context through Harness tools; promote durable knowledge separately through memory capture.
 
-When creating an application, introducing or changing its development dependencies, services, or environment configuration, or working on development tooling, use [development experience](references/development-experience.md). Use `document` when product contracts or usage documentation need to change, and `git` when preparing commits or PRs.
+For every development task, use `document` and [development experience](references/development-experience.md) to assess and maintain the project's documentation, DX, and local/remote CI as acceptance criteria. Preserve compliant project setup and complete missing or outdated requirements. Separate independent remediation into coherent deliveries when appropriate; a separate PR does not satisfy a pending criterion. Use `git` when preparing commits or PRs.
 
 Finish the requested deliverable, including its required integration and verification. Report the outcome, evidence, and material limitations in the user's language.
