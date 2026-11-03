@@ -9,6 +9,8 @@ Prefer tests of observable input and output at the meaningful boundary: for an A
 
 Critical logic warrants deeper tests, including pure functions or internal invariants when those are the most reliable boundary. Critical frontend behavior may warrant automation; ordinary visual changes do not automatically need a permanent test suite.
 
+When behavior depends on a database or service, prefer the real implementation in an isolated test environment with controlled, representative data and repeatable setup and cleanup. Exercise actual persistence and service interactions. Use mocks or other test doubles when the real dependency is impractical for the check, and make the resulting verification gap explicit.
+
 Use a balanced TDD approach. Write a focused failing test first when it clarifies an important contract or reproduces a defect. Implement first when that better resolves uncertainty, then verify the meaningful behavior. Neither sequence is universal.
 
 Use project-required checks and tests appropriate to the affected risk. After a fix, rerun the affected checks. Broaden testing when dependencies, failures, or unresolved concerns justify it. Avoid artificial coverage targets, trivial tests that mirror implementation, and repeated passing runs without a new reason.
